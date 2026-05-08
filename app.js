@@ -41,7 +41,8 @@ app.post('/entry/recording',upload.single('audio'),async (req,res) => {
     readable.push(null);
     const stream = cloudinary.uploader.upload_stream({resource_type:'auto'},async (err,result) => {
         if(err) res.status(400).json({ok:false});
-        await Recording.create({ student, muhaffiz, audio: result.secure_url });
+        console.log(result)
+        await Recording.create({ student, muhaffiz, audio: result.secure_url,duration:result.duration });
         res.status(200).json({ ok: true });
         
     }) 
@@ -50,6 +51,7 @@ app.post('/entry/recording',upload.single('audio'),async (req,res) => {
 })
 app.get('/recording/get',async (req,res) => {
     const recordings = await Recording.find();
+    console.log('hello')
     res.status(200).json({ok:true,recordings});
 })
 
