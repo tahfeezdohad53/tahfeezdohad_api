@@ -1,8 +1,12 @@
 import catchAsync from "../utils/catchAsync.js";
 import User from '../models/user.js'
 import { signJwt } from "../helpers/singJwt.js";
+import jsonwebtoken from 'jsonwebtoken';
+
 export const handleSignin = catchAsync(async (req,res,next) => {
-    const {email,name} = req.body;
+    const signedToken = req.headers?.authorization?.split(' ')[1];
+    const {email,name} = jsonwebtoken.verify(signedToken,process.env.FRONTEND_JWT_SECRET)
+    console.log(email,name);
     const user = await User.findOne({email});
     if(!user){
         const newUser = await User.create({email,name});

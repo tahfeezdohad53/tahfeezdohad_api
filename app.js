@@ -6,6 +6,7 @@ import multer from 'multer';
 import {Readable} from 'stream';
 import { v2 as cloudinary } from 'cloudinary';
 import authRoutes from './routes/auth.js'
+import userRoutes from './routes/user.js'
 configDotenv();
 cloudinary.config({
   cloud_name: "dkqsfm61z",
@@ -35,6 +36,7 @@ const upload = multer({
 // }
 // n();
 app.use('/auth',authRoutes);
+app.use('/user',userRoutes);
 app.post('/entry/recording',upload.single('audio'),async (req,res) => {
     const {student,muhaffiz} = req.body;
     const readable = new Readable();
