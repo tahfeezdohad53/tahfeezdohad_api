@@ -4,8 +4,8 @@ import mongoose from "mongoose";
 const schema = new mongoose.Schema({
     email:String,
     name:String,
-    muhaffiz:String,
-    profile:String,
+    teacher:mongoose.Schema.Types.ObjectId,
+    profileImage:String,
     role:{
         type:String,
         default:'student',
@@ -13,6 +13,6 @@ const schema = new mongoose.Schema({
     }
 },{timestamps:true});
 
-const model = mongoose.model('User',schema);
+const model = mongoose.model('Student',schema);
 
 export default model;
