@@ -31,7 +31,7 @@ export const handleSignin = catchAsync(async (req, res, next) => {
         jwt = signJwt(teacher.email, teacher._id, "teacher");
         user = teacher;
     }
-    else return res.status(200).json({ok:false,message:'account not found'});
+    else return res.status(400).json({ok:false,message:'account not found'});
   }
   if(role === 'admin'){
     const admin = await Admin.findOne({email});
@@ -39,7 +39,7 @@ export const handleSignin = catchAsync(async (req, res, next) => {
         jwt = signJwt(admin.email, admin._id, "admin");
         user = admin;
     }
-    else return res.status(200).json({ok:false,message:'account not found'});
+    else return res.status(400).json({ok:false,message:'account not found'});
   }
   
 // console.log(token);
