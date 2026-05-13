@@ -1,5 +1,6 @@
 import catchAsync from "../utils/catchAsync.js";
 import Recording from "../models/recording.js";
+import Student from "../models/student.js";
 import { Readable } from "stream";
 import cloudinary from "../libs/cloudinary.js";
 
@@ -20,6 +21,7 @@ export const handleUploadAudio = catchAsync(async (req, res, next) => {
     async (err, result) => {
       if (err) res.status(400).json({ ok: false });
       console.log(result);
+      await Student.findByIdAndUpdate(studentId,{proxyTeacher:null});
       await Recording.create({
         uploaderRole: role,
         student: studentId,

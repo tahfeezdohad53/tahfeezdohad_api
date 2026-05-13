@@ -25,16 +25,28 @@ export const handleChangeDiary = catchAsync(async (req,res,next) => {
     res.status(200).json({ok:true});
 })
 
+export const handleAssignProxy = catchAsync(async (req,res,next) => {
+    const {teacherId,studentId} = req.query;
+    const {id,role} = req.user;
+    const admin = await Admin.findById(teacherId);
+    if(admin) return res.status(400).json({ok:false,message:"can't assign proxy to admins"});
+    await Student.findOneAndUpdate({_id:studentId},{proxyTeacher:teacherId});
+    res.status(200).json({ok:true});
+})
+
 export const handleGetStudents = catchAsync(async (req,res,next) => {
     const {id,role} = req.user;
     let students;
     let adminStudents;
     if(role === 'teacher'){
-        students = await Student.find({teacher:id});
+        students = await Student.find({$or:[
+            {teacher:id},
+            {proxyTeacher:id}
+        ]}).populate('teacher proxyTeacher');
     }
     if(role === 'admin'){
-        students = await Student.find();
-        adminStudents = await Student.find({teacher:id}).populate('teacher');
+        students = await Student.find().populate('teacher proxyTeacher');
+        adminStudents = await Student.find({teacher:id}).populate('teacher proxyTeacher');
     }
     if(role === 'teacher') return res.status(200).json({ok:true,students});
     if(role === 'admin') return res.status(200).json({ok:true,students,adminStudents});

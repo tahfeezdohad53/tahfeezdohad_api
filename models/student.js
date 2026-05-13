@@ -8,6 +8,10 @@ const schema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Teacher'
     },
+    proxyTeacher:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Teacher'
+    },
     profileImage:String,
     role:{
         type:String,
