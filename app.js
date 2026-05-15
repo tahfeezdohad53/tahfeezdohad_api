@@ -68,6 +68,11 @@ io.on('connection',(socket) => {
             socket.to(user.get(to)).emit('ice-candidate',{candidate});
         }
     })
+    socket.on('end-call',({to}) => {
+        if(user.get(to)){
+            socket.to(user.get(to)).emit('end-call');
+        }
+    })
 })
 
 app.use('/auth',authRoutes);
