@@ -48,7 +48,6 @@ export const handleSignin = catchAsync(async (req, res, next) => {
 
 export const protectRoute = catchAsync(async (req, res, next) => {
   const jwt = req.headers?.authorization?.split(" ")[1];
-  console.log('hello from protect');
   try{
     const { email, id, role } = jsonwebtoken.verify(
     jwt,
