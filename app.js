@@ -80,9 +80,9 @@ app.use('/student',studentRoutes);
 app.use('/recording',recordingRoutes);
 app.use('/teacher',teacherRoutes);
 
-// app.use('/wake',async (req,res) => {
-//     res.status(200).send('alive!');
-// })
+app.use('/wake',async (req,res) => {
+    res.status(200).send('alive!');
+})
 
 (async function(){
     try{
