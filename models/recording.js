@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import Student from "../models/student.js";
-import Teacher from "../models/teacher.js";
-import Admin from "../models/admin.js";
+// import Student from "../models/student.js";
+// import Teacher from "../models/teacher.js";
+import User from "../models/user.js";
 
 const schema = new mongoose.Schema({
     studentName:String,
@@ -16,16 +16,18 @@ const schema = new mongoose.Schema({
 
 schema.pre('save',async function(next){
     let NameOfTeacher;
-    const student = await Student.findById(this.student);
+    const student = await User.findById(this.student);
     const NameOfStudent = student.name;
-    if(this.uploaderRole === 'teacher'){
-        const teacher = await Teacher.findById(this.teacher);
-        NameOfTeacher = teacher.name;
-    }
-    if(this.uploaderRole === 'admin'){
-        const teacher = await Admin.findById(this.teacher);
-        NameOfTeacher = teacher.name;
-    }
+    const teacher = await User.findById(this.teacher);
+    const nameOfTeacher = teacher.name;
+    // if(this.uploaderRole === 'teacher'){
+    //     const teacher = await Teacher.findById(this.teacher);
+    //     NameOfTeacher = teacher.name;
+    // }
+    // if(this.uploaderRole === 'admin'){
+    //     const teacher = await Admin.findById(this.teacher);
+    //     NameOfTeacher = teacher.name;
+    // }
     this.teacherName = NameOfTeacher;
     this.studentName = NameOfStudent
     // next();
