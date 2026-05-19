@@ -4,13 +4,15 @@ import mongoose from "mongoose";
 const schema = new mongoose.Schema({
     email:String,
     name:String,
+    batch:String,
+    fees:Number,
     teacher:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Teacher'
+        ref:'User'
     },
     proxyTeacher:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Teacher'
+        ref:'User'
     },
     profileImage:String,
     role:{
@@ -20,6 +22,6 @@ const schema = new mongoose.Schema({
     }
 },{timestamps:true});
 
-const model = mongoose.model('Student',schema);
+const model = mongoose.model('User',schema);
 
 export default model;
