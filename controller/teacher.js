@@ -7,3 +7,12 @@ export const handleGetAllTeachers = catchAsync(async (req,res,next) => {
     // console.log(teachers);
     res.status(200).json({ok:true,teachers});
 })
+
+export const handleGetMyTeachers = catchAsync(async (req,res,next) => {
+    const {id,teacher,proxyTeacher=null} = req.user;
+    const teachers = await User.find({$or:[
+        {_id:teacher},
+        {_id:proxyTeacher},
+    ]});
+    res.status(200).json({ok:true,teachers});
+})

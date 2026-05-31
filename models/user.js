@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
     email:String,
+    password:String,
     name:String,
     batch:String,
     fees:Number,

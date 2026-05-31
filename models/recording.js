@@ -15,7 +15,7 @@ const schema = new mongoose.Schema({
 
 
 schema.pre('save',async function(next){
-    let NameOfTeacher;
+    // let NameOfTeacher;
     const student = await User.findById(this.student);
     const NameOfStudent = student.name;
     const teacher = await User.findById(this.teacher);
@@ -28,7 +28,7 @@ schema.pre('save',async function(next){
     //     const teacher = await Admin.findById(this.teacher);
     //     NameOfTeacher = teacher.name;
     // }
-    this.teacherName = NameOfTeacher;
+    this.teacherName = nameOfTeacher;
     this.studentName = NameOfStudent
     // next();
 })

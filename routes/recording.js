@@ -1,5 +1,5 @@
 import express from 'express';
-import { handleSignin, protectRoute } from '../controller/auth.js';
+import { protectRoute } from '../controller/auth.js';
 import {
   handleUploadAudio,
   handleGetRecordings,

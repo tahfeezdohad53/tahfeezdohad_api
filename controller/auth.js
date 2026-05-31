@@ -2,8 +2,9 @@ import catchAsync from "../utils/catchAsync.js";
 import User from "../models/user.js";
 import { signJwt } from "../helpers/singJwt.js";
 import jsonwebtoken from "jsonwebtoken";
+import { compare } from "bcrypt";
 
-export const handleSignin = catchAsync(async (req, res, next) => {
+export const handleGoogleSignin = catchAsync(async (req, res, next) => {
     // console.log('hello');
   const signedToken = req.headers?.authorization?.split(" ")[1];
   const { email, name, role } = jsonwebtoken.verify(
@@ -17,53 +18,47 @@ export const handleSignin = catchAsync(async (req, res, next) => {
   const isUser = await User.findOne({email,role});
   console.log(isUser)
   if(isUser){
-    jwt = signJwt(isUser.email,isUser._id,isUser.role);
+    jwt = signJwt(isUser.toObject());
     user = isUser;
   }else{
     return res.status(400).json({ ok: false, message: "account not found" });
   }
-  // if(role === 'student'){
-  //   const student = await Student.findOne({ email });
-  //   if (!student) {
-  //     const newStudent = await Student.create({ email, name });
-  //     const signedToken = signJwt(newStudent.email, newStudent._id, "student");
-  //     return res.status(200).json({ ok: true, jwt: signedToken,user:newStudent });
-  //   }
-  //   jwt = signJwt(student.email, student._id, "student");
-  //   user = student;
-  // }
-  // if(role === 'teacher'){
-  //   const teacher = await Teacher.findOne({email});
-  //   if(teacher) {
-  //       jwt = signJwt(teacher.email, teacher._id, "teacher");
-  //       user = teacher;
-  //   }
-  //   else return res.status(400).json({ok:false,message:'account not found'});
-  // }
-  // if(role === 'admin'){
-  //   const admin = await Admin.findOne({email});
-  //   if(admin) {
-  //       jwt = signJwt(admin.email, admin._id, "admin");
-  //       user = admin;
-  //   }
-  //   else return res.status(400).json({ok:false,message:'account not found'});
-  // }
-  
-// console.log(token);
   res.status(200).json({ ok: true, jwt,user });
 });
 
+
+export const handlePasswordSignin = catchAsync(async (req, res, next) => {
+ 
+  const {email,password,role} = req.body;
+console.log(email,password)
+  const isUser = await User.findOne({email,role});
+    if (!isUser) return res.status(400).json({ok:false,message:'account not found'});
+    if(!isUser.password) return res.status(400).json({ok:false,message:"You haven't set a password yet"})
+    const isPasswordCorrect = await compare(password,isUser.password);
+    if(!isPasswordCorrect) return res.status(400).json({ok:false,message:'password incorrect'});
+    const jwt = signJwt(isUser.toObject());
+    res.cookie('jwt',jwt,{
+    sameSite:'lax',
+    httpOnly:true,
+    secure:false,
+    maxAge:10 * 24 * 60 * 60 * 1000
+  })
+  res.status(200).json({ ok: true });
+});
+
 export const protectRoute = catchAsync(async (req, res, next) => {
-  const jwt = req.headers?.authorization?.split(" ")[1];
+  const {jwt} = req.cookies;
+  // const jwt = req.headers?.authorization?.split(" ")[1];
+  if(!jwt) return console.log('no token')
   try{
-    const { email, id, role } = jsonwebtoken.verify(
+    const user = jsonwebtoken.verify(
     jwt,
     process.env.JWT_SECRET,
   );
 
-  const isUser = await User.findById(id);
+  const isUser = await User.findById(user._id);
   if(isUser){
-    req.user = {id:isUser._id,role:isUser.role};
+    req.user = {...user,id:user._id};
     return next();
   }
   else res.status(400).json({ok:false,message:'account not found'});
@@ -97,3 +92,5 @@ export const protectRoute = catchAsync(async (req, res, next) => {
     res.status(400).json({message:'you are not authenticated'});
   }
 });
+
+

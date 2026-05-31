@@ -11,44 +11,56 @@ import authRoutes from './routes/auth.js'
 import studentRoutes from './routes/student.js'
 import recordingRoutes from './routes/recording.js'
 import teacherRoutes from './routes/teacher.js'
+import userRoutes from './routes/user.js'
 import mongoose from 'mongoose';
-import jwt from 'jsonwebtoken'
+import jsonwebtoken from 'jsonwebtoken'
+import cookieParser from 'cookie-parser';
 configDotenv();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server,{
     cors:{
         origin:process.env.URL,
-        methods:['GET','POST']
+        methods:['GET','POST'],
+        credentials:true
     }
 });
 
 app.use(express.json());
-app.use(cors({origin:process.env.URL}));
+app.use(cors({origin:process.env.URL,credentials:true}));
 app.use(express.urlencoded({extended:true}));
-
+app.use(cookieParser());
 const user = new Map();
 io.use((socket, next) => {
+    console.log('tryinhg')
   try {
-    const token = socket.handshake.auth.jwt;
-    if (!token) {
-        console.log('Unauthorized')
-      return next(new Error("Unauthorized"));
-    }
-    // console.log('socket auth',token);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    const cookies = socket.handshake.headers.cookie
+    const jwt = cookies.split('; ').find(el => el.startsWith('jwt=')).split('=')[1];
+    // console.log('jwt', jwt)
+    try{
+        const decoded = jsonwebtoken.verify(jwt, process.env.JWT_SECRET);
+    // console.log(decoded)
     socket.user = decoded;
-
+    console.log(decoded)
     next();
+    }catch(err){
+        console.log(err)
+    }
+    // console.log('socket auth');
+    // if (!jwt) {
+    //     console.log('Unauthorized')
+    //   return next(new Error("Unauthorized"));
+    // }
   } catch (err) {
     next(new Error("Unauthorized"));
   }
 });
 
 io.on('connection',(socket) => {
+    console.log('connecting')
     user.set(socket.user.id,socket.id);
     socket.on('incoming-call',({to,from,offer}) => {
+        console.log('incoming')
         if(user.get(to)){
             // io.to(user.get(to)).emit('incoming-call',{caller:from,offer});
             socket.to(user.get(to)).emit('incoming-call',{caller:from,offer});
@@ -79,6 +91,7 @@ app.use('/auth',authRoutes);
 app.use('/student',studentRoutes);
 app.use('/recording',recordingRoutes);
 app.use('/teacher',teacherRoutes);
+app.use('/user',userRoutes);
 
 // app.get('/wake',(req,res,next) => {
 //     res.status(200).send('alive!');
