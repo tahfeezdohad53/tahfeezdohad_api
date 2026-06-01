@@ -15,11 +15,15 @@ export const handleChangeDiary = catchAsync(async (req,res,next) => {
     const {teacherId,studentId} = req.query;
     const {id,role} = req.user;
     if(role !== 'admin') return res.status(400).json({ok:false,message:'you are not allowed for this action'});
-    await Promise.all([
-        User.findOneAndUpdate({_id:studentId,role:'student'},{teacher:teacherId}),
-        User.findOneAndUpdate({students:studentId,role:'teacher'},{$pull:{students:studentId}}),
-        User.findOneAndUpdate({_id:teacherId,role:'teacher'},{$push:{students:studentId}})
-    ])
+    await User.findByIdAndUpdate(studentId,{teacher:teacherId});
+    res.status(200).json({ok:true});
+})
+
+export const handleChangeMultipleDiary = catchAsync(async (req,res,next) => {
+    const {teacherId,studentsId} = req.body;
+    const {id,role} = req.user;
+    if(role !== 'admin') return res.status(400).json({ok:false,message:'you are not allowed for this action'});
+    await User.updateMany({role:'student',_id:{$in:teacherId}},{teacher:teacherId});
     res.status(200).json({ok:true});
 })
 
