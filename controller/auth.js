@@ -3,28 +3,52 @@ import User from "../models/user.js";
 import { signJwt } from "../helpers/singJwt.js";
 import jsonwebtoken from "jsonwebtoken";
 import { compare } from "bcrypt";
+import { OAuth2Client } from "google-auth-library";
+import { config } from "dotenv";
+config();
 
+const client = new OAuth2Client(process.env.AUTH_GOOGLE_ID);
 export const handleGoogleSignin = catchAsync(async (req, res, next) => {
-    // console.log('hello');
-  const signedToken = req.headers?.authorization?.split(" ")[1];
-  const { email, name, role } = jsonwebtoken.verify(
-    signedToken,
-    process.env.FRONTEND_JWT_SECRET,
-  );
-  console.log(email, name, role);
-  let jwt;
-  let user;
+  const { idToken,role } = req.body;
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: process.env.AUTH_GOOGLE_ID,
+  });
+  const payload = ticket.getPayload();
 
-  const isUser = await User.findOne({email,role});
-  console.log(isUser)
-  if(isUser){
-    jwt = signJwt(isUser.toObject());
-    user = isUser;
-  }else{
-    return res.status(400).json({ ok: false, message: "account not found" });
-  }
-  res.status(200).json({ ok: true, jwt,user });
+  const isUser = await User.findOne({ email:payload.email, role });
+    // console.log(isUser)
+    if(!isUser) return res.status(400).json({ ok: false, message: "account not found" });
+    const jwt = signJwt(isUser.toObject());
+    res.cookie("jwt", jwt, {
+      sameSite: "none",
+      httpOnly: true,
+      secure: true,
+      maxAge: 10 * 24 * 60 * 60 * 1000,
+    });
+    res.status(200).json({ ok: true });
 });
+// export const handleGoogleSignin = catchAsync(async (req, res, next) => {
+//     // console.log('hello');
+//   const signedToken = req.headers?.authorization?.split(" ")[1];
+//   const { email, name, role } = jsonwebtoken.verify(
+//     signedToken,
+//     process.env.FRONTEND_JWT_SECRET,
+//   );
+//   console.log(email, name, role);
+//   let jwt;
+//   let user;
+
+//   const isUser = await User.findOne({email,role});
+//   console.log(isUser)
+//   if(isUser){
+//     jwt = signJwt(isUser.toObject());
+//     user = isUser;
+//   }else{
+//     return res.status(400).json({ ok: false, message: "account not found" });
+//   }
+//   res.status(200).json({ ok: true, jwt,user });
+// });
 
 
 export const handlePasswordSignin = catchAsync(async (req, res, next) => {
