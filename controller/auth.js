@@ -40,7 +40,7 @@ console.log(email,password)
     res.cookie('jwt',jwt,{
     sameSite:'none',
     httpOnly:true,
-    secure:false,
+    secure:true,
     maxAge:10 * 24 * 60 * 60 * 1000
   })
   res.status(200).json({ ok: true });
