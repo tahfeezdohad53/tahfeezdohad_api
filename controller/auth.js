@@ -38,7 +38,7 @@ console.log(email,password)
     if(!isPasswordCorrect) return res.status(400).json({ok:false,message:'password incorrect'});
     const jwt = signJwt(isUser.toObject());
     res.cookie('jwt',jwt,{
-    sameSite:'lax',
+    sameSite:'none',
     httpOnly:true,
     secure:false,
     maxAge:10 * 24 * 60 * 60 * 1000
