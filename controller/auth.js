@@ -32,7 +32,7 @@ export const handleGoogleSignin = catchAsync(async (req, res, next) => {
     res.status(200).json({ ok: true });
 });
 export const handleLogout = catchAsync(async (req, res, next) => {
-    res.clearCookie("jwt", {
+    res.cookie("jwt","", {
       sameSite: "none",
       httpOnly: true,
       secure: true, 
