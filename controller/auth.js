@@ -9,9 +9,12 @@ config();
 
 const client = new OAuth2Client(process.env.AUTH_GOOGLE_ID);
 export const handleGoogleSignin = catchAsync(async (req, res, next) => {
+  if(req.cookies.jwt) return res.status(200).json({ok:true,status:'authenticated'});
   const { idToken,role } = req.body;
+  // console.log('gggole')
+  // console.log(idToken);
   const ticket = await client.verifyIdToken({
-    idToken,
+    idToken:idToken,
     audience: process.env.AUTH_GOOGLE_ID,
   });
   const payload = ticket.getPayload();
@@ -72,8 +75,9 @@ console.log(email,password)
 
 export const protectRoute = catchAsync(async (req, res, next) => {
   const {jwt} = req.cookies;
+  console.log(req.cookies);
   // const jwt = req.headers?.authorization?.split(" ")[1];
-  if(!jwt) return console.log('no token')
+  if(!jwt) return res.status(400).json({ok:false,message:'please login first'})
   try{
     const user = jsonwebtoken.verify(
     jwt,
