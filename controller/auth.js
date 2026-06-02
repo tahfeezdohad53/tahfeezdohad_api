@@ -31,6 +31,14 @@ export const handleGoogleSignin = catchAsync(async (req, res, next) => {
     });
     res.status(200).json({ ok: true });
 });
+export const handleLogout = catchAsync(async (req, res, next) => {
+    res.clearCookie("jwt", {
+      sameSite: "none",
+      httpOnly: true,
+      secure: true, 
+    });
+    res.status(200).json({ ok: true });
+});
 // export const handleGoogleSignin = catchAsync(async (req, res, next) => {
 //     // console.log('hello');
 //   const signedToken = req.headers?.authorization?.split(" ")[1];
