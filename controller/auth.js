@@ -39,6 +39,13 @@ export const handleLogout = catchAsync(async (req, res, next) => {
     });
     res.status(200).json({ ok: true });
 });
+
+export const handleVerifyUser = catchAsync(async (req, res, next) => {
+    const {email,role} = req.body;
+    const user = await User.findOne({email,role});
+    if(!user) return res.status(401).json({ok:false,message:'please req admin to create your account first'});
+    res.status(200).json({ ok: true });
+});
 // export const handleGoogleSignin = catchAsync(async (req, res, next) => {
 //     // console.log('hello');
 //   const signedToken = req.headers?.authorization?.split(" ")[1];
@@ -65,7 +72,6 @@ export const handleLogout = catchAsync(async (req, res, next) => {
 export const handlePasswordSignin = catchAsync(async (req, res, next) => {
  
   const {email,password,role} = req.body;
-console.log(email,password)
   const isUser = await User.findOne({email,role});
     if (!isUser) return res.status(400).json({ok:false,message:'account not found'});
     if(!isUser.password) return res.status(400).json({ok:false,message:"You haven't set a password yet"})
@@ -83,7 +89,6 @@ console.log(email,password)
 
 export const protectRoute = catchAsync(async (req, res, next) => {
   const {jwt} = req.cookies;
-  console.log(req.cookies);
   // const jwt = req.headers?.authorization?.split(" ")[1];
   if(!jwt) return res.status(400).json({ok:false,message:'please login first'})
   try{
