@@ -1,19 +1,33 @@
 import mongoose from "mongoose";
 
-
-const schema = new mongoose.Schema({
-    students:{
-        type:[mongoose.Schema.Types.ObjectId],
-        ref:'Student'
+const schema = new mongoose.Schema(
+  {
+    students: {
+      required: true,
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
     },
-    teacher:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Teacher'
+    teacher: {
+      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    juz:String,
-    date:Date,
-},{timestamps:true});
+    batch: {
+      type: String,
+      required: true,
+    },
+    juz: {
+      required: true,
+      type: String,
+    },
+    date: {
+      required: true,
+      type: Date,
+    },
+  },
+  { timestamps: true },
+);
 
-const model = mongoose.model('Maqaraat',schema);
+const model = mongoose.model("Maqarat", schema);
 
 export default model;
