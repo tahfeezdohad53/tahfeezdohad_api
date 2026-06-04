@@ -12,7 +12,7 @@ export const handleCreateMaqarat = catchAsync(async (req,res,next) => {
 
 export const handleGetMaqarat = catchAsync(async (req,res,next) => {
     const {id,role} = req.user;
-    const { batch } = req.query;
+    const { batch,status } = req.query;
     let filter = {};
     if (role === "teacher") {
       filter.teacher = id;
@@ -25,11 +25,34 @@ export const handleGetMaqarat = catchAsync(async (req,res,next) => {
     if (batch) {
       filter.batch = batch;
     }
+    if(status === 'ended'){
+      const date = new Date();
+      filter.$and = [
+      {monthDate:{$lt:date.getDate()}},
+      {month:{$lte:date.getMonth()}},
+      {year:{$lte:date.getFullYear()}},
+    ]
+    }
+    if(status === 'upcoming'){
+      const date = new Date();
+      filter.$and = [
+      {monthDate:{$gt:date.getDate()}},
+      {month:{$gte:date.getMonth()}},
+      {year:{$gte:date.getFullYear()}},
+    ]
+    }
+    if(status === 'today'){
+      const date = new Date();
+      filter.$and = [
+      {monthDate:{$eq:date.getDate()}},
+      {month:{$eq:date.getMonth()}},
+      {year:{$eq:date.getFullYear()}},
+    ]
+    }
     const maqarat = await Maqarat.find(filter)
      .sort({ date: -1 })
      .limit(10)
      .populate("students")
      .populate("teacher");
-
     res.status(200).json({ok:true,maqarat});
 })

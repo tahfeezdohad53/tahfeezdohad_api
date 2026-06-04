@@ -24,10 +24,20 @@ const schema = new mongoose.Schema(
       required: true,
       type: Date,
     },
+    monthDate:Number,
+    month:Number,
+    year:Number,
   },
   { timestamps: true },
 );
 
+schema.pre('save',function(){
+  console.log('helloooo')
+  const date = new Date(this.date);
+  this.monthDate = date.getDate();
+  this.month = date.getMonth();
+  this.year = date.getFullYear();
+})
 const model = mongoose.model("Maqarat", schema);
 
 export default model;
