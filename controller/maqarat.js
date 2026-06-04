@@ -12,16 +12,24 @@ export const handleCreateMaqarat = catchAsync(async (req,res,next) => {
 
 export const handleGetMaqarat = catchAsync(async (req,res,next) => {
     const {id,role} = req.user;
-    let maqarat;
-    if(role === 'admin'){
-        maqarat = await Maqarat.find().sort({date:-1}).limit(10).populate('students').populate('teacher')
+    const { batch } = req.query;
+    let filter = {};
+    if (role === "teacher") {
+      filter.teacher = id;
     }
-    if(role === 'teacher'){
-        maqarat = await Maqarat.find({teacher:id}).sort({date:-1}).limit(10).populate('students').populate('teacher');
+
+    if (role === "student") {
+      filter.students = id;
     }
-    if(role === 'student'){
-        maqarat = await Maqarat.find({students:id}).sort({date:-1}).limit(10).populate('students').populate('teacher');
+
+    if (batch) {
+      filter.batch = batch;
     }
+    const maqarat = await Maqarat.find(filter)
+     .sort({ date: -1 })
+     .limit(10)
+     .populate("students")
+     .populate("teacher");
 
     res.status(200).json({ok:true,maqarat});
 })
