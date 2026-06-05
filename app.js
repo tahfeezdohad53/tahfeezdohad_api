@@ -13,6 +13,7 @@ import recordingRoutes from './routes/recording.js'
 import teacherRoutes from './routes/teacher.js'
 import userRoutes from './routes/user.js'
 import maqaratRoutes from './routes/maqarat.js'
+import aliveRoutes from './routes/alive.js'
 import mongoose from 'mongoose';
 import jsonwebtoken from 'jsonwebtoken'
 import cookieParser from 'cookie-parser';
@@ -94,6 +95,7 @@ app.use('/recording',recordingRoutes);
 app.use('/teacher',teacherRoutes);
 app.use('/user',userRoutes);
 app.use('/maqarat',maqaratRoutes);
+app.use('/alive',aliveRoutes);
 
 // app.get('/wake',(req,res,next) => {
 //     res.status(200).send('alive!');
