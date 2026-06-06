@@ -34,7 +34,7 @@ app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const user = new Map();
 io.use((socket, next) => {
-    console.log('tryinhg')
+    // console.log('tryinhg')
   try {
     const cookies = socket.handshake.headers.cookie
     const jwt = cookies.split('; ').find(el => el.startsWith('jwt=')).split('=')[1];
@@ -43,7 +43,7 @@ io.use((socket, next) => {
         const decoded = jsonwebtoken.verify(jwt, process.env.JWT_SECRET);
     // console.log(decoded)
     socket.user = decoded;
-    console.log(decoded)
+    // console.log(decoded)
     next();
     }catch(err){
         console.log(err)
@@ -59,10 +59,11 @@ io.use((socket, next) => {
 });
 
 io.on('connection',(socket) => {
-    console.log('connecting')
-    user.set(socket.user.id,socket.id);
+    // console.log('connecting')
+    user.set(socket.user._id,socket.id);
     socket.on('incoming-call',({to,from,offer}) => {
-        console.log('incoming')
+        // console.log('incoming')
+        // console.log(user);
         if(user.get(to)){
             // io.to(user.get(to)).emit('incoming-call',{caller:from,offer});
             socket.to(user.get(to)).emit('incoming-call',{caller:from,offer});
@@ -76,7 +77,7 @@ io.on('connection',(socket) => {
         }
     })
     socket.on('ice-candidate',({to,candidate}) => {
-        console.log(to);
+        // console.log(to);
         if(user.get(to)){
             // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
             socket.to(user.get(to)).emit('ice-candidate',{candidate});
