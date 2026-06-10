@@ -8,12 +8,12 @@ export const handleGetGurfahData = catchAsync(async (req, res, next) => {
   let classes;
   let user;
   if(role === 'student'){
-    classes = await OnlineClass.find({student:id,teacher:userId});
+    classes = await OnlineClass.find({student:id,teacher:userId}).sort({createdAt:-1}).limit(10);
     user = await User.findById(userId);
 
   }
   else{
-     classes = await OnlineClass.find({ student: userId, teacher: id });
+     classes = await OnlineClass.find({ student: userId, teacher: id }).sort({createdAt:-1}).limit(10);
      user = await User.findById(userId);
 
   }
