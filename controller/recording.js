@@ -1,11 +1,12 @@
 import catchAsync from "../utils/catchAsync.js";
 import Recording from "../models/recording.js";
 import User from "../models/user.js";
+import OnlineClass from "../models/onlineclass.js";
 import { Readable } from "stream";
 import cloudinary from "../libs/cloudinary.js";
 
 export const handleUploadAudio = catchAsync(async (req, res, next) => {
-  const {} = req.body;
+  const {isOnline} = req.body;
   const { studentId } = req.params;
   const { id, role } = req.user;
   if (role === "student")
@@ -29,6 +30,7 @@ export const handleUploadAudio = catchAsync(async (req, res, next) => {
         audio: result.secure_url,
         duration: Math.ceil(result.duration / 60),
       });
+      if(isOnline) await OnlineClass.create({student:studentId,teacher:id,duration:Math.ceil(result.duration / 60)});
       res.status(200).json({ ok: true });
     },
   );
