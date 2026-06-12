@@ -14,6 +14,7 @@ import teacherRoutes from './routes/teacher.js'
 import userRoutes from './routes/user.js'
 import maqaratRoutes from './routes/maqarat.js'
 import gurfahRoutes from './routes/gurfah.js'
+import leaveRoutes from './routes/leave.js'
 import aliveRoutes from './routes/alive.js'
 import mongoose from 'mongoose';
 import jsonwebtoken from 'jsonwebtoken'
@@ -98,6 +99,7 @@ app.use('/teacher',teacherRoutes);
 app.use('/user',userRoutes);
 app.use('/maqarat',maqaratRoutes);
 app.use('/gurfah',gurfahRoutes);
+app.use('/leave',leaveRoutes);
 app.use('/alive',aliveRoutes);
 
 // app.get('/wake',(req,res,next) => {
