@@ -3,9 +3,9 @@ import User from "../models/user.js";
 import Leave from "../models/leave.js";
 
 export const handleCreateLeave = catchAsync(async (req, res, next) => {
-  const { id, role, batch, name } = req.user;
+  const { id, role, batch='yaqoot', name } = req.user;
   const {type,reason,from,to,days} = req.body;
-  await Leave.create({type,reason,from,to,days,user:id,role,batch,name});
+  await Leave.create({reason,from,to,days,user:id,role,batch,name});
   res.status(201).json({ok:true});
 });
 
@@ -17,12 +17,12 @@ export const handleGetLeaves = catchAsync(async (req, res, next) => {
   if(role !== 'admin'){
     filter.user = id;
     filter.status = status;
-    const leaves = await Leave.find(filter).sort({createdAt:-1}).limit(50);
+    const leaves = await Leave.find(filter).sort({createdAt:-1}).limit(100);
     return res.status(200).json({ok:true,leaves});
   }
 
   filter.user = user;
-  const leaves = await Leave.find({ role:user,status }).sort({createdAt:-1}).limit(100);
+  const leaves = await Leave.find({ role:user,status }).sort({createdAt:-1}).limit(500);
   return res.status(200).json({ ok: true, leaves });
 });
 

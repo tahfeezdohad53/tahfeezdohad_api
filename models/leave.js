@@ -19,7 +19,7 @@ const schema = new mongoose.Schema(
         type:Number,
         required:true,
     },
-    type:{
+    name:{
         type:String,
         required:true,
     },
