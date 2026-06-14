@@ -7,6 +7,7 @@ import Recording from './models/recording.js'
 import multer from 'multer';
 import {Readable} from 'stream';
 import { v2 as cloudinary } from 'cloudinary';
+import User from './models/user.js'
 import authRoutes from './routes/auth.js'
 import studentRoutes from './routes/student.js'
 import recordingRoutes from './routes/recording.js'
@@ -60,9 +61,10 @@ io.use((socket, next) => {
   }
 });
 
-io.on('connection',(socket) => {
+io.on('connection',async (socket) => {
     // console.log('connecting')
     user.set(socket.user._id,socket.id);
+    await User.findByIdAndUpdate(socket.user._id,{status:'online'});
     socket.on('incoming-call',({to,from,offer}) => {
         // console.log('incoming')
         // console.log(user);
@@ -89,6 +91,10 @@ io.on('connection',(socket) => {
         if(user.get(to)){
             socket.to(user.get(to)).emit('end-call');
         }
+    })
+    socket.on('disconnect',async () => {
+        await User.findByIdAndUpdate(socket.user._id,{status:'offline'});
+        user.delete(socket.user._id);
     })
 })
 

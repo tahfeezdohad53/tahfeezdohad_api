@@ -11,18 +11,21 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
 
 export const handleGetLeaves = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
-  const { user,status } = req.query;
+  const { user,status,page } = req.query;
+  const skip = (Number(page) - 1) * 10;
+
   let filter = {};
 
   if(role !== 'admin'){
-    filter.user = id;
-    filter.status = status;
+    if (user) filter.user = id;
+    if (status) filter.status = status;
     const leaves = await Leave.find(filter).sort({createdAt:-1}).limit(100);
     return res.status(200).json({ok:true,leaves});
   }
 
-  filter.user = user;
-  const leaves = await Leave.find({ role:user,status }).sort({createdAt:-1}).limit(500);
+  if(user) filter.user = user;
+  if(status) filter.status = status;
+  const leaves = await Leave.find(filter).sort({createdAt:-1}).limit(500);
   return res.status(200).json({ ok: true, leaves });
 });
 
@@ -45,7 +48,7 @@ export const handleGetLeaveStatistics = catchAsync(async (req, res, next) => {
   }
 
   filter.user = user;
-  const leaves = await Leave.find({ role:user });
+  const leaves = await Leave.find();
   leaves.forEach((el) => {
     stats[el.status]++;
   });

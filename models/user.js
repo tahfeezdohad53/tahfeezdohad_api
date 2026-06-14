@@ -20,6 +20,10 @@ const schema = new mongoose.Schema({
         type:String,
         default:'student',
         enum:['student','teacher','admin']
+    },
+    status:{
+        type:String,
+        enum:['online','offline'],
     }
 },{timestamps:true});
 
