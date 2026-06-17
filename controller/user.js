@@ -12,7 +12,6 @@ export const handleUpdatePassword = catchAsync(async (req, res, next) => {
 });
 
 export const handleGetUser = catchAsync(async (req, res, next) => {
-  console.log('getting user')
   const { id } = req.user;
   const user = await User.findById(id);
   if (!user) return res.status(400).json({ ok: false });
