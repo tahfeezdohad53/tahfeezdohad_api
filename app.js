@@ -67,7 +67,7 @@ io.on('connection',async (socket) => {
     const currentUser = await User.findByIdAndUpdate(socket.user._id,{status:'online'});
     if(currentUser.role === 'student') socket
       .to(user.get(currentUser.teacher.toString()))
-      .emit("online", { name: currentUser.name, role: currentUser.role });
+      .emit("online", { name: currentUser.name, role: currentUser.role,id:currentUser._id.toString() });
     if(currentUser.role === 'teacher'){
         const students = await User.find({role:'student',teacher:currentUser._id});
         students.forEach(el => {
@@ -76,6 +76,7 @@ io.on('connection',async (socket) => {
               .emit("online", {
                 name: currentUser.name,
                 role: currentUser.role,
+                id:currentUser._id.toString()
               });
         })
     } 
