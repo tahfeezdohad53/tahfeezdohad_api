@@ -79,7 +79,7 @@ io.on('connection',async (socket) => {
        }
     }
     if(currentUser.role === 'teacher') {
-        console.log(socket.id);
+        // console.log(socket.id);
         const students = await User.find({
           role: "student",
           teacher: currentUser._id,
@@ -100,35 +100,48 @@ io.on('connection',async (socket) => {
           }
         });
     }
+    if(currentUser.role === 'admin') {
+        user.set(socket.user._id, {
+          role: currentUser.role,
+          socketId: socket.id,
+        });
+    }
 
-    if(currentUser.role === 'teacher'){
-        const students = await User.find({role:'student',teacher:currentUser._id});
+    // if(currentUser.role === 'teacher'){
+    //     const students = await User.find({role:'student',teacher:currentUser._id});
         
-    } 
+    // } 
     socket.on('incoming-call',({to,from,offer}) => {
         // console.log('incoming')
         // console.log(user);
-        if(user.get(to).socketId){
+        if(user.has(to)){
             // io.to(user.get(to)).emit('incoming-call',{caller:from,offer});
             socket.to(user.get(to).socketId).emit('incoming-call',{caller:from,offer});
             // console.log(offer);
         }
     })
+    socket.on('line-busy',({to}) => {
+        if(user.has(to)){
+            socket.to(user.get(to).socketId).emit('line-busy');
+        }
+    })
     socket.on('call-accepted',({to,from,answer}) => {
-        if(user.get(to).socketId){
+        console.log(user.has(to));
+        if(user.has(to)){
             // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
             socket.to(user.get(to).socketId).emit('call-accepted',{answerer:from,answer});
         }
     })
     socket.on('ice-candidate',({to,candidate}) => {
         // console.log(to);
-        if(user.get(to).socketId){
+        if(user.has(to)){
             // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
             socket.to(user.get(to).socketId).emit('ice-candidate',{candidate});
         }
     })
     socket.on('end-call',({to}) => {
-        if(user.get(to).socketId){
+        console.log('end call',user.has(to));
+        if(user.has(to)){
             socket.to(user.get(to).socketId).emit('end-call');
         }
     })
@@ -161,7 +174,7 @@ io.on('connection',async (socket) => {
               }
             });
         }
-        await User.findByIdAndUpdate(socket.user._id,{status:'offline'});
+        if (user.get(socket.user._id)?.role !== "admin") await User.findByIdAndUpdate(socket.user._id, { status: "offline" });
         user.delete(socket.user._id);
     })
 })

@@ -7,6 +7,11 @@ const schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    type:{
+      type:String,
+      required:true,
+      enum:['casual','sick']
+    },
     from: {
       required: true,
       type: Date,

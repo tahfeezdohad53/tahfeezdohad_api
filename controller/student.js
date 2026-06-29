@@ -26,6 +26,13 @@ export const handleChangeMultipleDiary = catchAsync(async (req,res,next) => {
     await User.updateMany({role:'student',_id:{$in:studentsId}},{teacher:teacherId});
     res.status(200).json({ok:true});
 })
+export const handleAssignMultipleProxies = catchAsync(async (req,res,next) => {
+    const {teacherId,studentsId} = req.body;
+    const {id,role} = req.user;
+    if(role !== 'admin') return res.status(400).json({ok:false,message:'you are not allowed for this action'});
+    await User.updateMany({role:'student',_id:{$in:studentsId}},{proxyTeacher:teacherId});
+    res.status(200).json({ok:true});
+})
 
 export const handleAssignProxy = catchAsync(async (req,res,next) => {
     const {teacherId,studentId} = req.query;

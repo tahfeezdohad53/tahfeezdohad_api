@@ -24,6 +24,7 @@ const schema = new mongoose.Schema({
     status:{
         type:String,
         enum:['online','offline'],
+        default:'offline'
     }
 },{timestamps:true});
 
