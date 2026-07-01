@@ -146,7 +146,8 @@ io.on('connection',async (socket) => {
             socket.to(user.get(to).socketId).emit('end-call');
         }
     })
-    socket.on('disconnect',async () => {
+    socket.on('disconnect',async (reason) => {
+      console.log('reason disconnected: ',reason);
         console.log('disconnected');
         if(user.get(socket.user._id)?.role === 'student'){
             // console.log(user.get(user.get(socket.user._id).teacher).socketId);
