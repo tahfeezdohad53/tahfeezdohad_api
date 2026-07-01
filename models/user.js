@@ -4,6 +4,9 @@ import mongoose from "mongoose";
 const schema = new mongoose.Schema({
     email:String,
     password:String,
+    its:Number,
+    juz:Number,
+    nisf:Number,
     name:String,
     batch:String,
     fees:Number,
