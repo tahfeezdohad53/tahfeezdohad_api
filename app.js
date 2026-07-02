@@ -139,7 +139,7 @@ io.on('connection',async (socket) => {
     });
       socket.on("ice-restart-answer", ({ answer, to }) => {
         if (user.has(to)) {
-          socket.to(user.get(to).socketId).emit("ice-restart-offer", { answer });
+          socket.to(user.get(to).socketId).emit("ice-restart-answer", { answer });
         }
       });
 
