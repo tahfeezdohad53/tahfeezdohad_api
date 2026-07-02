@@ -1,3 +1,4 @@
+import { hash } from "bcrypt";
 import mongoose from "mongoose";
 
 
@@ -30,6 +31,12 @@ const schema = new mongoose.Schema({
         default:'offline'
     }
 },{timestamps:true});
+
+schema.pre('save',async function(next){
+    // let NameOfTeacher;
+    const hashedPass = await hash(this.password,10);
+    this.password = hashedPass;
+})
 
 const model = mongoose.model('User',schema);
 

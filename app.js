@@ -130,6 +130,19 @@ io.on('connection',async (socket) => {
             socket.to(user.get(to).socketId).emit('line-busy');
         }
     })
+    socket.on("ice-restart-offer",({offer,to}) => {
+       if (user.has(to)) {
+         socket
+           .to(user.get(to).socketId)
+           .emit("ice-restart-offer", { offer });
+       }
+    });
+      socket.on("ice-restart-answer", ({ answer, to }) => {
+        if (user.has(to)) {
+          socket.to(user.get(to).socketId).emit("ice-restart-offer", { answer });
+        }
+      });
+
     socket.on('call-accepted',({to,from,answer}) => {
         console.log(user.has(to));
         if(user.has(to)){
@@ -202,7 +215,16 @@ io.on('connection',async (socket) => {
 //   });
 // });
 
-
+// async function fnn(){
+//   await User.create({
+//     email:'abbas@gmail.com',
+//     name:'abbas jiniya',
+//     // batch:'yaqoot_mardo',
+//     password:'1234',
+//     role:'teacher'
+//   })
+// }
+// fnn();
 
 app.get("/turn-credentials", async (req, res) => {
   const response = await axios.post(
