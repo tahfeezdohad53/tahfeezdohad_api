@@ -180,10 +180,18 @@ io.on('connection',async (socket) => {
               }
             });
         }
-        const role = user.get(socket.user._id)?.role;
-        user.delete(socket.user._id);
-        console.log('user after disconnect: ',user);
-        if (role !== "admin") await User.findByIdAndUpdate(socket.user._id, { status: "offline" });
+
+        const current = user.get(socket.user._id);
+
+        if (current?.socketId === socket.id) {
+          user.delete(socket.user._id);
+
+          if (current.role !== "admin") {
+            await User.findByIdAndUpdate(socket.user._id, {
+              status: "offline",
+            });
+          }
+        }
     })
 })
 // io.on("connection", (socket) => {
