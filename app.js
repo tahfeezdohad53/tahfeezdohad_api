@@ -37,157 +37,157 @@ app.use(cors({origin:process.env.URL,credentials:true}));
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const user = new Map();
-// io.use((socket, next) => {
-//     // console.log('tryinhg')
-//   try {
-//     const cookies = socket.handshake.headers.cookie
-//     const jwt = cookies.split('; ').find(el => el.startsWith('jwt=')).split('=')[1];
-//     // console.log('jwt', jwt)
-//     try{
-//         const decoded = jsonwebtoken.verify(jwt, process.env.JWT_SECRET);
-//     // console.log(decoded)
-//     socket.user = decoded;
-//     // console.log(decoded)
-//     next();
-//     }catch(err){
-//         console.log(err)
-//     }
-//     // console.log('socket auth');
-//     // if (!jwt) {
-//     //     console.log('Unauthorized')
-//     //   return next(new Error("Unauthorized"));
-//     // }
-//   } catch (err) {
-//     next(new Error("Unauthorized"));
-//   }
-// });
-
-// io.on('connection',async (socket) => {
-//     console.log('connecting')
-//     console.log('socket id:',socket.id);
-//     // const currentUser = await User.findByIdAndUpdate(socket.user._id,{status:'online'});
-//     // if(currentUser.role === 'student') {
-//     //     user.set(socket.user._id, {
-//     //         role:currentUser.role,
-//     //       teacher: currentUser.teacher.toString(),
-//     //       socketId: socket.id,
-//     //     });
-//     //    if(user.has(currentUser.teacher.toString())){
-//     //      socket.to(user.get(currentUser.teacher.toString()).socketId).emit("online", {
-//     //        name: currentUser.name,
-//     //        role: currentUser.role,
-//     //        id: currentUser._id.toString(),
-//     //      });
-//     //    }
-//     // }
-//     // if(currentUser.role === 'teacher') {
-//     //     // console.log(socket.id);
-//     //     const students = await User.find({
-//     //       role: "student",
-//     //       teacher: currentUser._id,
-//     //     });
-//     //     const studentsId = students.map(el => el._id.toString());
-//     //     user.set(socket.user._id, {
-//     //       role: currentUser.role,
-//     //       students: studentsId,
-//     //       socketId: socket.id,
-//     //     });
-//     //     students.forEach((el) => {
-//     //       if(user.has(el._id.toString())){
-//     //         socket.to(user.get(el._id.toString()).socketId).emit("online", {
-//     //           name: currentUser.name,
-//     //           role: currentUser.role,
-//     //           id: currentUser._id.toString(),
-//     //         });
-//     //       }
-//     //     });
-//     // }
-//     // if(currentUser.role === 'admin') {
-//     //     user.set(socket.user._id, {
-//     //       role: currentUser.role,
-//     //       socketId: socket.id,
-//     //     });
-//     // }
-
-//     // // if(currentUser.role === 'teacher'){
-//     // //     const students = await User.find({role:'student',teacher:currentUser._id});
-        
-//     // // } 
-//     // socket.on('incoming-call',({to,from,offer}) => {
-//     //     // console.log('incoming')
-//     //     // console.log(user);
-//     //     if(user.has(to)){
-//     //         // io.to(user.get(to)).emit('incoming-call',{caller:from,offer});
-//     //         socket.to(user.get(to).socketId).emit('incoming-call',{caller:from,offer});
-//     //         // console.log(offer);
-//     //     }
-//     // })
-//     // socket.on('line-busy',({to}) => {
-//     //     if(user.has(to)){
-//     //         socket.to(user.get(to).socketId).emit('line-busy');
-//     //     }
-//     // })
-//     // socket.on('call-accepted',({to,from,answer}) => {
-//     //     console.log(user.has(to));
-//     //     if(user.has(to)){
-//     //         // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
-//     //         socket.to(user.get(to).socketId).emit('call-accepted',{answerer:from,answer});
-//     //     }
-//     // })
-//     // socket.on('ice-candidate',({to,candidate}) => {
-//     //     // console.log(to);
-//     //     if(user.has(to)){
-//     //         // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
-//     //         socket.to(user.get(to).socketId).emit('ice-candidate',{candidate});
-//     //     }
-//     // })
-//     // socket.on('end-call',({to}) => {
-//     //     console.log('end call',user.has(to));
-//     //     if(user.has(to)){
-//     //         socket.to(user.get(to).socketId).emit('end-call');
-//     //     }
-//     // })
-//     socket.on('disconnect',async (reason) => {
-//       console.log('disconnected');
-//       console.log('reason disconnected: ',reason);
-//         // if(user.get(socket.user._id)?.role === 'student'){
-//         //     // console.log(user.get(user.get(socket.user._id).teacher).socketId);
-//         //     // console.log(user.get(socket.user._id).role);
-//         //     const curruser = user.get(socket.user._id).teacher;
-//         //     const teacherSocketId = user.get(curruser)?.socketId;
-//         //     // console.log(user.get(curruser).socketId);
-//         //     // console.log(user.has(curruser))
-//         //     if (user.has(curruser)){
-//         //         socket
-//         //           .to(user.get(curruser).socketId)
-//         //           .emit("offline", {
-//         //             role: user.get(socket.user._id).role,
-//         //             id: socket.user._id,
-//         //           });
-
-//         //     }
-//         // }
-//         // if(user.get(socket.user._id)?.role === 'teacher'){
-//         //     user.get(socket.user._id).students.forEach((el) => {
-//         //       if (user.has(el)) {
-//         //         socket.to(user.get(el).socketId).emit("offline", {
-//         //           role: user.get(socket.user._id).role,
-//         //           id: socket.user._id,
-//         //         });
-//         //       }
-//         //     });
-//         // }
-//         // if (user.get(socket.user._id)?.role !== "admin") await User.findByIdAndUpdate(socket.user._id, { status: "offline" });
-//         // user.delete(socket.user._id);
-//     })
-// })
-io.on("connection", (socket) => {
-  console.log("CONNECTED", socket.id);
-
-  socket.on("disconnect", (reason) => {
-    console.log("DISCONNECTED", socket.id, reason);
-  });
+io.use((socket, next) => {
+    // console.log('tryinhg')
+  try {
+    const cookies = socket.handshake.headers.cookie
+    const jwt = cookies.split('; ').find(el => el.startsWith('jwt=')).split('=')[1];
+    // console.log('jwt', jwt)
+    try{
+        const decoded = jsonwebtoken.verify(jwt, process.env.JWT_SECRET);
+    // console.log(decoded)
+    socket.user = decoded;
+    // console.log(decoded)
+    next();
+    }catch(err){
+        console.log(err)
+    }
+    // console.log('socket auth');
+    // if (!jwt) {
+    //     console.log('Unauthorized')
+    //   return next(new Error("Unauthorized"));
+    // }
+  } catch (err) {
+    next(new Error("Unauthorized"));
+  }
 });
+
+io.on('connection',async (socket) => {
+    console.log('connecting')
+    console.log('socket id:',socket.id);
+    const currentUser = await User.findByIdAndUpdate(socket.user._id,{status:'online'});
+    if(currentUser.role === 'student') {
+        user.set(socket.user._id, {
+            role:currentUser.role,
+          teacher: currentUser.teacher.toString(),
+          socketId: socket.id,
+        });
+       if(user.has(currentUser.teacher.toString())){
+         socket.to(user.get(currentUser.teacher.toString()).socketId).emit("online", {
+           name: currentUser.name,
+           role: currentUser.role,
+           id: currentUser._id.toString(),
+         });
+       }
+    }
+    if(currentUser.role === 'teacher') {
+        // console.log(socket.id);
+        const students = await User.find({
+          role: "student",
+          teacher: currentUser._id,
+        });
+        const studentsId = students.map(el => el._id.toString());
+        user.set(socket.user._id, {
+          role: currentUser.role,
+          students: studentsId,
+          socketId: socket.id,
+        });
+        students.forEach((el) => {
+          if(user.has(el._id.toString())){
+            socket.to(user.get(el._id.toString()).socketId).emit("online", {
+              name: currentUser.name,
+              role: currentUser.role,
+              id: currentUser._id.toString(),
+            });
+          }
+        });
+    }
+    if(currentUser.role === 'admin') {
+        user.set(socket.user._id, {
+          role: currentUser.role,
+          socketId: socket.id,
+        });
+    }
+
+    // if(currentUser.role === 'teacher'){
+    //     const students = await User.find({role:'student',teacher:currentUser._id});
+        
+    // } 
+    socket.on('incoming-call',({to,from,offer}) => {
+        // console.log('incoming')
+        // console.log(user);
+        if(user.has(to)){
+            // io.to(user.get(to)).emit('incoming-call',{caller:from,offer});
+            socket.to(user.get(to).socketId).emit('incoming-call',{caller:from,offer});
+            // console.log(offer);
+        }
+    })
+    socket.on('line-busy',({to}) => {
+        if(user.has(to)){
+            socket.to(user.get(to).socketId).emit('line-busy');
+        }
+    })
+    socket.on('call-accepted',({to,from,answer}) => {
+        console.log(user.has(to));
+        if(user.has(to)){
+            // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
+            socket.to(user.get(to).socketId).emit('call-accepted',{answerer:from,answer});
+        }
+    })
+    socket.on('ice-candidate',({to,candidate}) => {
+        // console.log(to);
+        if(user.has(to)){
+            // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
+            socket.to(user.get(to).socketId).emit('ice-candidate',{candidate});
+        }
+    })
+    socket.on('end-call',({to}) => {
+        console.log('end call',user.has(to));
+        if(user.has(to)){
+            socket.to(user.get(to).socketId).emit('end-call');
+        }
+    })
+    socket.on('disconnect',async (reason) => {
+      console.log('disconnected id: ',socket.id);
+      console.log('reason disconnected: ',reason);
+        if(user.get(socket.user._id)?.role === 'student'){
+            // console.log(user.get(user.get(socket.user._id).teacher).socketId);
+            // console.log(user.get(socket.user._id).role);
+            const curruser = user.get(socket.user._id).teacher;
+            const teacherSocketId = user.get(curruser)?.socketId;
+            // console.log(user.get(curruser).socketId);
+            // console.log(user.has(curruser))
+            if (user.has(curruser)){
+                socket
+                  .to(user.get(curruser).socketId)
+                  .emit("offline", {
+                    role: user.get(socket.user._id).role,
+                    id: socket.user._id,
+                  });
+
+            }
+        }
+        if(user.get(socket.user._id)?.role === 'teacher'){
+            user.get(socket.user._id).students.forEach((el) => {
+              if (user.has(el)) {
+                socket.to(user.get(el).socketId).emit("offline", {
+                  role: user.get(socket.user._id).role,
+                  id: socket.user._id,
+                });
+              }
+            });
+        }
+        if (user.get(socket.user._id)?.role !== "admin") await User.findByIdAndUpdate(socket.user._id, { status: "offline" });
+        user.delete(socket.user._id);
+    })
+})
+// io.on("connection", (socket) => {
+//   console.log("CONNECTED", socket.id);
+
+//   socket.on("disconnect", (reason) => {
+//     console.log("DISCONNECTED", socket.id, reason);
+//   });
+// });
 
 
 
