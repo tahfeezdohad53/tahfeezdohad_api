@@ -217,11 +217,6 @@ app.use('/gurfah',gurfahRoutes);
 app.use('/leave',leaveRoutes);
 app.use('/alive',aliveRoutes);
 
-// app.get('/wake',(req,res,next) => {
-//     res.status(200).send('alive!');
-//     next()
-// })
-
 (async function(){
     try{
         const r = await mongoose.connect(process.env.MONGO_URI);
@@ -231,6 +226,6 @@ app.use('/alive',aliveRoutes);
         console.log(err);
     } 
 })()
-server.listen(4000,() => {
+server.listen(process.env.PORT,() => {
     console.log('listening');
 })
