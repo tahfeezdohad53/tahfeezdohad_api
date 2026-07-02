@@ -72,6 +72,7 @@ io.on('connection',async (socket) => {
           teacher: currentUser.teacher.toString(),
           socketId: socket.id,
         });
+        console.log('user after student connect: ',user);
        if(user.has(currentUser.teacher.toString())){
          socket.to(user.get(currentUser.teacher.toString()).socketId).emit("online", {
            name: currentUser.name,
@@ -92,6 +93,8 @@ io.on('connection',async (socket) => {
           students: studentsId,
           socketId: socket.id,
         });
+        console.log("user after teacher connect: ", user);
+
         students.forEach((el) => {
           if(user.has(el._id.toString())){
             socket.to(user.get(el._id.toString()).socketId).emit("online", {
@@ -177,8 +180,10 @@ io.on('connection',async (socket) => {
               }
             });
         }
-        if (user.get(socket.user._id)?.role !== "admin") await User.findByIdAndUpdate(socket.user._id, { status: "offline" });
+        const role = user.get(socket.user._id)?.role;
         user.delete(socket.user._id);
+        console.log('user after disconnect: ',user);
+        if (role !== "admin") await User.findByIdAndUpdate(socket.user._id, { status: "offline" });
     })
 })
 // io.on("connection", (socket) => {
