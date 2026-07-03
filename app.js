@@ -16,6 +16,7 @@ import userRoutes from './routes/user.js'
 import maqaratRoutes from './routes/maqarat.js'
 import gurfahRoutes from './routes/gurfah.js'
 import leaveRoutes from './routes/leave.js'
+import messageRoutes from './routes/message.js'
 import aliveRoutes from './routes/alive.js'
 import mongoose from 'mongoose';
 import jsonwebtoken from 'jsonwebtoken'
@@ -162,6 +163,12 @@ io.on('connection',async (socket) => {
         if(user.has(to)){
             socket.to(user.get(to).socketId).emit('end-call');
         }
+    })
+
+    socket.on('message',({message,to,from,createdAt}) => {
+      if(user.has(to)){
+        socket.to(user.get(to).socketId).emit('message',{message,to,from,createdAt})
+      }
     })
     socket.on('disconnect',async (reason) => {
       // console.log('disconnected id: ',socket.id);
@@ -834,6 +841,7 @@ app.use('/user',userRoutes);
 app.use('/maqarat',maqaratRoutes);
 app.use('/gurfah',gurfahRoutes);
 app.use('/leave',leaveRoutes);
+app.use('/message',messageRoutes);
 app.use('/alive',aliveRoutes);
 
 (async function(){
