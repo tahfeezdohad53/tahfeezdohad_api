@@ -77,11 +77,35 @@ export const handleGetMaqaratStudents = catchAsync(async (req,res,next) => {
     const {id,role} = req.user;
     const {batch,juz,nisf} = req.query;
     let students;
-    console.log(juz,nisf);
-    if(juz >= 1 && juz <= 25) {
-    students = await User.find({role:'student',batch:batch,juz:{$lt:Number(juz)}});
+    if(Number(juz) >= 1 && Number(juz) <= 25) {
+    students = await User.find({role:'student',batch:batch,juz:{$lt:Number(juz)},nisf:{$exists:false}});
     }
-    else students = await User.find({role:'student',batch:batch,juz:{$gte:Number(juz)},nisf:{$gte:Number(nisf)}});
+    else if(Number(juz) === 26 && Number(nisf) === 1){
+        students = await User.find({
+          role: "student",
+          batch: batch,
+          juz: { $eq: Number(juz) },
+          nisf: { $eq: Number(nisf) },
+        });
+    }  
+    else if(Number(juz) === 29 && Number(nisf) === 2){
+        students = await User.find({
+          role: "student",
+          batch: batch,
+          juz: { $lte: Number(juz) },
+          nisf: { $lte: Number(nisf) },
+        });
+    }  
+    else {
+        students = await User.find({
+          role: "student",
+          batch: batch,
+          $or: [
+            { juz: { $lt: Number(juz),$gte:26 } },
+            { juz: { $eq: Number(juz) }, nisf: { $lt: Number(nisf) } },
+          ],
+        });
+    }
     
     res.status(200).json({ok:true,students});
 })
