@@ -13,6 +13,7 @@ import { r2 } from "../utils/r2.js";
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
   const { isOnline,url,duration } = req.body;
   const { studentId } = req.params;
+  console.log(studentId);
   const { id, role } = req.user;
   if (role === "student")
     return res

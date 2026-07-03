@@ -72,3 +72,16 @@ export const handleGetAllStudentNames = catchAsync(async (req,res,next) => {
     const admins = await User.find({role:'admin'});
     res.status(200).json({ok:true,students,teachers:[...teachers,...admins]});
 })
+
+export const handleGetMaqaratStudents = catchAsync(async (req,res,next) => {
+    const {id,role} = req.user;
+    const {batch,juz,nisf} = req.query;
+    let students;
+    console.log(juz,nisf);
+    if(juz >= 1 && juz <= 25) {
+    students = await User.find({role:'student',batch:batch,juz:{$lt:Number(juz)}});
+    }
+    else students = await User.find({role:'student',batch:batch,juz:{$gte:Number(juz)},nisf:{$gte:Number(nisf)}});
+    
+    res.status(200).json({ok:true,students});
+})
