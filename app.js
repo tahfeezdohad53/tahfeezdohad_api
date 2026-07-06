@@ -184,18 +184,18 @@ io.on('connection',async (socket) => {
             // console.log(user.get(curruser).socketId);
             // console.log(user.has(curruser))
             if (user.has(curruser)){
-                socket
-                  .to(user.get(curruser).socketId)
-                  .emit("offline", {
+                if(user.get(socket.user._id).socketId === socket.id) {
+                  socket.to(user.get(curruser).socketId).emit("offline", {
                     role: user.get(socket.user._id).role,
                     id: socket.user._id,
                   });
+                }
 
             }
         }
         if(user.get(socket.user._id)?.role === 'teacher'){
             user.get(socket.user._id).students.forEach((el) => {
-              if (user.has(el)) {
+              if (user.has(el) && user.get(socket.user._id) === socket.id) {
                 socket.to(user.get(el).socketId).emit("offline", {
                   role: user.get(socket.user._id).role,
                   id: socket.user._id,
