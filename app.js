@@ -195,7 +195,7 @@ io.on('connection',async (socket) => {
         }
         if(user.get(socket.user._id)?.role === 'teacher'){
             user.get(socket.user._id).students.forEach((el) => {
-              if (user.has(el) && user.get(socket.user._id) === socket.id) {
+              if (user.has(el) && user.get(socket.user._id).socketId === socket.id) {
                 socket.to(user.get(el).socketId).emit("offline", {
                   role: user.get(socket.user._id).role,
                   id: socket.user._id,
