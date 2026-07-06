@@ -236,8 +236,8 @@ io.on('connection',async (socket) => {
 //     },
 // async function fnn(){
 //   await User.create({
-//     name: "hasan pitol",
-//     email: "hasan@gmail.com",
+//     name: "qusai",
+//     email: "qusai@gmail.com",
 //     password: "1234",
 //     teacher: "6a0c95c24c87ffea1503058d",
 //   });
