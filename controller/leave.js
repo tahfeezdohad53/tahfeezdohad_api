@@ -17,7 +17,7 @@ export const handleGetLeaves = catchAsync(async (req, res, next) => {
   let filter = {};
 
   if(role !== 'admin'){
-    if (user) filter.user = id;
+    filter.user = id;
     if (status) filter.status = status;
     const leaves = await Leave.find(filter).sort({createdAt:-1}).limit(100).populate('user');
     return res.status(200).json({ok:true,leaves});
