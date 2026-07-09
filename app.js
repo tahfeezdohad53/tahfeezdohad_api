@@ -73,7 +73,7 @@ io.on('connection',async (socket) => {
           teacher: currentUser.teacher.toString(),
           socketId: socket.id,
         });
-        console.log('user after student connect: ',user);
+        // console.log('user after student connect: ',user);
        if(user.has(currentUser.teacher.toString())){
          socket.to(user.get(currentUser.teacher.toString()).socketId).emit("online", {
            name: currentUser.name,
@@ -148,7 +148,7 @@ io.on('connection',async (socket) => {
       });
 
     socket.on('call-accepted',({to,from,answer}) => {
-        console.log(user.has(to));
+        // console.log(user.has(to));
         if(user.has(to)){
             // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
             socket.to(user.get(to).socketId).emit('call-accepted',{answerer:from,answer});

@@ -13,14 +13,13 @@ import { r2 } from "../utils/r2.js";
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
   const { isOnline,url,duration } = req.body;
   const { studentId } = req.params;
-  console.log(studentId);
   const { id, role } = req.user;
   if (role === "student")
     return res
       .status(200)
       .json({ ok: false, message: "you are not allowed for this action" });
   
-     await Recording.create({
+     const recording = await Recording.create({
         uploaderRole: role,
         student: studentId,
         teacher: id,
@@ -32,6 +31,7 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
           student: studentId,
           teacher: id,
           duration: Math.ceil(duration),
+          recording:recording._id,
         });
       res.status(200).json({ ok: true });
 
