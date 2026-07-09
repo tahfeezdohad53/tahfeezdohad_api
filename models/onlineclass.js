@@ -12,6 +12,11 @@ const schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    recording: {
+      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Recording",
+    },
     duration:{
         type:Number,
         required:true,

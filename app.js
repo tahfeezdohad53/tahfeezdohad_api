@@ -236,11 +236,13 @@ io.on('connection',async (socket) => {
 //     },
 // async function fnn(){
 //   await User.create({
-//     name: "qusai",
-//     email: "qusai@gmail.com",
+//     name: "tahfeez dohad",
+//     email: "tahfeezdohad@gmail.com",
 //     password: "1234",
 //     teacher: "6a0c95c24c87ffea1503058d",
 //   });
+
+//   await User.updateMany({batch:{$size:0}},{$:{batch:'baneen'}});
 // }
 // fnn();
 

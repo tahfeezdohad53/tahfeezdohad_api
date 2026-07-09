@@ -18,14 +18,21 @@ export const handleGetLeaves = catchAsync(async (req, res, next) => {
 
   if(role !== 'admin'){
     filter.user = id;
-    if (status) filter.status = status;
+    if (status && status !== 'all') filter.status = status;
+
+    if (status && status === 'all') {
+    const leaves = await Leave.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .populate("user");
+    }
     const leaves = await Leave.find(filter).sort({createdAt:-1}).limit(100).populate('user');
     return res.status(200).json({ok:true,leaves});
   }
-
+  let limit = !status ? 10 : 500;
   if(user) filter.user = user;
-  if(status) filter.status = status;
-  const leaves = await Leave.find(filter).sort({createdAt:-1}).limit(500).populate('user');
+  if(status && status !== 'all') filter.status = status;
+  const leaves = await Leave.find(filter).sort({createdAt:-1}).limit(limit).populate('user');
   return res.status(200).json({ ok: true, leaves });
 });
 
