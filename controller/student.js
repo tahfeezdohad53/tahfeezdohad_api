@@ -67,10 +67,13 @@ export const handleGetStudents = catchAsync(async (req,res,next) => {
 
 export const handleGetAllStudentNames = catchAsync(async (req,res,next) => {
     const {id,role} = req.user;
-    const students = await User.find({role:'student'});
-    const teachers = await User.find({role:'teacher'});
-    const admins = await User.find({role:'admin'});
-    res.status(200).json({ok:true,students,teachers:[...teachers,...admins]});
+    const students = await User.find({role:'student'}).select('name teacher _id').lean();
+    const teachers = await User.find({$or:[
+        {role:'teacher'},
+        {role:'admin'},
+    ]});
+    // const admins = await User.find({role:'admin'});
+    res.status(200).json({ok:true,students,teachers});
 })
 
 export const handleGetMaqaratStudents = catchAsync(async (req,res,next) => {
@@ -86,6 +89,7 @@ export const handleGetMaqaratStudents = catchAsync(async (req,res,next) => {
           batch: batch,
           juz: { $eq: Number(juz) },
           nisf: { $eq: Number(nisf) },
+          newNizam:true,
         });
     }  
     else if(Number(juz) === 29 && Number(nisf) === 2){
@@ -94,6 +98,7 @@ export const handleGetMaqaratStudents = catchAsync(async (req,res,next) => {
           batch: batch,
           juz: { $lte: Number(juz) },
           nisf: { $lte: Number(nisf) },
+          newNizam:true,
         });
     }  
     else {
@@ -101,8 +106,8 @@ export const handleGetMaqaratStudents = catchAsync(async (req,res,next) => {
           role: "student",
           batch: batch,
           $or: [
-            { juz: { $lt: Number(juz),$gte:26 } },
-            { juz: { $eq: Number(juz) }, nisf: { $lt: Number(nisf) } },
+            { juz: { $lt: Number(juz),$gte:26 },newNizam:true },
+            { juz: { $eq: Number(juz) }, nisf: { $lt: Number(nisf) },newNizam:true },
           ],
         });
     }

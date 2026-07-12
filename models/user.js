@@ -39,6 +39,9 @@ const schema = new mongoose.Schema({
         type:String,
         enum:['online','offline'],
         default:'offline'
+    },
+    newNizam:{
+        type:Boolean,
     }
 },{timestamps:true});
 
