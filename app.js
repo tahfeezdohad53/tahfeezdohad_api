@@ -71,6 +71,7 @@ io.on('connection',async (socket) => {
         user.set(socket.user._id, {
             role:currentUser.role,
           teacher: currentUser?.teacher?.toString(),
+          proxyTeacher:currentUser?.proxyTeacher?.toString(),
           socketId: socket.id,
         });
         // console.log('user after student connect: ',user);
@@ -81,12 +82,22 @@ io.on('connection',async (socket) => {
            id: currentUser._id.toString(),
          });
        }
+       if(user.has(currentUser?.proxyTeacher?.toString())){
+         socket.to(user.get(currentUser?.proxyTeacher?.toString())?.socketId).emit("online", {
+           name: currentUser.name,
+           role: currentUser.role,
+           id: currentUser._id.toString(),
+         });
+       }
     }
     if(currentUser.role === 'teacher') {
         // console.log(socket.id);
         const students = await User.find({
           role: "student",
-          teacher: currentUser._id,
+          $or:[
+            {teacher: currentUser._id},
+            {proxyTeacher:currentUser._id}
+          ]
         });
         const studentsId = students?.map(el => el?._id?.toString());
         user.set(socket.user._id, {
@@ -184,6 +195,7 @@ io.on('connection',async (socket) => {
             // console.log(user.get(user.get(socket.user._id).teacher).socketId);
             // console.log(user.get(socket.user._id).role);
             const curruser = user.get(socket.user._id)?.teacher;
+            const proxyTeacher = user.get(socket.user._id)?.proxyTeacher;
             const teacherSocketId = user.get(curruser)?.socketId;
             // console.log(user.get(curruser).socketId);
             // console.log(user.has(curruser))
@@ -196,8 +208,18 @@ io.on('connection',async (socket) => {
                 }
 
             }
+            if (user.has(proxyTeacher)){
+                if(user.get(socket.user._id).socketId === socket.id) {
+                  socket.to(user.get(proxyTeacher).socketId).emit("offline", {
+                    role: user.get(socket.user._id).role,
+                    id: socket.user._id,
+                  });
+                }
+
+            }
         }
         const studentsArr = user.get(socket.user._id)?.students;
+        
         if(user.get(socket.user._id)?.role === 'teacher'){
           if(studentsArr?.length > 0){
             studentsArr.forEach((el) => {
