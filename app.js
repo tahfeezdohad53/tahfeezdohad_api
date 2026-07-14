@@ -70,12 +70,12 @@ io.on('connection',async (socket) => {
     if(currentUser.role === 'student') {
         user.set(socket.user._id, {
             role:currentUser.role,
-          teacher: currentUser.teacher.toString(),
+          teacher: currentUser?.teacher?.toString(),
           socketId: socket.id,
         });
         // console.log('user after student connect: ',user);
-       if(user.has(currentUser.teacher.toString())){
-         socket.to(user.get(currentUser.teacher.toString()).socketId).emit("online", {
+       if(user.has(currentUser?.teacher?.toString())){
+         socket.to(user.get(currentUser?.teacher?.toString())?.socketId).emit("online", {
            name: currentUser.name,
            role: currentUser.role,
            id: currentUser._id.toString(),
@@ -88,22 +88,26 @@ io.on('connection',async (socket) => {
           role: "student",
           teacher: currentUser._id,
         });
-        const studentsId = students.map(el => el._id.toString());
+        const studentsId = students?.map(el => el?._id?.toString());
         user.set(socket.user._id, {
           role: currentUser.role,
           students: studentsId,
           socketId: socket.id,
         });
 
-        students.forEach((el) => {
-          if(user.has(el._id.toString())){
-            socket.to(user.get(el._id.toString()).socketId).emit("online", {
-              name: currentUser.name,
-              role: currentUser.role,
-              id: currentUser._id.toString(),
-            });
-          }
-        });
+        if(students.length > 0){
+          students?.forEach((el) => {
+            if (user.has(el?._id?.toString())) {
+              socket
+                .to(user.get(el?._id?.toString())?.socketId)
+                .emit("online", {
+                  name: currentUser.name,
+                  role: currentUser.role,
+                  id: currentUser._id.toString(),
+                });
+            }
+          });
+        }
     }
     if(currentUser.role === 'admin') {
         user.set(socket.user._id, {
@@ -179,7 +183,7 @@ io.on('connection',async (socket) => {
         if(user.get(socket.user._id)?.role === 'student'){
             // console.log(user.get(user.get(socket.user._id).teacher).socketId);
             // console.log(user.get(socket.user._id).role);
-            const curruser = user.get(socket.user._id).teacher;
+            const curruser = user.get(socket.user._id)?.teacher;
             const teacherSocketId = user.get(curruser)?.socketId;
             // console.log(user.get(curruser).socketId);
             // console.log(user.has(curruser))
@@ -193,8 +197,10 @@ io.on('connection',async (socket) => {
 
             }
         }
+        const studentsArr = user.get(socket.user._id)?.students;
         if(user.get(socket.user._id)?.role === 'teacher'){
-            user.get(socket.user._id).students.forEach((el) => {
+          if(studentsArr?.length > 0){
+            studentsArr.forEach((el) => {
               if (user.has(el) && user.get(socket.user._id).socketId === socket.id) {
                 socket.to(user.get(el).socketId).emit("offline", {
                   role: user.get(socket.user._id).role,
@@ -202,6 +208,7 @@ io.on('connection',async (socket) => {
                 });
               }
             });
+          }
         }
 
         const current = user.get(socket.user._id);
@@ -227,6 +234,13 @@ io.on('connection',async (socket) => {
 // /////////////////////////////////////////////////////////////////////////////////////////////
 // {
 //       its: 40153993,
+//       name: "40153993 Mohammed bhai Shaikh Murtaza bhai Udaipurwala",
+//       email: "40153993@gmail.com",
+//       batch: "baneen",
+//       juz: 16,
+//       password: "3993",
+
+//       its: 40153993,
 //       name: "Mohammed bhai Shaikh Murtaza bhai Udaipurwala",
 //       email: "40153993@gmail.com",
 //       batch: "baneen",
@@ -234,16 +248,17 @@ io.on('connection',async (socket) => {
 //       juz: 16,
 //       password: "3993",
 //     },
-// async function fnn(){
-//   await User.create({
-//     name: "tahfeez dohad",
-//     email: "tahfeezdohad@gmail.com",
-//     password: "1234",
-//     teacher: "6a0c95c24c87ffea1503058d",
-//   });
-
-//   await User.updateMany({batch:{$size:0}},{$:{batch:'baneen'}});
-// }
+async function fnn(){
+  await User.create({
+    its: 123455,
+    email:'azhar@gmail.com',
+    name: "a azhar bhai limdi",
+    password: "1234",
+    role: "teacher",
+  });
+  console.log('saved');
+  // await User.updateMany({batch:{$size:0}},{$:{batch:'baneen'}});
+}
 // fnn();
 
 app.get("/turn-credentials", async (req, res) => {

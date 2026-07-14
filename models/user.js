@@ -9,17 +9,22 @@ const schema = new mongoose.Schema({
         lowercase:true,
     },
     password:String,
-    its:Number,
+    its:{
+        type:Number,
+        unique:true,
+    },
     juz:Number,
     nisf:Number,
     name:{
         type:String,
         lowercase:true,
     },
-    batch:[
-       { type:String,
-        lowercase:true,}
-    ],
+    batch:{
+        type:String,
+        // required:true,
+        // lowercase:true,
+        // enum:['yaqoot_mardo','yaqoot_bairo','baneen','banaat','kibaar','taheri_hall']
+    },
     fees:Number,
     teacher:{
         type:mongoose.Schema.Types.ObjectId,
