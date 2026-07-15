@@ -6,7 +6,8 @@ export const handleCreateMaqarat = catchAsync(async (req,res,next) => {
     const { id, role } = req.user;
     if(role !== 'admin') return res.status(401).json({ok:false,message:'you are not authorized for this action'});
     const {teacher,batch,students,juz,date} = req.body;
-    await Maqarat.create({teacher,batch,students,juz,date});
+    const formattedJuz = juz?.nisf.length > 0 ? `juz ${juz.juz} (nisf ${juz.nisf})` : `juz ${juz.juz}`
+    await Maqarat.create({teacher,batch,students,juz:formattedJuz,date});
     res.status(201).json({ok:true});
 })
 
