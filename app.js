@@ -196,7 +196,6 @@ io.on('connection',async (socket) => {
     socket.on('disconnect',async (reason) => {
       // console.log('disconnected id: ',socket.id);
       // console.log('reason disconnected: ',reason);
-      socket.broadcast.emit('offline-broadcast',{id:socket.user?._id,role:socket.user?.role});
         // if(user.get(socket.user._id)?.role === 'student'){
         //     // console.log(user.get(user.get(socket.user._id).teacher).socketId);
         //     // console.log(user.get(socket.user._id).role);
@@ -240,7 +239,13 @@ io.on('connection',async (socket) => {
         // }
 
         const current = user.get(socket.user._id);
+        if(!user.has(socket.user._id)){
+      socket.broadcast.emit("offline-broadcast", {
+        id: socket.user?._id,
+        role: socket.user?.role,
+      });
 
+        }
         if (current?.socketId === socket.id) {
           user.delete(socket.user._id);
 
