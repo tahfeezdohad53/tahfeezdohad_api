@@ -248,7 +248,10 @@ io.on('connection',async (socket) => {
         }
         if (current?.socketId === socket.id) {
           user.delete(socket.user._id);
-
+          socket.broadcast.emit("offline-broadcast", {
+            id: socket.user?._id,
+            role: socket.user?.role,
+          });
           
             await User.findByIdAndUpdate(socket.user._id, {
               status: "offline",
