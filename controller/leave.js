@@ -3,9 +3,10 @@ import User from "../models/user.js";
 import Leave from "../models/leave.js";
 
 export const handleCreateLeave = catchAsync(async (req, res, next) => {
-  const { id, role, batch='yaqoot', name } = req.user;
+  const { id, role, batch, name } = req.user;
   const {type,reason,from,to,days} = req.body;
-  await Leave.create({reason,from,to,days,user:id,role,batch,name});
+  if(batch)await Leave.create({reason,from,to,days,user:id,role,batch,name,type});
+  if(!batch)await Leave.create({reason,from,to,days,user:id,role,name,type});
   res.status(201).json({ok:true});
 });
 
