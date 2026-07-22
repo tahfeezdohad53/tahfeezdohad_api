@@ -182,15 +182,15 @@ io.on('connection',async (socket) => {
         }
     })
     socket.on('end-call',({to}) => {
-        console.log('end call',user.has(to));
+        // console.log('end call',user.has(to));
         if(user.has(to)){
             socket.to(user.get(to).socketId).emit('end-call');
         }
     })
 
-    socket.on('message',({message,to,from,createdAt}) => {
+    socket.on('message',({message,to,from,createdAt,senderName,profileImage}) => {
       if(user.has(to)){
-        socket.to(user.get(to).socketId).emit('message',{message,to,from,createdAt})
+        socket.to(user.get(to).socketId).emit('message',{message,to,from,createdAt,senderName,profileImage})
       }
     })
     socket.on('disconnect',async (reason) => {
