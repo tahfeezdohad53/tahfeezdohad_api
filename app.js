@@ -327,7 +327,7 @@ app.get("/turn-credentials", async (req, res) => {
 //   }
 // }
 // update();
-const CACHE_TIME = 10 * 1000;
+const CACHE_TIME = 8 * 60 * 60 * 1000;
 let CACHED_DATA = null;
 let LAST_FETCHED_AT = 0;
 
@@ -336,10 +336,10 @@ async function fetchData(req,res,next){
       const now = Date.now();
      try{
       if(CACHED_DATA && ((now - LAST_FETCHED_AT) < CACHE_TIME)){
-        console.log('returning cached data');
+        // console.log('returning cached data');
         return res.status(200).json(CACHED_DATA)
       }
-        console.log("fetching new data");
+        // console.log("fetching new data");
 
        const students = await User.find({role:'student'}).select('name teacher _id').lean();
       const teachers = await User.find({$or:[
