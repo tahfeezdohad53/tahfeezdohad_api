@@ -71,7 +71,7 @@ export const handleGetAllStudentNames = catchAsync(async (req,res,next) => {
     const teachers = await User.find({$or:[
         {role:'teacher'},
         {role:'admin'},
-    ]});
+    ]}).select('name _id').lean();
     // const admins = await User.find({role:'admin'});
     res.status(200).json({ok:true,students,teachers});
 })

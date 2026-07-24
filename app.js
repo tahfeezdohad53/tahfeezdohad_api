@@ -22,6 +22,7 @@ import mongoose from 'mongoose';
 import jsonwebtoken from 'jsonwebtoken'
 import cookieParser from 'cookie-parser';
 import axios from 'axios';
+import { protectRoute } from './controller/auth.js';
 configDotenv();
 const app = express();
 const server = http.createServer(app);
@@ -326,6 +327,31 @@ app.get("/turn-credentials", async (req, res) => {
 //   }
 // }
 // update();
+const CACHE_TIME = 8 * 60 * 60 * 1000;
+let CACHED_DATA = null;
+let LAST_FETCHED_AT = null;
+
+async function fetchData(){
+      const {id,role} = req.user;
+      const now = Date.now();
+     try{
+      if(CACHED_DATA && ((now - LAST_FETCHED_AT) < CACHE_TIME)){
+        return res.status(200).json(CACHED_DATA)
+      }
+       const students = await User.find({role:'student'}).select('name teacher _id').lean();
+      const teachers = await User.find({$or:[
+          {role:'teacher'},
+          {role:'admin'},
+      ]}).select('name _id').lean();
+      CACHED_DATA = {ok:true,students,teachers}
+      LAST_FETCHED_AT = now;
+      res.status(200).json(CACHED_DATA);
+     }catch(err){
+      res.status(500).json({ok:false});
+     }
+
+}
+app.get("/student/getAllStudentsAndTeachers",protectRoute,fetchData);
 app.use('/auth',authRoutes);
 app.use('/student',studentRoutes);
 app.use('/recording',recordingRoutes);

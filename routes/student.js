@@ -21,6 +21,6 @@ router.patch("/assignMultipleProxies", protectRoute, handleAssignMultipleProxies
 router.patch('/assignProxy',protectRoute,handleAssignProxy)
 router.get('/getStudents',protectRoute,handleGetStudents)
 router.get('/getMaqaratStudents',protectRoute,handleGetMaqaratStudents)
-router.get('/getAllStudentsAndTeachers',protectRoute,handleGetAllStudentNames)
+// router.get('/getAllStudentsAndTeachers',protectRoute,handleGetAllStudentNames)
 
 export default router;
