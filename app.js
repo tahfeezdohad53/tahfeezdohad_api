@@ -327,7 +327,7 @@ app.get("/turn-credentials", async (req, res) => {
 //   }
 // }
 // update();
-const CACHE_TIME = 8 * 60 * 60 * 1000;
+const CACHE_TIME = 10 * 1000;
 let CACHED_DATA = null;
 let LAST_FETCHED_AT = 0;
 
