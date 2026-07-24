@@ -336,8 +336,11 @@ async function fetchData(req,res,next){
       const now = Date.now();
      try{
       if(CACHED_DATA && ((now - LAST_FETCHED_AT) < CACHE_TIME)){
+        console.log('returning cached data');
         return res.status(200).json(CACHED_DATA)
       }
+        console.log("fetching new data");
+
        const students = await User.find({role:'student'}).select('name teacher _id').lean();
       const teachers = await User.find({$or:[
           {role:'teacher'},
