@@ -329,9 +329,9 @@ app.get("/turn-credentials", async (req, res) => {
 // update();
 const CACHE_TIME = 8 * 60 * 60 * 1000;
 let CACHED_DATA = null;
-let LAST_FETCHED_AT = null;
+let LAST_FETCHED_AT = 0;
 
-async function fetchData(){
+async function fetchData(req,res,next){
       const {id,role} = req.user;
       const now = Date.now();
      try{
