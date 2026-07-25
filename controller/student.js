@@ -14,7 +14,7 @@ export const handleUpdateStudent = catchAsync(async (req,res,next) => {
 export const handleChangeDiary = catchAsync(async (req,res,next) => {
     const {teacherId,studentId} = req.query;
     const {id,role} = req.user;
-    if(role !== 'admin') return res.status(400).json({ok:false,message:'you are not allowed for this action'});
+    // if(role !== 'admin') return res.status(400).json({ok:false,message:'you are not allowed for this action'});
     await User.findByIdAndUpdate(studentId,{teacher:teacherId});
     res.status(200).json({ok:true});
 })
