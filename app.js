@@ -306,15 +306,22 @@ io.on("connection", async (socket) => {
 //       password: "3993",
 //     },
 async function fnn() {
-  await User.create({
-    email: "30402940@gmail.com",
-    password: "2940",
-    its: 304029400,
-    name: "30402940 mulla aliasgar bhai mulla qutbuddin bhai adil",
-    role: "teacher",
-  });
-  console.log("saved");
-  // await User.updateMany({batch:{$size:0}},{$:{batch:'baneen'}});
+  // await User.create({
+  //   email: "40906652@gmail.com",
+  //   password: "6652",
+  //   its: 40906652,
+  //   name: "40906652 idris bhai zakiuddin bhai jesawada",
+  //   role: "teacher",
+  // });
+  let timer = 0;
+  let int = setInterval(() => {
+    timer++;
+  }, 1000);
+  await User.updateMany({},[
+    {$set:{isActive:true}}
+  ],{updatePipeline:true});
+  clearInterval(int);
+  console.log("updated in ",timer, ' seconds');
 }
 // fnn();
 
@@ -360,19 +367,25 @@ async function fetchData(req, res, next) {
       return res.status(200).json(CACHED_DATA);
     }
     // console.log("fetching new data");
+    await refetchCachedData(now);
+    res.status(200).json(CACHED_DATA);
+  } catch (err) {
+    res.status(500).json({ ok: false });
+  }
+}
 
+export async function refetchCachedData(){
+  
     const students = await User.find({ role: "student" })
       .select("name teacher _id")
       .lean();
     const teachers = await User.find({role:"teacher"})
       .select("name _id")
       .lean();
+      // console.log(teachers.length);
     CACHED_DATA = { ok: true, students, teachers };
-    LAST_FETCHED_AT = now;
-    res.status(200).json(CACHED_DATA);
-  } catch (err) {
-    res.status(500).json({ ok: false });
-  }
+    LAST_FETCHED_AT = Date.now()
+    // console.log('fetched new data');
 }
 app.get("/student/getAllStudentsAndTeachers", protectRoute, fetchData);
 app.use("/auth", authRoutes);

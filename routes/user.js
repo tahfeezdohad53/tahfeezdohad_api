@@ -4,6 +4,7 @@ import {
   handleGetUser,
   handleUpdatePassword,
   handleImageUpdate,
+  handleCreateUser,
 } from "../controller/user.js";
 import {uploadImage} from '../libs/multer.js';
 
@@ -11,6 +12,7 @@ const router = new express.Router();
 
 
 router.patch('/updatePassword',protectRoute,handleUpdatePassword);
+router.post('/create',protectRoute,handleCreateUser);
 router.get('/getUser',protectRoute,handleGetUser);
 router.post('/image',protectRoute, uploadImage.single('image') ,handleImageUpdate);
 

@@ -25,6 +25,10 @@ const schema = new mongoose.Schema({
         // lowercase:true,
         // enum:['yaqoot_mardo','yaqoot_bairo','baneen','banaat','kibaar','taheri_hall']
     },
+    isActive:{
+        type:Boolean,
+        default:true,
+    },
     fees:Number,
     teacher:{
         type:mongoose.Schema.Types.ObjectId,
