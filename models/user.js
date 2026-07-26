@@ -22,8 +22,8 @@ const schema = new mongoose.Schema({
     batch:{
         type:String,
         // required:true,
-        // lowercase:true,
-        // enum:['yaqoot_mardo','yaqoot_bairo','baneen','banaat','kibaar','taheri_hall']
+        lowercase:true,
+        enum:['yaqoot_mardo','yaqoot_bairo','baneen','banaat','kibaar','taheri_hall']
     },
     isActive:{
         type:Boolean,
