@@ -80,7 +80,15 @@ export const handleGetRecordings = catchAsync(async (req, res, next) => {
 });
 
 export const handleGenerateSignedUrl = catchAsync(async (req, res) => {
-  const key = `${crypto.randomUUID()}.webm`;
+  const {name} = req.params;
+  const date = new Date()
+    .toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+    .replace(/,?\s/g, "-");
+  const key = `${name}-${date}-${crypto.randomUUID()}.webm`;
 
   const command = new PutObjectCommand({
     Bucket: process.env.R2_BUCKET_NAME,

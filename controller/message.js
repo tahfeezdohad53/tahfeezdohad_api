@@ -11,13 +11,11 @@ export const handleSendMessage = catchAsync(async (req,res,next) => {
 
 
 export const handleGetMessages = catchAsync(async (req, res, next) => {
-    console.log('incoming')
   const { id } = req.user;
   const { userId } = req.query;
   const messages = await Message.find({$or:[
     {sender:id,receiver:userId},
     {sender:userId,receiver:id},
   ]})
-  console.log(messages)
   res.status(200).json({ ok: true,messages });
 });
