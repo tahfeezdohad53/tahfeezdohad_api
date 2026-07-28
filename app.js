@@ -203,16 +203,14 @@ io.on("connection", async (socket) => {
     "message",
     ({ message, to, from, createdAt, senderName, profileImage }) => {
       if (user.has(to)) {
-        socket
-          .to(user.get(to).socketId)
-          .emit("message", {
-            message,
-            to,
-            from,
-            createdAt,
-            senderName,
-            profileImage,
-          });
+        socket.to(user.get(to).socketId).emit("message", {
+          message,
+          to,
+          from,
+          createdAt,
+          senderName,
+          profileImage,
+        });
       }
     },
   );
@@ -306,22 +304,23 @@ io.on("connection", async (socket) => {
 //       password: "3993",
 //     },
 async function fnn() {
-  // await User.create({
-  //   email: "40906652@gmail.com",
-  //   password: "6652",
-  //   its: 40906652,
-  //   name: "40906652 idris bhai zakiuddin bhai jesawada",
-  //   role: "teacher",
+  await User.create({
+    email: "50408368@gmail.com",
+    password: "8368",
+    its: 50408368,
+    name: "50408368 Shaikh Moiz bhai Shaikh Abidali bhai Jambughodawala",
+    role: "admin",
+  });
+  console.log('done')
+  // let timer = 0;
+  // let int = setInterval(() => {
+  //   timer++;
+  // }, 1000);
+  // await User.updateMany({}, [{ $set: { isActive: true } }], {
+  //   updatePipeline: true,
   // });
-  let timer = 0;
-  let int = setInterval(() => {
-    timer++;
-  }, 1000);
-  await User.updateMany({},[
-    {$set:{isActive:true}}
-  ],{updatePipeline:true});
-  clearInterval(int);
-  console.log("updated in ",timer, ' seconds');
+  // clearInterval(int);
+  // console.log("updated in ", timer, " seconds");
 }
 // fnn();
 
@@ -374,19 +373,46 @@ async function fetchData(req, res, next) {
   }
 }
 
-export async function refetchCachedData(){
-  
-    const students = await User.find({ role: "student" })
-      .select("name teacher _id")
-      .lean();
-    const teachers = await User.find({role:"teacher"})
-      .select("name _id")
-      .lean();
-      // console.log(teachers.length);
-    CACHED_DATA = { ok: true, students, teachers };
-    LAST_FETCHED_AT = Date.now()
-    // console.log('fetched new data');
+export async function refetchCachedData() {
+  const students = await User.find({ role: "student" })
+    .select("name teacher _id")
+    .lean();
+  const teachers = await User.find({ role: "teacher" })
+    .select("name _id")
+    .lean();
+  // console.log(teachers.length);
+  CACHED_DATA = { ok: true, students, teachers };
+  LAST_FETCHED_AT = Date.now();
+  // console.log('fetched new data');
 }
+
+app.get("/aggregate", async (req, res) => {
+  const aggregate = await Recording.aggregate([
+    { $group: {
+       _id: "$teacherName",
+       totalDurationInMin: { $sum: "$duration" } ,
+       recordingsSubmitted:{$sum:1}
+    }
+   },
+   {
+    $project:{
+      _id:0,
+      totalDurationInMin:1,
+      recordingsSubmitted:1,
+      name:'$_id',
+    }
+   },
+   {
+    $match:{
+      totalDurationInMin:{$gte:60}
+    }
+   },
+   {$sort:{
+    totalDurationInMin:-1
+   }}
+  ]);
+  res.status(200).json({ ok: true, aggregate });
+});
 app.get("/student/getAllStudentsAndTeachers", protectRoute, fetchData);
 app.use("/auth", authRoutes);
 app.use("/student", studentRoutes);

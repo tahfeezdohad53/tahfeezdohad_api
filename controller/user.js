@@ -15,6 +15,29 @@ export const handleUpdatePassword = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(id, { password: hashedPassword });
   res.status(200).json({ ok: true, message: "password updated" });
 });
+export const handleGetAccounts = catchAsync(async (req, res, next) => {
+  const { id,role:currUserRole } = req.user;
+  const {role,batch,page} = req.query;
+  const skip = (page - 1) * 10;
+  if(currUserRole !== 'admin') return res.status(401).json({ok:false,message:'you are not authorized for this action'});
+  if(role === 'teacher'){
+    const accounts = await User.find({role:'teacher'}).skip(skip).limit(10).select('_id name its role').lean();
+    const totalRes = await User.countDocuments({role:'teacher'});
+    return res.status(200).json({accounts,totalRes});
+  }
+  if(role === 'student'){
+    const accounts = await User.find({role:'student',batch}).skip(skip).limit(10).select('_id name its role batch').lean();
+    const totalRes = await User.countDocuments({ role: "student",batch });
+
+    return res.status(200).json({accounts,totalRes});
+  }
+  if(role === 'admin'){
+    const accounts = await User.find({role:'admin'}).skip(skip).limit(10).select('_id name its role').lean();
+    const totalRes = await User.countDocuments({ role: "admin" });
+
+    return res.status(200).json({accounts,totalRes});
+  }
+});
 
 export const handleGetUser = catchAsync(async (req, res, next) => {
   const { id } = req.user;
