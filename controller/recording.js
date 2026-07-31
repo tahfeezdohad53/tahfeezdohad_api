@@ -65,7 +65,6 @@ export const handleGetRecordings = catchAsync(async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(10);
-    console.log(recordings);
     totalResults = await Recording.countDocuments({ teacher: id });
   }
   if (role === "student") {

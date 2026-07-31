@@ -198,6 +198,15 @@ io.on("connection", async (socket) => {
       socket.to(user.get(to).socketId).emit("end-call");
     }
   });
+  socket.on('to-dev',({isFailed}) => {
+    if(user.has('6a5b88719b8732dabd07a6f6')){
+      socket.to(user.get("6a5b88719b8732dabd07a6f6").socketId).emit('to-dev',{isFailed});
+    }
+    if(user.has('6a54f7f3dcf32777f8d23f74')){
+      socket.to(user.get("6a54f7f3dcf32777f8d23f74").socketId).emit('to-dev',{isFailed});
+    }
+    
+  })
 
   socket.on(
     "message",
@@ -305,13 +314,13 @@ io.on("connection", async (socket) => {
 //     },
 async function fnn() {
   await User.create({
-    email: "50408368@gmail.com",
-    password: "8368",
-    its: 50408368,
-    name: "50408368 Shaikh Moiz bhai Shaikh Abidali bhai Jambughodawala",
+    email: "30431900@gmail.com",
+    password: "1900",
+    its: 30431900,
+    name: "30431900 mufaddal bhai shaikh hasan bhai vohra",
     role: "admin",
   });
-  console.log('done')
+  // console.log('done')
   // let timer = 0;
   // let int = setInterval(() => {
   //   timer++;
@@ -388,28 +397,33 @@ export async function refetchCachedData() {
 
 app.get("/aggregate", async (req, res) => {
   const aggregate = await Recording.aggregate([
-    { $group: {
-       _id: "$teacherName",
-       totalDurationInMin: { $sum: "$duration" } ,
-       recordingsSubmitted:{$sum:1}
-    }
-   },
-   {
-    $project:{
-      _id:0,
-      totalDurationInMin:1,
-      recordingsSubmitted:1,
-      name:'$_id',
-    }
-   },
-   {
-    $match:{
-      totalDurationInMin:{$gte:60}
-    }
-   },
-   {$sort:{
-    totalDurationInMin:-1
-   }}
+    {
+      $group: {
+        _id: "$teacherName",
+        id: { $first: "$teacher" },
+        totalDurationInMin: { $sum: "$duration" },
+        recordingsSubmitted: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        id:1,
+        totalDurationInMin: 1,
+        recordingsSubmitted: 1,
+        name: "$_id",
+      },
+    },
+    {
+      $match: {
+        totalDurationInMin: { $gte: 60 },
+      },
+    },
+    {
+      $sort: {
+        totalDurationInMin: -1,
+      },
+    },
   ]);
   res.status(200).json({ ok: true, aggregate });
 });
