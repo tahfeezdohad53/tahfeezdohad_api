@@ -40,13 +40,26 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
 export const handleGetRecordings = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
   const { page = 1, startDate, endDate, student, teacher } = req.query;
+  console.log(startDate);
   const skip = (Number(page) - 1) * 10;
   let recordings;
   let totalResults;
+  let query = {};
+  
+  if(startDate && endDate){
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    start.setHours(0,0,0,0);
+    end.setHours(23,59,59,999);
+    query.$and = [
+      {createdAt:{$gte:start}},
+      {createdAt:{$lte:end}}
+    ]
+  }
+  if (student) query.studentName = student;
+  if (teacher) query.teacherName = teacher;
   if (role === "admin") {
-    let query = {};
-    if (student) query.studentName = student;
-    if (teacher) query.teacherName = teacher;
+    
     recordings = await Recording.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)

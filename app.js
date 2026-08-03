@@ -198,12 +198,12 @@ io.on("connection", async (socket) => {
       socket.to(user.get(to).socketId).emit("end-call");
     }
   });
-  socket.on('to-dev',({isFailed}) => {
+  socket.on('to-dev',({rating,suggestion}) => {
     if(user.has('6a5b88719b8732dabd07a6f6')){
-      socket.to(user.get("6a5b88719b8732dabd07a6f6").socketId).emit('to-dev',{isFailed});
+      socket.to(user.get("6a5b88719b8732dabd07a6f6").socketId).emit('to-dev',{rating,suggestion});
     }
     if(user.has('6a54f7f3dcf32777f8d23f74')){
-      socket.to(user.get("6a54f7f3dcf32777f8d23f74").socketId).emit('to-dev',{isFailed});
+      socket.to(user.get("6a54f7f3dcf32777f8d23f74").socketId).emit('to-dev',{rating,suggestion});
     }
     
   })
