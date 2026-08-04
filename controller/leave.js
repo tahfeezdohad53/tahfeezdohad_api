@@ -102,7 +102,7 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
             </p>
 
             <a
-              href="https://www.tahfeezdohad.org"
+              href="https://www.tahfeezdohad.org/leave"
               target="_blank"
               style="
                 display:inline-block;
