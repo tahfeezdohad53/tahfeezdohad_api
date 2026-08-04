@@ -50,10 +50,10 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Role</td>
                 <td style="padding:10px;border:1px solid #ddd;">${role}</td>
               </tr>
-              ${batch && <tr>
+              ${batch && `<tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Batch</td>
                 <td style="padding:10px;border:1px solid #ddd;">${batch}</td>
-              </tr>}
+              </tr>`}
               <tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
                 <td style="padding:10px;border:1px solid #ddd;">${type}</td>
@@ -178,7 +178,99 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
     return res
       .status(400)
       .json({ message: "you are not allowed for this action" });
-  await Leave.findByIdAndUpdate(leaveId, { status });
+  const leave = await Leave.findByIdAndUpdate(leaveId, { status },{returnDocument});
+  const user = await User.findById(leave.user);
+  const approved = status === 'accepted';
+  resend.emails.send({
+    from: "Leave Management <noreply@tahfeezdohad.org>",
+    to: user.email, // or an array of emails
+    subject: `Your leave request`,
+    html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leave Request Update</title>
+</head>
+<body style="margin:0;padding:24px;background:#f5f5f5;font-family:Arial,sans-serif;color:#333;">
+  <div style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;">
+
+    <div style="background:${approved ? "#16a34a" : "#dc2626"};padding:20px;text-align:center;">
+      <h2 style="margin:0;color:#fff;">
+        Leave Request ${approved ? "Approved" : "Rejected"}
+      </h2>
+    </div>
+
+    <div style="padding:24px;">
+      <p>Dear ${user.name},</p>
+
+      <p>
+        Your leave request has been
+        <strong style="color:${approved ? "#16a34a" : "#dc2626"};">
+          ${approved ? "APPROVED" : "REJECTED"}
+        </strong>.
+      </p>
+
+      <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
+          <td style="padding:10px;border:1px solid #ddd;">${leave.type}</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">From</td>
+          <td style="padding:10px;border:1px solid #ddd;">${leave.from}</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">To</td>
+          <td style="padding:10px;border:1px solid #ddd;">${leave.to}</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Days</td>
+          <td style="padding:10px;border:1px solid #ddd;">${leave.days}</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Reason</td>
+          <td style="padding:10px;border:1px solid #ddd;">${leave.reason}</td>
+        </tr>
+      </table>
+
+      ${
+        approved
+          ? `
+      <p style="margin:24px 0 16px;">
+        Your leave has been approved. Please ensure your responsibilities are appropriately managed before your leave begins.
+      </p>`
+          : `
+      <p style="margin:24px 0 16px;">
+        Unfortunately, your leave request could not be approved at this time. If you have any questions, please contact your tahfeez masool.
+      </p>`
+      }
+
+      <a
+        href="https://www.tahfeezdohad.org/leave"
+        target="_blank"
+        style="
+          display:inline-block;
+          background:${approved ? "#16a34a" : "#dc2626"};
+          color:#fff;
+          text-decoration:none;
+          padding:12px 20px;
+          border-radius:6px;
+          font-weight:bold;
+        "
+      >
+        View Leave Status
+      </a>
+
+      <p style="margin:24px 0 0;">
+        Regards,<br>
+        <strong>Leave Management System</strong>
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>`,
+  });
 
   return res.status(200).json({ ok: true });
 });
