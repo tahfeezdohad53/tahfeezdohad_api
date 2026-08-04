@@ -16,6 +16,13 @@ export function formatName(name) {
   return formattedName;
 }
 
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
 
 export const handleCreateLeave = catchAsync(async (req, res, next) => {
   const { id, role, batch, name } = req.user;
@@ -74,11 +81,11 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
               </tr>
               <tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">From</td>
-                <td style="padding:10px;border:1px solid #ddd;">${from}</td>
+                <td style="padding:10px;border:1px solid #ddd;">${formatDate(from)}</td>
               </tr>
               <tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">To</td>
-                <td style="padding:10px;border:1px solid #ddd;">${to}</td>
+                <td style="padding:10px;border:1px solid #ddd;">${formatDate(to)}</td>
               </tr>
               <tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Days</td>
@@ -215,7 +222,7 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
     </div>
 
     <div style="padding:24px;">
-      <p>Dear ${user.name},</p>
+      <p>Dear ${formatName(user.name)},</p>
 
       <p>
         Your leave request has been
@@ -231,11 +238,11 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
         </tr>
         <tr>
           <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">From</td>
-          <td style="padding:10px;border:1px solid #ddd;">${leave.from}</td>
+          <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.from)}</td>
         </tr>
         <tr>
           <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">To</td>
-          <td style="padding:10px;border:1px solid #ddd;">${leave.to}</td>
+          <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.to)}</td>
         </tr>
         <tr>
           <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Days</td>
