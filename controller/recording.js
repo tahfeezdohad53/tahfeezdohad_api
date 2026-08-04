@@ -26,13 +26,13 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
         audio: url,
         duration: Math.ceil(duration),
       });
-      if (isOnline)
-        await OnlineClass.create({
-          student: studentId,
-          teacher: id,
-          duration: Math.ceil(duration),
-          recording:recording._id,
-        });
+      // if (isOnline)
+      //   await OnlineClass.create({
+      //     student: studentId,
+      //     teacher: id,
+      //     duration: Math.ceil(duration),
+      //     recording:recording._id,
+      //   });
       res.status(200).json({ ok: true });
 
 });
