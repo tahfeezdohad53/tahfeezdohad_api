@@ -181,7 +181,7 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
   const leave = await Leave.findByIdAndUpdate(leaveId, { status },{returnDocument});
   const user = await User.findById(leave.user);
   const approved = status === 'accepted';
-  resend.emails.send({
+  await resend.emails.send({
     from: "Leave Management <noreply@tahfeezdohad.org>",
     to: user.email, // or an array of emails
     subject: `Your leave request`,
