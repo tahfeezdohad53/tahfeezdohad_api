@@ -3,6 +3,20 @@ import User from "../models/user.js";
 import Leave from "../models/leave.js";
 import resend from "../libs/resend.js";
 
+export function formatName(name) {
+  if (!name) return "";
+  const firstChar = name
+    .split(" ")[1]
+    .slice(0, 1)
+    .toUpperCase()
+    .concat(name.split(" ")[1].slice(1));
+  const formattedName = firstChar.concat(
+    " " + name.split(" ").slice(2).join(" "),
+  );
+  return formattedName;
+}
+
+
 export const handleCreateLeave = catchAsync(async (req, res, next) => {
   const { id, role, batch, name } = req.user;
   const { type, reason, from, to, days } = req.body;
@@ -25,7 +39,7 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
       "adilaliasgar53@gmail.com",
       "huzefaratlam63@gmail.com",
     ], // or an array of emails
-    subject: `Leave Request - ${name}`,
+    subject: `Leave Request - ${formatName(name)}`,
     html: `
     <!DOCTYPE html>
     <html>
@@ -44,16 +58,16 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
             <table style="width:100%;border-collapse:collapse;">
               <tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Name</td>
-                <td style="padding:10px;border:1px solid #ddd;">${name}</td>
+                <td style="padding:10px;border:1px solid #ddd;">${formatName(name)}</td>
               </tr>
               <tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Role</td>
                 <td style="padding:10px;border:1px solid #ddd;">${role}</td>
               </tr>
-              ${batch && `<tr>
+              ${batch ? `<tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Batch</td>
                 <td style="padding:10px;border:1px solid #ddd;">${batch}</td>
-              </tr>`}
+              </tr>`:''}
               <tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
                 <td style="padding:10px;border:1px solid #ddd;">${type}</td>
@@ -178,7 +192,7 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
     return res
       .status(400)
       .json({ message: "you are not allowed for this action" });
-  const leave = await Leave.findByIdAndUpdate(leaveId, { status },{returnDocument});
+  const leave = await Leave.findByIdAndUpdate(leaveId, { status },{returnDocument:true});
   const user = await User.findById(leave.user);
   const approved = status === 'accepted';
   await resend.emails.send({
