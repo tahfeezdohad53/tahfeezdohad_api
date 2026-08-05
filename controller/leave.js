@@ -43,7 +43,6 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
     from: "Leave Management <noreply@tahfeezdohad.org>",
     to: [
       "murtazayudaipurwala@gmail.com",
-      "adilaliasgar53@gmail.com",
       "huzefaratlam63@gmail.com",
     ], // or an array of emails
     subject: `Leave Request - ${formatName(name)}`,
