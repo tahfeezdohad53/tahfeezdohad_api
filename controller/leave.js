@@ -23,7 +23,6 @@ const formatDate = (date) =>
     year: "numeric",
   });
 
-
 export const handleCreateLeave = catchAsync(async (req, res, next) => {
   const { id, role, batch, name } = req.user;
   const { type, reason, from, to, days } = req.body;
@@ -40,11 +39,8 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
       type,
     });
   await resend.emails.send({
-    from: "Leave Management <noreply@tahfeezdohad.org>",
-    to: [
-      "murtazayudaipurwala@gmail.com",
-      "huzefaratlam63@gmail.com",
-    ], // or an array of emails
+    from: "Tahfeez Dohad Leave Management <noreply@tahfeezdohad.org>",
+    to: ["murtazayudaipurwala@gmail.com", "huzefaratlam63@gmail.com"], // or an array of emails
     subject: `Leave Request - ${formatName(name)}`,
     html: `
     <!DOCTYPE html>
@@ -70,10 +66,14 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Role</td>
                 <td style="padding:10px;border:1px solid #ddd;">${role}</td>
               </tr>
-              ${batch ? `<tr>
+              ${
+                batch
+                  ? `<tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Batch</td>
                 <td style="padding:10px;border:1px solid #ddd;">${batch}</td>
-              </tr>`:''}
+              </tr>`
+                  : ""
+              }
               <tr>
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
                 <td style="padding:10px;border:1px solid #ddd;">${type}</td>
@@ -198,99 +198,205 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
     return res
       .status(400)
       .json({ message: "you are not allowed for this action" });
-  const leave = await Leave.findByIdAndUpdate(leaveId, { status },{returnDocument:true});
+      const approved = status === "accepted";
+  const leave = await Leave.findByIdAndUpdate(
+    leaveId,
+    { status },
+    { new: true }, // or { returnDocument: "after" } if you're using the MongoDB driver
+  );
+
   const user = await User.findById(leave.user);
-  const approved = status === 'accepted';
-  await resend.emails.send({
-    from: "Leave Management <noreply@tahfeezdohad.org>",
-    to: user.email, // or an array of emails
-    subject: `Your leave request`,
+
+  if(approved) await resend.emails.send({
+    from: "Tahfeez Dohad Leave Management <noreply@tahfeezdohad.org>",
+    to: [
+      "adilaliasgar53@gmail.com",
+      "abbas.mahesri@gmail.com",
+      "huzefaratlam63@gmail.com",
+    ],
+    subject: "Your Leave Request Has Been Approved",
     html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Leave Request Update</title>
-</head>
-<body style="margin:0;padding:24px;background:#f5f5f5;font-family:Arial,sans-serif;color:#333;">
-  <div style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;">
+<html>
+  <body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:24px;">
+    <div style="max-width:600px;margin:auto;background:#fff;border-radius:8px;border:1px solid #e5e5e5;overflow:hidden;">
 
-    <div style="background:${approved ? "#16a34a" : "#dc2626"};padding:20px;text-align:center;">
-      <h2 style="margin:0;color:#fff;">
-        Leave Request ${approved ? "Approved" : "Rejected"}
-      </h2>
+      <div style="background:#16a34a;color:#fff;padding:20px;text-align:center;">
+        <h2 style="margin:0;">Leave Approved</h2>
+      </div>
+
+      <div style="padding:24px;">
+        <p>Dear Head Teacher,</p>
+
+        <p>
+          This is to inform you that the following leave request has been
+          <strong>approved by the Admin</strong>.
+        </p>
+
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Teacher</td>
+            <td style="padding:10px;border:1px solid #ddd;">${formatName(user.name)}</td>
+          </tr>
+
+          ${user?.batch ? `<tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Batch</td>
+            <td style="padding:10px;border:1px solid #ddd;">${leave.batch}</td>
+          </tr>` : ''}
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
+            <td style="padding:10px;border:1px solid #ddd;">${leave.type}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">From</td>
+            <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.from)}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">To</td>
+            <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.to)}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Duration</td>
+            <td style="padding:10px;border:1px solid #ddd;">${leave.days} day${leave.days > 1 ? "s" : ""}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Reason</td>
+            <td style="padding:10px;border:1px solid #ddd;">${leave.reason}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Status</td>
+            <td style="padding:10px;border:1px solid #ddd;color:#16a34a;font-weight:bold;">
+              Approved
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:24px 0 16px;">
+          Please make the necessary arrangements for the teacher's absence during
+          the approved leave period.
+        </p>
+
+        <a
+          href="https://www.tahfeezdohad.org/leave"
+          target="_blank"
+          style="
+            display:inline-block;
+            background:#16a34a;
+            color:#ffffff;
+            text-decoration:none;
+            padding:12px 20px;
+            border-radius:6px;
+            font-weight:600;
+          "
+        >
+          View Leave Details
+        </a>
+
+        <p style="margin:24px 0 0;">
+          Regards,<br>
+          <strong>Leave Management System</strong>
+        </p>
+      </div>
+
     </div>
-
-    <div style="padding:24px;">
-      <p>Dear ${formatName(user.name)},</p>
-
-      <p>
-        Your leave request has been
-        <strong style="color:${approved ? "#16a34a" : "#dc2626"};">
-          ${approved ? "APPROVED" : "REJECTED"}
-        </strong>.
-      </p>
-
-      <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
-        <tr>
-          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
-          <td style="padding:10px;border:1px solid #ddd;">${leave.type}</td>
-        </tr>
-        <tr>
-          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">From</td>
-          <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.from)}</td>
-        </tr>
-        <tr>
-          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">To</td>
-          <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.to)}</td>
-        </tr>
-        <tr>
-          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Days</td>
-          <td style="padding:10px;border:1px solid #ddd;">${leave.days}</td>
-        </tr>
-        <tr>
-          <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Reason</td>
-          <td style="padding:10px;border:1px solid #ddd;">${leave.reason}</td>
-        </tr>
-      </table>
-
-      ${
-        approved
-          ? `
-      <p style="margin:24px 0 16px;">
-        Your leave has been approved. Please ensure your responsibilities are appropriately managed before your leave begins.
-      </p>`
-          : `
-      <p style="margin:24px 0 16px;">
-        Unfortunately, your leave request could not be approved at this time. If you have any questions, please contact your tahfeez masool.
-      </p>`
-      }
-
-      <a
-        href="https://www.tahfeezdohad.org/leave"
-        target="_blank"
-        style="
-          display:inline-block;
-          background:${approved ? "#16a34a" : "#dc2626"};
-          color:#fff;
-          text-decoration:none;
-          padding:12px 20px;
-          border-radius:6px;
-          font-weight:bold;
-        "
-      >
-        View Leave Status
-      </a>
-
-      <p style="margin:24px 0 0;">
-        Regards,<br>
-        <strong>Leave Management System</strong>
-      </p>
-    </div>
-
-  </div>
-</body>
+  </body>
 </html>`,
   });
+  //   await resend.emails.send({
+  //     from: "Leave Management <noreply@tahfeezdohad.org>",
+  //     to: user.email, // or an array of emails
+  //     subject: `Your leave request`,
+  //     html: `<!DOCTYPE html>
+  // <html lang="en">
+  // <head>
+  //   <meta charset="UTF-8" />
+  //   <title>Leave Request Update</title>
+  // </head>
+  // <body style="margin:0;padding:24px;background:#f5f5f5;font-family:Arial,sans-serif;color:#333;">
+  //   <div style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;">
+
+  //     <div style="background:${approved ? "#16a34a" : "#dc2626"};padding:20px;text-align:center;">
+  //       <h2 style="margin:0;color:#fff;">
+  //         Leave Request ${approved ? "Approved" : "Rejected"}
+  //       </h2>
+  //     </div>
+
+  //     <div style="padding:24px;">
+  //       <p>Dear ${formatName(user.name)},</p>
+
+  //       <p>
+  //         Your leave request has been
+  //         <strong style="color:${approved ? "#16a34a" : "#dc2626"};">
+  //           ${approved ? "APPROVED" : "REJECTED"}
+  //         </strong>.
+  //       </p>
+
+  //       <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+  //         <tr>
+  //           <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
+  //           <td style="padding:10px;border:1px solid #ddd;">${leave.type}</td>
+  //         </tr>
+  //         <tr>
+  //           <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">From</td>
+  //           <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.from)}</td>
+  //         </tr>
+  //         <tr>
+  //           <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">To</td>
+  //           <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.to)}</td>
+  //         </tr>
+  //         <tr>
+  //           <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Days</td>
+  //           <td style="padding:10px;border:1px solid #ddd;">${leave.days}</td>
+  //         </tr>
+  //         <tr>
+  //           <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Reason</td>
+  //           <td style="padding:10px;border:1px solid #ddd;">${leave.reason}</td>
+  //         </tr>
+  //       </table>
+
+  //       ${
+  //         approved
+  //           ? `
+  //       <p style="margin:24px 0 16px;">
+  //         Your leave has been approved. Please ensure your responsibilities are appropriately managed before your leave begins.
+  //       </p>`
+  //           : `
+  //       <p style="margin:24px 0 16px;">
+  //         Unfortunately, your leave request could not be approved at this time. If you have any questions, please contact your tahfeez masool.
+  //       </p>`
+  //       }
+
+  //       <a
+  //         href="https://www.tahfeezdohad.org/leave"
+  //         target="_blank"
+  //         style="
+  //           display:inline-block;
+  //           background:${approved ? "#16a34a" : "#dc2626"};
+  //           color:#fff;
+  //           text-decoration:none;
+  //           padding:12px 20px;
+  //           border-radius:6px;
+  //           font-weight:bold;
+  //         "
+  //       >
+  //         View Leave Status
+  //       </a>
+
+  //       <p style="margin:24px 0 0;">
+  //         Regards,<br>
+  //         <strong>Leave Management System</strong>
+  //       </p>
+  //     </div>
+
+  //   </div>
+  // </body>
+  // </html>`,
+  //   });
 
   return res.status(200).json({ ok: true });
 });
