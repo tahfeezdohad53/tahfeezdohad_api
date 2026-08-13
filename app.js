@@ -40,19 +40,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 const user = new Map();
 io.use((socket, next) => {
-  // console.log('tryinhg')
   try {
     const cookies = socket.handshake.headers.cookie;
     const jwt = cookies
       .split("; ")
       .find((el) => el.startsWith("jwt="))
       .split("=")[1];
-    // console.log('jwt', jwt)
     try {
       const decoded = jsonwebtoken.verify(jwt, process.env.JWT_SECRET);
-      // console.log(decoded)
       socket.user = decoded;
-      // console.log(decoded)
       next();
     } catch (err) {
       console.log(err);
@@ -68,8 +64,7 @@ io.use((socket, next) => {
 });
 
 io.on("connection", async (socket) => {
-  // console.log('connecting')
-  // console.log('socket id:',socket.id);
+
   const currentUser = await User.findByIdAndUpdate(socket.user._id, {
     status: "online",
   });
@@ -81,82 +76,15 @@ io.on("connection", async (socket) => {
     id: currentUser._id,
     role: currentUser.role,
   });
-  // if(currentUser.role === 'student') {
-  //     user.set(socket.user._id, {
-  //         role:currentUser.role,
-  //       teacher: currentUser?.teacher?.toString(),
-  //       proxyTeacher:currentUser?.proxyTeacher?.toString(),
-  //       socketId: socket.id,
-  //     });
-  //     // console.log('user after student connect: ',user);
-  //    if(user.has(currentUser?.teacher?.toString())){
-  //      socket.to(user.get(currentUser?.teacher?.toString())?.socketId).emit("online", {
-  //        name: currentUser.name,
-  //        role: currentUser.role,
-  //        id: currentUser._id.toString(),
-  //      });
-  //    }
-  //    if(user.has(currentUser?.proxyTeacher?.toString())){
-  //      socket.to(user.get(currentUser?.proxyTeacher?.toString())?.socketId).emit("online", {
-  //        name: currentUser.name,
-  //        role: currentUser.role,
-  //        id: currentUser._id.toString(),
-  //      });
-  //    }
-  // }
-  // if(currentUser.role === 'teacher') {
-  //     // console.log(socket.id);
-  //     const students = await User.find({
-  //       role: "student",
-  //       $or:[
-  //         {teacher: currentUser._id},
-  //         {proxyTeacher:currentUser._id}
-  //       ]
-  //     });
-  //     const studentsId = students?.map(el => el?._id?.toString());
-  //     user.set(socket.user._id, {
-  //       role: currentUser.role,
-  //       students: studentsId,
-  //       socketId: socket.id,
-  //     });
 
-  //     if(students.length > 0){
-  //       students?.forEach((el) => {
-  //         if (user.has(el?._id?.toString())) {
-  //           socket
-  //             .to(user.get(el?._id?.toString())?.socketId)
-  //             .emit("online", {
-  //               name: currentUser.name,
-  //               role: currentUser.role,
-  //               id: currentUser._id.toString(),
-  //             });
-  //         }
-  //       });
-  //     }
-  // }
-  // if(currentUser.role === 'admin') {
-  //     user.set(socket.user._id, {
-  //       role: currentUser.role,
-  //       socketId: socket.id,
-  //     });
-  // }
-
-  // if(currentUser.role === 'teacher'){
-  //     const students = await User.find({role:'student',teacher:currentUser._id});
-
-  // }
   socket.on("incoming-call", ({ to, from, offer }) => {
-    // console.log('incoming')
-    // console.log(user);
 
-    if (user.has(to)) {
-      // io.to(user.get(to)).emit('incoming-call',{caller:from,offer});
+    if (user.has(to)) { 
       socket
         .to(user.get(to).socketId)
         .emit("incoming-call", { caller: from, offer });
     }
     if (!user.has(to)) {
-      // io.to(user.get(to)).emit('incoming-call',{caller:from,offer});
       socket.emit("not-online");
     }
   });
@@ -177,23 +105,18 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("call-accepted", ({ to, from, answer }) => {
-    // console.log(user.has(to));
     if (user.has(to)) {
-      // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
       socket
         .to(user.get(to).socketId)
         .emit("call-accepted", { answerer: from, answer });
     }
   });
   socket.on("ice-candidate", ({ to, candidate }) => {
-    // console.log(to);
     if (user.has(to)) {
-      // io.to(user.get(to)).emit('call-accepted',{caller:from,offer});
       socket.to(user.get(to).socketId).emit("ice-candidate", { candidate });
     }
   });
   socket.on("end-call", ({ to }) => {
-    // console.log('end call',user.has(to));
     if (user.has(to)) {
       socket.to(user.get(to).socketId).emit("end-call");
     }
@@ -224,49 +147,6 @@ io.on("connection", async (socket) => {
     },
   );
   socket.on("disconnect", async (reason) => {
-    // console.log('disconnected id: ',socket.id);
-    // console.log('reason disconnected: ',reason);
-    // if(user.get(socket.user._id)?.role === 'student'){
-    //     // console.log(user.get(user.get(socket.user._id).teacher).socketId);
-    //     // console.log(user.get(socket.user._id).role);
-    //     const curruser = user.get(socket.user._id)?.teacher;
-    //     const proxyTeacher = user.get(socket.user._id)?.proxyTeacher;
-    //     const teacherSocketId = user.get(curruser)?.socketId;
-    //     // console.log(user.get(curruser).socketId);
-    //     // console.log(user.has(curruser))
-    //     if (user.has(curruser)){
-    //         if(user.get(socket.user._id).socketId === socket.id) {
-    //           socket.to(user.get(curruser).socketId).emit("offline", {
-    //             role: user.get(socket.user._id).role,
-    //             id: socket.user._id,
-    //           });
-    //         }
-
-    //     }
-    //     if (user.has(proxyTeacher)){
-    //         if(user.get(socket.user._id).socketId === socket.id) {
-    //           socket.to(user.get(proxyTeacher).socketId).emit("offline", {
-    //             role: user.get(socket.user._id).role,
-    //             id: socket.user._id,
-    //           });
-    //         }
-
-    //     }
-    // }
-    // const studentsArr = user.get(socket.user._id)?.students;
-
-    // if(user.get(socket.user._id)?.role === 'teacher'){
-    //   if(studentsArr?.length > 0){
-    //     studentsArr.forEach((el) => {
-    //       if (user.has(el) && user.get(socket.user._id).socketId === socket.id) {
-    //         socket.to(user.get(el).socketId).emit("offline", {
-    //           role: user.get(socket.user._id).role,
-    //           id: socket.user._id,
-    //         });
-    //       }
-    //     });
-    //   }
-    // }
 
     const current = user.get(socket.user._id);
     if (!user.has(socket.user._id)) {
@@ -288,48 +168,15 @@ io.on("connection", async (socket) => {
     }
   });
 });
-// io.on("connection", (socket) => {
-//   console.log("CONNECTED", socket.id);
 
-//   socket.on("disconnect", (reason) => {
-//     console.log("DISCONNECTED", socket.id, reason);
-//   });
-// });
-// /////////////////////////////////////////////////////////////////////////////////////////////
-// {
-//       its: 40153993,
-//       name: "40153993 Mohammed bhai Shaikh Murtaza bhai Udaipurwala",
-//       email: "40153993@gmail.com",
-//       batch: "baneen",
-//       juz: 16,
-//       password: "3993",
-
-//       its: 40153993,
-//       name: "Mohammed bhai Shaikh Murtaza bhai Udaipurwala",
-//       email: "40153993@gmail.com",
-//       batch: "baneen",
-//       teacher: "6a0c95c24c87ffea1503058d",
-//       juz: 16,
-//       password: "3993",
-//     },
 async function fnn() {
   await User.create({
-    email: "30431900@gmail.com",
-    password: "1900",
-    its: 30431900,
-    name: "30431900 mufaddal bhai shaikh hasan bhai vohra",
-    role: "admin",
+    email: "tahfeezdohad2@gmail.com",
+    password: "tahfeez2",
+    its: '-',
+    name: "- tahfeez dohad 2",
+    role: "student",
   });
-  // console.log('done')
-  // let timer = 0;
-  // let int = setInterval(() => {
-  //   timer++;
-  // }, 1000);
-  // await User.updateMany({}, [{ $set: { isActive: true } }], {
-  //   updatePipeline: true,
-  // });
-  // clearInterval(int);
-  // console.log("updated in ", timer, " seconds");
 }
 // fnn();
 
@@ -350,18 +197,6 @@ app.get("/turn-credentials", async (req, res) => {
   res.status(200).json(response.data);
 });
 
-// async function update(){
-//   try{
-//     await User.updateMany({},[
-//     {$set:{
-//       batch:['$batch']
-//     }}
-//   ],{updatePipeline:true});
-//   }catch(err){
-//     console.log(err);
-//   }
-// }
-// update();
 const CACHE_TIME = 8 * 60 * 60 * 1000;
 let CACHED_DATA = null;
 let LAST_FETCHED_AT = 0;
@@ -371,10 +206,8 @@ async function fetchData(req, res, next) {
   const now = Date.now();
   try {
     if (CACHED_DATA && now - LAST_FETCHED_AT < CACHE_TIME) {
-      // console.log('returning cached data');
       return res.status(200).json(CACHED_DATA);
     }
-    // console.log("fetching new data");
     await refetchCachedData(now);
     res.status(200).json(CACHED_DATA);
   } catch (err) {
@@ -389,10 +222,8 @@ export async function refetchCachedData() {
   const teachers = await User.find({ role: "teacher" })
     .select("name _id")
     .lean();
-  // console.log(teachers.length);
   CACHED_DATA = { ok: true, students, teachers };
   LAST_FETCHED_AT = Date.now();
-  // console.log('fetched new data');
 }
 
 app.get("/aggregate", async (req, res) => {

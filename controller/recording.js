@@ -37,6 +37,42 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
 
 });
 
+export const handleCheckIsUploaded = catchAsync(async (req, res, next) => {
+  const { url } = req.query;
+
+  if (!url) {
+    return res.status(400).json({
+      message: "Recording URL is required",
+    });
+  }
+
+  try {
+    const objectUrl = new URL(url);
+
+    // Remove the leading "/"
+    const key = objectUrl.pathname.substring(1);
+    
+    await r2.send(
+      new HeadObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: key,
+      }),
+    );
+
+    return res.status(200).json({
+      uploaded: true,
+    });
+  } catch (error) {
+    if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
+      return res.status(200).json({
+        uploaded: false,
+      });
+    }
+
+    return next(error);
+  }
+});
+
 export const handleGetRecordings = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
   const { page = 1, startDate, endDate, student, teacher } = req.query;
