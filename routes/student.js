@@ -8,7 +8,8 @@ import {
   handleGetAllStudentNames,
   handleGetStudents,
   handleUpdateStudent,
-  handleGetMaqaratStudents
+  handleGetMaqaratStudents,
+  handleGetStudentsExcel,
 } from "../controller/student.js";
 import { uploadImage } from '../libs/multer.js';
 
@@ -21,6 +22,7 @@ router.patch("/assignMultipleProxies", protectRoute, handleAssignMultipleProxies
 router.patch('/assignProxy',protectRoute,handleAssignProxy)
 router.get('/getStudents',protectRoute,handleGetStudents)
 router.get('/getMaqaratStudents',protectRoute,handleGetMaqaratStudents)
+router.get('/excel',protectRoute,handleGetStudentsExcel);
 // router.get('/getAllStudentsAndTeachers',protectRoute,handleGetAllStudentNames)
 
 export default router;

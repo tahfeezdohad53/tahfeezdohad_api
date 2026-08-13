@@ -1,5 +1,7 @@
 import catchAsync from "../utils/catchAsync.js";
 import User from '../models/user.js';
+import xlsx from "exceljs";
+import { formatName } from "./leave.js";
 
 export const handleUpdateStudent = catchAsync(async (req,res,next) => {
     const {name} = req.body;
@@ -10,6 +12,63 @@ export const handleUpdateStudent = catchAsync(async (req,res,next) => {
     // await Student.findOneAndUpdate({_id:id},{name});
     // res.status(200).json({ok:true});
 })
+export const handleGetStudentsExcel = catchAsync(async (req, res, next) => {
+//   const { name } = req.body;
+  const { id } = req.user;
+
+  const workbook = new xlsx.Workbook();
+
+  const worksheet = workbook.addWorksheet('students');
+
+  worksheet.columns = [
+    {
+      header: "ITS",
+      key: "its",
+      width: 10,
+    },
+    {
+      header: "student Name",
+      key: "name",
+      width: 50,
+    },
+    {
+      header: "Email",
+      key: "email",
+      width: 25,
+    },
+  ];
+
+  const students = await User.find({role:'student'}).select('name its email').lean();
+
+  for(const student of students){
+    worksheet.addRow({
+      its: student.its,
+      name: formatName(student.name),
+      email: student.email,
+    });
+  }
+
+  worksheet.getRow(1).font = {
+    bold:true,
+  }
+  worksheet.getColumn('its').alignment = {
+    horizontal:'left'
+  }
+  worksheet.getRow(1).alignment = {
+    horizontal:'center',
+  }
+
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
+
+  res.setHeader("Content-Disposition", "attachment; filename=students.xlsx");
+
+  await workbook.xlsx.write(res);
+
+  res.end();
+});
 
 export const handleChangeDiary = catchAsync(async (req,res,next) => {
     const {teacherId,studentId} = req.query;
