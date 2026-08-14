@@ -8,6 +8,9 @@ const schema = new mongoose.Schema({
         unique:true,
         lowercase:true,
     },
+    contactEmail:{
+        type:String,
+    },
     password:String,
     its:{
         type:Number,

@@ -8,13 +8,15 @@ import {
   handleImageUpdate,
   handleCreateUser,
   handleGetAccounts,
+  handleAddContactEmail,
 } from "../controller/user.js";
 import {uploadImage} from '../libs/multer.js';
 
 const router = new express.Router();
 
 
-router.patch('/updatePassword',protectRoute,handleUpdatePassword);
+router.patch('/contactEmail',protectRoute,handleAddContactEmail);
+router.patch("/updatePassword", protectRoute, handleAddContactEmail);
 router.post('/create',protectRoute,handleCreateUser);
 router.get('/getUser',protectRoute,handleGetUser);
 router.get('/getAccounts',protectRoute,handleGetAccounts);

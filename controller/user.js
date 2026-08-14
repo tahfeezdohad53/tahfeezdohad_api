@@ -15,6 +15,13 @@ export const handleUpdatePassword = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(id, { password: hashedPassword });
   res.status(200).json({ ok: true, message: "password updated" });
 });
+
+export const handleAddContactEmail = catchAsync(async (req, res, next) => {
+  const { id } = req.user;
+  const { contactEmail } = req.body;
+  await User.findByIdAndUpdate(id, {contactEmail});
+  res.status(200).json({ ok: true, message: "contact email added updated" });
+});
 export const handleGetAccounts = catchAsync(async (req, res, next) => {
   const { id,role:currUserRole } = req.user;
   const {role,batch,page} = req.query;
