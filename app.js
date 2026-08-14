@@ -23,6 +23,7 @@ import jsonwebtoken from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import axios from "axios";
 import { protectRoute } from "./controller/auth.js";
+import nodeCron from "node-cron";
 configDotenv();
 const app = express();
 const server = http.createServer(app);
@@ -258,6 +259,17 @@ app.get("/aggregate", async (req, res) => {
   ]);
   res.status(200).json({ ok: true, aggregate });
 });
+
+nodeCron.schedule('0 0 * * *',async () => {
+  try{
+    await User.updateMany({role:'student'},{classDuration:0,classStatus:'pending'});
+  }catch(err){
+    console.log(err);
+  }
+},{
+  timezone:'Asia/Kolkata'
+})
+
 app.get("/student/getAllStudentsAndTeachers", protectRoute, fetchData);
 app.use("/auth", authRoutes);
 app.use("/student", studentRoutes);

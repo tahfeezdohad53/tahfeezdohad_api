@@ -9,6 +9,9 @@ import crypto from "crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { r2 } from "../utils/r2.js";
+import ExcelJs from 'exceljs';
+import { format } from "date-fns";
+import { formatName } from "./leave.js";
 
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
   const { isOnline,url,duration } = req.body;
@@ -25,6 +28,12 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
         teacher: id,
         audio: url,
         duration: Math.ceil(duration),
+        classMode:isOnline ? 'online':'in-person',
+      });
+
+      await User.findByIdAndUpdate(studentId, {
+        classStatus: "recorded",
+        $inc: { classDuration: Math.ceil(duration) },
       });
       // if (isOnline)
       //   await OnlineClass.create({
@@ -125,6 +134,103 @@ export const handleGetRecordings = catchAsync(async (req, res, next) => {
   }
   // recordings = await Recording.find({teacher:id}).sort({createdAt:-1}).skip(skip).limit(10);
   res.status(200).json({ ok: true, recordings, totalResults });
+});
+
+export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
+  const { id, role } = req.user;
+  const { page = 1, startDate, endDate, student, teacher } = req.query;
+  const skip = (Number(page) - 1) * 10;
+  let recordings;
+  let totalResults;
+  let query = {};
+  
+  if(startDate && endDate){
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    start.setHours(0,0,0,0);
+    end.setHours(23,59,59,999);
+    query.$and = [
+      {createdAt:{$gte:start}},
+      {createdAt:{$lte:end}}
+    ]
+  }
+  if (student) query.studentName = student;
+  if (teacher) query.teacherName = teacher;
+  if (role === "admin") {
+  
+    recordings = await Recording.find(query)
+      .sort({ createdAt: -1 })
+  }
+
+  const workbook = new ExcelJs.Workbook();
+
+  const worksheet = workbook.addWorksheet('classes');
+
+  worksheet.columns = [
+    { header: "Date", key: "date", width: 20 },
+    {
+      header: "Time",
+      key: "time",
+      width: 15,
+    },
+    {
+      header: "Student_ITS",
+      key: "its",
+      width: 20,
+    },
+    {
+      header: "Student Name",
+      key: "student_name",
+      width: 50,
+    },
+    {
+      header: "Recorded By",
+      key: "teacher_name",
+      width: 50,
+    },
+    {
+      header: "Duration (min)",
+      key: "duration",
+      width: 15,
+    },
+    {
+      header: "Mode",
+      key: "mode",
+      width: 15,
+    },
+  ];
+
+  worksheet.getColumn('duration').alignment = {
+    horizontal:'left'
+  }
+
+  for(const recording of recordings){
+    worksheet.addRow({
+      date: format(recording.createdAt, "MMM d, yyyy"),
+      time: format(recording.createdAt, "HH:mm"),
+      its: recording.studentName.split(' ')[0],
+      student_name: formatName(recording.studentName),
+      teacher_name:formatName(recording.teacherName),
+      duration:recording.duration,
+      mode:recording.classMode,
+    });
+  }
+
+  worksheet.getRow(1).font = {
+    bold:true,
+  }
+
+  res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+  
+    res.setHeader("Content-Disposition", "attachment; filename=classes.xlsx");
+  
+    await workbook.xlsx.write(res);
+  
+    res.end();
+  
 });
 
 export const handleGenerateSignedUrl = catchAsync(async (req, res) => {

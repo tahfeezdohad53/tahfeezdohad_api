@@ -11,6 +11,11 @@ const schema = new mongoose.Schema({
     student:mongoose.Schema.Types.ObjectId,
     audio:String,
     duration:Number,
+    classMode:{
+        type:String,
+        default:'in-person',
+        enum:['in-person','online'],
+    }
 },{timestamps:true});
 
 

@@ -19,6 +19,15 @@ const schema = new mongoose.Schema({
         type:String,
         lowercase:true,
     },
+    classStatus:{
+        type:String,
+        default:'pending',
+        enum:['pending','recorded'],
+    },
+    classDuration:{
+        type:Number,
+        default:0,
+    },
     batch:{
         type:String,
         // required:true,
