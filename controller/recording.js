@@ -208,7 +208,7 @@ export const handleEvaluateClassRecording = catchAsync(
                           color: #111827;
                         "
                           >
-                            ${recording.studentName}
+                            ${formatName(recording.studentName)}
                           </td>
                         </tr>
 
@@ -219,7 +219,7 @@ export const handleEvaluateClassRecording = catchAsync(
                           font-size: 13px;
                         "
                           >
-                            Recording Duration
+                            Duration
                           </td>
 
                           <td
