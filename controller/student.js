@@ -104,18 +104,23 @@ export const handleAssignProxy = catchAsync(async (req,res,next) => {
 
 export const handleGetStudents = catchAsync(async (req,res,next) => {
     const {id,role} = req.user;
-    const {batch} = req.query;
+    const {batch,classStatus} = req.query;
     let students;
     let adminStudents;
     if(role === 'teacher'){
-        students = await User.find({$or:[
+      const filter = {};
+        if(classStatus && classStatus !== 'all') filter.classStatus = classStatus;
+        filter.$or = [
             {teacher:id},
             {proxyTeacher:id}
-        ],role:'student'}).populate('teacher proxyTeacher');
+        ]
+        filter.role = 'student';
+        students = await User.find(filter).populate('teacher proxyTeacher');
     }
     if(role === 'admin'){
         let filter = {role:'student'};
         if(batch) filter.batch = batch;
+        if(classStatus && classStatus !== 'all') filter.classStatus = classStatus;
         students = await User.find(filter).populate('teacher proxyTeacher');
         // adminStudents = await Student.find({teacher:id}).populate('teacher proxyTeacher');
     }
