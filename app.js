@@ -27,6 +27,7 @@ import nodeCron from "node-cron";
 configDotenv();
 const app = express();
 const server = http.createServer(app);
+console.log(process.env.URL2);
 const io = new Server(server, {
   cors: {
     origin: [process.env.URL2, process.env.URL],
