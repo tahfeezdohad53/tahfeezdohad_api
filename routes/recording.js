@@ -6,6 +6,7 @@ import {
   handleCreateAudio,
   handleCheckIsUploaded,
   handleGetRecordingsExcel,
+  handleEvaluateClassRecording,
 } from "../controller/recording.js";
 import { uploadAudio } from '../libs/multer.js';
 
@@ -17,5 +18,6 @@ router.get("/signedToken/:name", protectRoute, handleGenerateSignedUrl);
 // router.post("/create/:studentId", protectRoute, handleGenerateSignedUrl);
 router.get('/getRecordings',protectRoute,handleGetRecordings);
 router.get('/excel',protectRoute,handleGetRecordingsExcel);
+router.patch("/evaluate/:recordingId", protectRoute, handleEvaluateClassRecording);
 
 export default router;

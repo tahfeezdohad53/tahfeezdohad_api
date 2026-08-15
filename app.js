@@ -171,13 +171,18 @@ io.on("connection", async (socket) => {
 });
 
 async function fnn() {
-  await User.create({
-    email: "tahfeezdohad2@gmail.com",
-    password: "tahfeez2",
-    its: '-',
-    name: "- tahfeez dohad 2",
-    role: "student",
-  });
+  // await User.create({
+  //   email: "tahfeezdohad2@gmail.com",
+  //   password: "tahfeez2",
+  //   its: '-',
+  //   name: "- tahfeez dohad 2",
+  //   role: "student",
+  // });
+  await Recording.updateMany(
+    {},
+    { $set: { evaluationStatus: "pending" } }
+  );
+  console.log('done')
 }
 // fnn();
 

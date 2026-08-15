@@ -3,20 +3,36 @@ import mongoose from "mongoose";
 // import Teacher from "../models/teacher.js";
 import User from "../models/user.js";
 
-const schema = new mongoose.Schema({
-    studentName:String,
-    teacherName:String,
-    uploaderRole:String,
-    teacher:mongoose.Schema.Types.ObjectId,
-    student:mongoose.Schema.Types.ObjectId,
-    audio:String,
-    duration:Number,
-    classMode:{
-        type:String,
-        default:'in-person',
-        enum:['in-person','online'],
-    }
-},{timestamps:true});
+const schema = new mongoose.Schema(
+  {
+    studentName: String,
+    teacherName: String,
+    uploaderRole: String,
+    teacher: mongoose.Schema.Types.ObjectId,
+    student: mongoose.Schema.Types.ObjectId,
+    audio: String,
+    duration: Number,
+    evaluationStatus: {
+      type: String,
+      default: "pending",
+      enum: ["pending", "evaluated"],
+    },
+    evaluationDate: {
+      type: Date,
+    },
+    evaluatedBy: String,
+    grade:String,
+    remarks:String,
+    talqeenMissed:Number,
+    makharijMissed:String,
+    classMode: {
+      type: String,
+      default: "in-person",
+      enum: ["in-person", "online"],
+    },
+  },
+  { timestamps: true },
+);
 
 
 schema.pre('save',async function(next){

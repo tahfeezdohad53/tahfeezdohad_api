@@ -9,42 +9,64 @@ import crypto from "crypto";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { r2 } from "../utils/r2.js";
-import ExcelJs from 'exceljs';
+import ExcelJs from "exceljs";
 import { format } from "date-fns";
 import { formatName } from "./leave.js";
 
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
-  const { isOnline,url,duration } = req.body;
+  const { isOnline, url, duration } = req.body;
   const { studentId } = req.params;
   const { id, role } = req.user;
   if (role === "student")
     return res
       .status(200)
       .json({ ok: false, message: "you are not allowed for this action" });
-  
-     const recording = await Recording.create({
-        uploaderRole: role,
-        student: studentId,
-        teacher: id,
-        audio: url,
-        duration: Math.ceil(duration),
-        classMode:isOnline ? 'online':'in-person',
-      });
 
-      await User.findByIdAndUpdate(studentId, {
-        classStatus: "recorded",
-        $inc: { classDuration: Math.ceil(duration) },
-      });
-      // if (isOnline)
-      //   await OnlineClass.create({
-      //     student: studentId,
-      //     teacher: id,
-      //     duration: Math.ceil(duration),
-      //     recording:recording._id,
-      //   });
-      res.status(200).json({ ok: true });
+  const recording = await Recording.create({
+    uploaderRole: role,
+    student: studentId,
+    teacher: id,
+    audio: url,
+    duration: Math.ceil(duration),
+    classMode: isOnline ? "online" : "in-person",
+  });
 
+  await User.findByIdAndUpdate(studentId, {
+    classStatus: "recorded",
+    $inc: { classDuration: Math.ceil(duration) },
+  });
+  // if (isOnline)
+  //   await OnlineClass.create({
+  //     student: studentId,
+  //     teacher: id,
+  //     duration: Math.ceil(duration),
+  //     recording:recording._id,
+  //   });
+  res.status(200).json({ ok: true });
 });
+export const handleEvaluateClassRecording = catchAsync(
+  async (req, res, next) => {
+    const { id, role, name } = req.user;
+    const { recordingId } = req.params;
+    const {
+      data: { talqeenMissed, makharijMissed, grade, remarks },
+    } = req.body;
+
+    if (role !== "admin")
+      return res.status(401).json({ message: "not authorized" });
+
+    await Recording.findByIdAndUpdate(recordingId, {
+      evaluationStatus: "evaluated",
+      evaluatedBy: formatName(name),
+      evaluationDate: new Date(),
+      talqeenMissed,
+      makharijMissed,
+      grade,
+      remarks,
+    });
+    res.status(200).json({ ok: true });
+  },
+);
 
 export const handleCheckIsUploaded = catchAsync(async (req, res, next) => {
   const { url } = req.query;
@@ -60,7 +82,7 @@ export const handleCheckIsUploaded = catchAsync(async (req, res, next) => {
 
     // Remove the leading "/"
     const key = objectUrl.pathname.substring(1);
-    
+
     await r2.send(
       new HeadObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME,
@@ -90,21 +112,17 @@ export const handleGetRecordings = catchAsync(async (req, res, next) => {
   let recordings;
   let totalResults;
   let query = {};
-  
-  if(startDate && endDate){
+
+  if (startDate && endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    start.setHours(0,0,0,0);
-    end.setHours(23,59,59,999);
-    query.$and = [
-      {createdAt:{$gte:start}},
-      {createdAt:{$lte:end}}
-    ]
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    query.$and = [{ createdAt: { $gte: start } }, { createdAt: { $lte: end } }];
   }
   if (student) query.studentName = student;
   if (teacher) query.teacherName = teacher;
   if (role === "admin") {
-    
     recordings = await Recording.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -143,28 +161,23 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
   let recordings;
   let totalResults;
   let query = {};
-  
-  if(startDate && endDate){
+
+  if (startDate && endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    start.setHours(0,0,0,0);
-    end.setHours(23,59,59,999);
-    query.$and = [
-      {createdAt:{$gte:start}},
-      {createdAt:{$lte:end}}
-    ]
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    query.$and = [{ createdAt: { $gte: start } }, { createdAt: { $lte: end } }];
   }
   if (student) query.studentName = student;
   if (teacher) query.teacherName = teacher;
   if (role === "admin") {
-  
-    recordings = await Recording.find(query)
-      .sort({ createdAt: -1 })
+    recordings = await Recording.find(query).sort({ createdAt: -1 });
   }
 
   const workbook = new ExcelJs.Workbook();
 
-  const worksheet = workbook.addWorksheet('classes');
+  const worksheet = workbook.addWorksheet("classes");
 
   worksheet.columns = [
     { header: "Date", key: "date", width: 20 },
@@ -200,41 +213,40 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
     },
   ];
 
-  worksheet.getColumn('duration').alignment = {
-    horizontal:'left'
-  }
+  worksheet.getColumn("duration").alignment = {
+    horizontal: "left",
+  };
 
-  for(const recording of recordings){
+  for (const recording of recordings) {
     worksheet.addRow({
       date: format(recording.createdAt, "MMM d, yyyy"),
       time: format(recording.createdAt, "HH:mm"),
-      its: recording.studentName.split(' ')[0],
+      its: recording.studentName.split(" ")[0],
       student_name: formatName(recording.studentName),
-      teacher_name:formatName(recording.teacherName),
-      duration:recording.duration,
-      mode:recording.classMode,
+      teacher_name: formatName(recording.teacherName),
+      duration: recording.duration,
+      mode: recording.classMode,
     });
   }
 
   worksheet.getRow(1).font = {
-    bold:true,
-  }
+    bold: true,
+  };
 
   res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    );
-  
-    res.setHeader("Content-Disposition", "attachment; filename=classes.xlsx");
-  
-    await workbook.xlsx.write(res);
-  
-    res.end();
-  
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
+
+  res.setHeader("Content-Disposition", "attachment; filename=classes.xlsx");
+
+  await workbook.xlsx.write(res);
+
+  res.end();
 });
 
 export const handleGenerateSignedUrl = catchAsync(async (req, res) => {
-  const {name} = req.params;
+  const { name } = req.params;
   const date = new Date()
     .toLocaleDateString("en-US", {
       month: "short",
