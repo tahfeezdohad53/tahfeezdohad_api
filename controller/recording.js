@@ -12,6 +12,7 @@ import { r2 } from "../utils/r2.js";
 import ExcelJs from "exceljs";
 import { format } from "date-fns";
 import { formatName } from "./leave.js";
+import resend from "../libs/resend.js";
 
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
   const { isOnline, url, duration } = req.body;
@@ -55,15 +56,363 @@ export const handleEvaluateClassRecording = catchAsync(
     if (role !== "admin")
       return res.status(401).json({ message: "not authorized" });
 
-    await Recording.findByIdAndUpdate(recordingId, {
-      evaluationStatus: "evaluated",
-      evaluatedBy: formatName(name),
-      evaluationDate: new Date(),
-      talqeenMissed,
-      makharijMissed,
-      grade,
-      remarks,
-    });
+    const recording = await Recording.findByIdAndUpdate(
+      recordingId,
+      {
+        evaluationStatus: "evaluated",
+        evaluatedBy: formatName(name),
+        evaluationDate: new Date(),
+        talqeenMissed,
+        makharijMissed,
+        grade,
+        remarks,
+      },
+      { returnDocument: "after" },
+    );
+    const teacher = await User.findById(recording.teacher);
+
+    if (teacher.contactEmail)
+      await resend.emails.send({
+        from: "Tahfeez Dohad Leave Management <noreply@tahfeezdohad.org>",
+        to: teacher.contactEmail,
+        subject: "Recording evaluated",
+        html: `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recording Evaluation</title>
+  </head>
+
+  <body
+    style="
+  margin: 0;
+  padding: 0;
+  background-color: #f4f7f6;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1f2937;
+"
+  >
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="background-color: #f4f7f6; padding: 40px 15px;"
+    >
+      <tr>
+        <td align="center">
+          <!-- Main Container -->
+          <table
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            style="
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+          "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+              background-color: #166534;
+              padding: 28px 30px;
+              text-align: center;
+            "
+              >
+                <h1
+                  style="
+                margin: 0;
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: 700;
+              "
+                >
+                  Recording Evaluated
+                </h1>
+
+                <p
+                  style="
+                margin: 8px 0 0;
+                color: #dcfce7;
+                font-size: 14px;
+              "
+                >
+                  One of your recording has been evaluated
+                </p>
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td style="padding: 30px;">
+                <p
+                  style="
+                margin: 0 0 20px;
+                font-size: 16px;
+                line-height: 1.6;
+              "
+                >
+                  Salam e jameel,
+                </p>
+
+                <p
+                  style="
+                margin: 0 0 25px;
+                font-size: 15px;
+                line-height: 1.6;
+                color: #4b5563;
+              "
+                >
+                   Here are the evaluation details:
+                </p>
+
+                <!-- Student Info -->
+                <table
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  style="
+                  background-color: #f9fafb;
+                  border: 1px solid #e5e7eb;
+                  border-radius: 8px;
+                  margin-bottom: 22px;
+                "
+                >
+                  <tr>
+                    <td style="padding: 16px 18px;">
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td
+                            style="
+                          padding-bottom: 12px;
+                          color: #6b7280;
+                          font-size: 13px;
+                        "
+                          >
+                            Student
+                          </td>
+
+                          <td
+                            style="
+                          padding-bottom: 12px;
+                          text-align: right;
+                          font-weight: 600;
+                          font-size: 14px;
+                          color: #111827;
+                        "
+                          >
+                            ${recording.studentName}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td
+                            style="
+                          color: #6b7280;
+                          font-size: 13px;
+                        "
+                          >
+                            Recording Duration
+                          </td>
+
+                          <td
+                            style="
+                          text-align: right;
+                          font-weight: 600;
+                          font-size: 14px;
+                          color: #111827;
+                        "
+                          >
+                            ${recording.duration}
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Evaluation -->
+                <h2
+                  style="
+                margin: 0 0 14px;
+                font-size: 17px;
+                color: #111827;
+              "
+                >
+                  Evaluation Details
+                </h2>
+
+                <table
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  style="
+                  border: 1px solid #e5e7eb;
+                  border-radius: 8px;
+                  overflow: hidden;
+                  margin-bottom: 22px;
+                "
+                >
+                  <tr>
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    background-color: #f9fafb;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 13px;
+                    color: #6b7280;
+                  "
+                    >
+                      Talqeen missed
+                    </td>
+
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    text-align: right;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 14px;
+                    font-weight: 600;
+                  "
+                    >
+                      ${talqeenMissed}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    background-color: #f9fafb;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 13px;
+                    color: #6b7280;
+                  "
+                    >
+                      Missed Makharij
+                    </td>
+
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    text-align: right;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 14px;
+                    font-weight: 600;
+                  "
+                    >
+                      ${makharijMissed}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    background-color: #f9fafb;
+                    font-size: 13px;
+                    color: #6b7280;
+                  "
+                    >
+                      Grade
+                    </td>
+
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    text-align: right;
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #166534;
+                  "
+                    >
+                      ${grade.toUpperCase()}
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Remarks -->
+                <h2
+                  style="
+                margin: 0 0 12px;
+                font-size: 17px;
+                color: #111827;
+              "
+                >
+                  Remarks
+                </h2>
+
+                <div
+                  style="
+                background-color: #f0fdf4;
+                border-left: 4px solid #166534;
+                padding: 15px 16px;
+                border-radius: 6px;
+                margin-bottom: 25px;
+              "
+                >
+                  <p
+                    style="
+                  margin: 0;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #374151;
+                "
+                  >
+                    ${remarks}
+                  </p>
+                </div>
+
+                <p
+                  style="
+                margin: 0;
+                font-size: 13px;
+                line-height: 1.6;
+                color: #6b7280;
+              "
+                >
+                  Please review the evaluation and provide any necessary guidance to the student.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+              padding: 20px 30px;
+              background-color: #f9fafb;
+              border-top: 1px solid #e5e7eb;
+              text-align: center;
+            "
+              >
+                <p
+                  style="
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+              "
+                >
+                  This is an automated notification from Tahfeez Dohad.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`,
+      });
     res.status(200).json({ ok: true });
   },
 );
