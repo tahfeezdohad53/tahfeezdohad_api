@@ -27,10 +27,18 @@ import nodeCron from "node-cron";
 configDotenv();
 const app = express();
 const server = http.createServer(app);
-console.log(process.env.URL2);
+const allowedOrigins = process.env.URL.split(",");
 const io = new Server(server, {
   cors: {
-    origin: [process.env.URL2, process.env.URL],
+    origin: (origin, callback) => {
+      console.log("ORIGIN:", origin);
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true,
   },
