@@ -230,7 +230,7 @@ export const handleEvaluateClassRecording = catchAsync(
                           color: #111827;
                         "
                           >
-                            ${recording.duration}
+                            ${recording.duration} min
                           </td>
                         </tr>
                       </table>
