@@ -30,8 +30,16 @@ const server = http.createServer(app);
 const allowedOrigins = process.env.URL.split(",");
 const io = new Server(server, {
   cors: {
+    origin:allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+app.use(express.json());
+app.use(
+  cors({
     origin: (origin, callback) => {
-      console.log("ORIGIN:", origin);
+      // console.log("ORIGIN:", origin);
 
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -39,12 +47,9 @@ const io = new Server(server, {
         callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST"],
     credentials: true,
-  },
-});
-app.use(express.json());
-app.use(cors({ origin: process.env.URL, credentials: true }));
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 const user = new Map();
