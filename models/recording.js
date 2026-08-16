@@ -21,10 +21,13 @@ const schema = new mongoose.Schema(
       type: Date,
     },
     evaluatedBy: String,
-    grade:String,
-    remarks:String,
-    talqeenMissed:Number,
-    makharijMissed:String,
+    grade: {
+      type: String,
+      uppercase:true,
+    },
+    remarks: String,
+    talqeenMissed: Number,
+    makharijMissed: String,
     classMode: {
       type: String,
       default: "in-person",
