@@ -73,7 +73,7 @@ export const handleGetStudentsExcel = catchAsync(async (req, res, next) => {
 export const handleChangeDiary = catchAsync(async (req,res,next) => {
     const {teacherId,studentId} = req.query;
     const {id,role} = req.user;
-    // if(role !== 'admin') return res.status(400).json({ok:false,message:'you are not allowed for this action'});
+    
     await User.findByIdAndUpdate(studentId,{teacher:teacherId});
     res.status(200).json({ok:true});
 })
@@ -81,14 +81,14 @@ export const handleChangeDiary = catchAsync(async (req,res,next) => {
 export const handleChangeMultipleDiary = catchAsync(async (req,res,next) => {
     const {teacherId,studentsId} = req.body;
     const {id,role} = req.user;
-    // if(role !== 'admin') return res.status(400).json({ok:false,message:'you are not allowed for this action'});
+    
     await User.updateMany({role:'student',_id:{$in:studentsId}},{teacher:teacherId});
     res.status(200).json({ok:true});
 })
 export const handleAssignMultipleProxies = catchAsync(async (req,res,next) => {
     const {teacherId,studentsId} = req.body;
     const {id,role} = req.user;
-    // if(role !== 'admin') return res.status(400).json({ok:false,message:'you are not allowed for this action'});
+    
     await User.updateMany({role:'student',_id:{$in:studentsId}},{proxyTeacher:teacherId});
     res.status(200).json({ok:true});
 })
@@ -107,6 +107,7 @@ export const handleGetStudents = catchAsync(async (req,res,next) => {
     const {batch,classStatus} = req.query;
     let students;
     let adminStudents;
+    let count;
     if(role === 'teacher'){
       const filter = {};
         if(classStatus && classStatus !== 'all') filter.classStatus = classStatus;
@@ -122,11 +123,10 @@ export const handleGetStudents = catchAsync(async (req,res,next) => {
         if(batch) filter.batch = batch;
         if(classStatus && classStatus !== 'all') filter.classStatus = classStatus;
         students = await User.find(filter).populate('teacher proxyTeacher');
-        // adminStudents = await Student.find({teacher:id}).populate('teacher proxyTeacher');
+        count = students.length;
     }
-    // if(role === 'teacher') return res.status(200).json({ok:true,students});
-    // if(role === 'admin') return res.status(200).json({ok:true,students,adminStudents});
-    res.status(200).json({ok:true,students});
+   
+    res.status(200).json({ok:true,students,count});
 })
 
 export const handleGetAllStudentNames = catchAsync(async (req,res,next) => {

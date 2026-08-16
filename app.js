@@ -8,8 +8,10 @@ import multer from "multer";
 import { Readable } from "stream";
 import { v2 as cloudinary } from "cloudinary";
 import User from "./models/user.js";
+import Fee from "./models/fee.js";
 import authRoutes from "./routes/auth.js";
 import studentRoutes from "./routes/student.js";
+import feeRoutes from "./routes/fee.js";
 import recordingRoutes from "./routes/recording.js";
 import teacherRoutes from "./routes/teacher.js";
 import userRoutes from "./routes/user.js";
@@ -191,10 +193,19 @@ async function fnn() {
   //   name: "- tahfeez dohad 2",
   //   role: "student",
   // });
-  await Recording.updateMany(
-    {},
-    { $set: { evaluationStatus: "pending" } }
-  );
+  const students = await User.find({batch:'kibaar'}).select('_id batch');
+
+  const feeObligations = students.map(el => {
+    return {
+      student:el._id,
+      batch:el.batch,
+      allocatedFee:4000,
+      term:3,
+      year:2026,
+    }
+  })
+  await Fee.insertMany(feeObligations);
+
   console.log('done')
 }
 // fnn();
@@ -298,6 +309,7 @@ app.use("/maqarat", maqaratRoutes);
 app.use("/gurfah", gurfahRoutes);
 app.use("/leave", leaveRoutes);
 app.use("/message", messageRoutes);
+app.use("/fee", feeRoutes);
 app.use("/alive", aliveRoutes);
 
 (async function () {
