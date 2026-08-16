@@ -202,7 +202,7 @@ export const handleEvaluateClassRecording = catchAsync(
     <td
       style="
         padding: 14px 16px;
-        text-align: left;
+        text-align: right;
         border-bottom: 1px solid #e5e7eb;
         font-size: 14px;
         font-weight: 600;
@@ -262,7 +262,7 @@ export const handleEvaluateClassRecording = catchAsync(
         color: #111827;
       "
     >
-      ${format(recording.createdAt,"dd MMM, yyyy")} min
+      ${format(recording.createdAt,"dd MMM, yyyy")}
     </td>
   </tr>
 </table>
