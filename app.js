@@ -204,7 +204,8 @@ async function fnn() {
       year:2026,
     }
   })
-  await Fee.insertMany(feeObligations);
+  // await Fee.insertMany(feeObligations);
+  await Fee.updateMany({},{amountPaid:0,status:'pending'});
 
   console.log('done')
 }
