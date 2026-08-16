@@ -73,7 +73,7 @@ export const handleEvaluateClassRecording = catchAsync(
 
     if (teacher.contactEmail)
       await resend.emails.send({
-        from: "Tahfeez Dohad Leave Management <noreply@tahfeezdohad.org>",
+        from: "Tahfeez Dohad Evaluation Management <noreply@tahfeezdohad.org>",
         to: teacher.contactEmail,
         subject: "Recording evaluated",
         html: `
@@ -169,74 +169,103 @@ export const handleEvaluateClassRecording = catchAsync(
                 color: #4b5563;
               "
                 >
-                   Here are the evaluation details:
+                   Here are the class details:
                 </p>
 
                 <!-- Student Info -->
                 <table
-                  width="100%"
-                  cellpadding="0"
-                  cellspacing="0"
-                  border="0"
-                  style="
-                  background-color: #f9fafb;
-                  border: 1px solid #e5e7eb;
-                  border-radius: 8px;
-                  margin-bottom: 22px;
-                "
-                >
-                  <tr>
-                    <td style="padding: 16px 18px;">
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td
-                            style="
-                          padding-bottom: 12px;
-                          color: #6b7280;
-                          font-size: 13px;
-                        "
-                          >
-                            Student
-                          </td>
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  border="0"
+  style="
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 22px;
+  "
+>
+  <tr>
+    <td
+      style="
+        padding: 14px 16px;
+        background-color: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 13px;
+        color: #6b7280;
+      "
+    >
+      Student
+    </td>
 
-                          <td
-                            style="
-                          padding-bottom: 12px;
-                          text-align: right;
-                          font-weight: 600;
-                          font-size: 14px;
-                          color: #111827;
-                        "
-                          >
-                            ${formatName(recording.studentName)}
-                          </td>
-                        </tr>
+    <td
+      style="
+        padding: 14px 16px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+      "
+    >
+      ${formatName(recording.studentName)}
+    </td>
+  </tr>
 
-                        <tr>
-                          <td
-                            style="
-                          color: #6b7280;
-                          font-size: 13px;
-                        "
-                          >
-                            Duration
-                          </td>
+  <tr>
+    <td
+      style="
+        padding: 14px 16px;
+        background-color: #f9fafb;
+        font-size: 13px;
+        color: #6b7280;
+        border-bottom: 1px solid #e5e7eb;
+      
+      "
+    >
+      Duration
+    </td>
 
-                          <td
-                            style="
-                          text-align: right;
-                          font-weight: 600;
-                          font-size: 14px;
-                          color: #111827;
-                        "
-                          >
-                            ${recording.duration} min
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
+    <td
+      style="
+        padding: 14px 16px;
+        text-align: right;
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+        border-bottom: 1px solid #e5e7eb;
+      
+      "
+    >
+      ${recording.duration} min
+    </td>
+  </tr>
+  <tr>
+    <td
+      style="
+        padding: 14px 16px;
+        background-color: #f9fafb;
+        font-size: 13px;
+        color: #6b7280;
+      "
+    >
+      Recorded on
+    </td>
+
+    <td
+      style="
+        padding: 14px 16px;
+        text-align: right;
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
+      "
+    >
+      ${format(recording.createdAt,"dd MMM, yyyy")} min
+    </td>
+  </tr>
+</table>
 
                 <!-- Evaluation -->
                 <h2
