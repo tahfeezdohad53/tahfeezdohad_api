@@ -6,7 +6,7 @@ import { Readable } from "stream";
 import cloudinary from "../libs/cloudinary.js";
 
 import crypto from "crypto";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { r2 } from "../utils/r2.js";
 import ExcelJs from "exceljs";
@@ -448,7 +448,8 @@ export const handleEvaluateClassRecording = catchAsync(
 
 export const handleCheckIsUploaded = catchAsync(async (req, res, next) => {
   const { url } = req.query;
-
+  console.log('finding rec');
+  console.log(url);
   if (!url) {
     return res.status(400).json({
       message: "Recording URL is required",
@@ -467,12 +468,13 @@ export const handleCheckIsUploaded = catchAsync(async (req, res, next) => {
         Key: key,
       }),
     );
-
+    console.log('finded')
     return res.status(200).json({
       uploaded: true,
     });
   } catch (error) {
     if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
+      console.log('failed to find')
       return res.status(200).json({
         uploaded: false,
       });
