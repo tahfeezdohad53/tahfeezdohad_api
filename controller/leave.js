@@ -307,6 +307,111 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
   </body>
 </html>`,
   });
+
+  await resend.emails.send({
+    from: "Tahfeez Dohad Leave Management <noreply@tahfeezdohad.org>",
+    to: user.contactEmail,
+    subject: `Your Leave Request Has Been ${approved ? "Approved" : "Rejected"}`,
+    html: `
+<!DOCTYPE html>
+<html>
+  <body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:24px;">
+    <div style="max-width:600px;margin:auto;background:#fff;border-radius:8px;border:1px solid #e5e5e5;overflow:hidden;">
+
+      <div style="background:${approved ? "#16a34a" : "#dc2626"};color:#fff;padding:20px;text-align:center;">
+        <h2 style="margin:0;">Leave ${approved ? "Approved" : "Rejected"}</h2>
+      </div>
+
+      <div style="padding:24px;">
+        <p>Salam e Jameel,</p>
+
+        <p>${formatName(user.name)}</p>
+
+        <p>
+          ${
+            approved
+              ? `We are pleased to inform you that your leave request has been
+                 <strong>approved by the Admin</strong>.`
+              : `We regret to inform you that your leave request has been
+                 <strong>rejected by the Admin</strong>.`
+          }
+        </p>
+
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
+            <td style="padding:10px;border:1px solid #ddd;">${leave.type}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">From</td>
+            <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.from)}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">To</td>
+            <td style="padding:10px;border:1px solid #ddd;">${formatDate(leave.to)}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Duration</td>
+            <td style="padding:10px;border:1px solid #ddd;">
+              ${leave.days} day${leave.days > 1 ? "s" : ""}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Reason</td>
+            <td style="padding:10px;border:1px solid #ddd;">${leave.reason}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Status</td>
+            <td style="padding:10px;border:1px solid #ddd;color:${approved ? "#16a34a" : "#dc2626"};font-weight:bold;">
+              ${approved ? "Approved" : "Rejected"}
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:24px 0 16px;">
+          ${
+            approved
+              ? `Your leave has been approved for the period mentioned above.
+                 Please ensure that any necessary work or responsibilities are
+                 properly handed over before your leave begins.`
+              : `Unfortunately, your leave request could not be approved for the
+                 period mentioned above. Please contact the Admin if you require
+                 further clarification regarding this decision.`
+          }
+        </p>
+
+        <a
+          href="https://www.tahfeezdohad.org/leave"
+          target="_blank"
+          style="
+            display:inline-block;
+            background:${approved ? "#16a34a" : "#dc2626"};
+            color:#ffffff;
+            text-decoration:none;
+            padding:12px 20px;
+            border-radius:6px;
+            font-weight:600;
+          "
+        >
+          View Leave Details
+        </a>
+
+        <p style="margin:24px 0 0;">
+          Regards,<br>
+          <strong>Leave Management System</strong>
+        </p>
+      </div>
+
+    </div>
+  </body>
+</html>
+`,
+  });
   //   await resend.emails.send({
   //     from: "Leave Management <noreply@tahfeezdohad.org>",
   //     to: user.email, // or an array of emails
