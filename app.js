@@ -196,20 +196,22 @@ async function fnn() {
   //   name: "- tahfeez dohad 2",
   //   role: "student",
   // });
-  const students = await User.find({batch:'kibaar'}).select('_id batch');
+  // const students = await User.find({batch:'kibaar'}).select('_id batch');
 
-  const feeObligations = students.map(el => {
-    return {
-      student:el._id,
-      batch:el.batch,
-      allocatedFee:4000,
-      term:3,
-      year:2026,
-    }
-  })
+  // const feeObligations = students.map(el => {
+  //   return {
+  //     student:el._id,
+  //     batch:el.batch,
+  //     allocatedFee:4000,
+  //     term:3,
+  //     year:2026,
+  //   }
+  // })
   // await Fee.insertMany(feeObligations);
-  await Fee.updateMany({},{amountPaid:0,status:'pending'});
+  // await Fee.updateMany({},{amountPaid:0,status:'pending'});
 
+  const c = await User.find({contactEmail:{$exists:0},role:'teacher'});
+c.forEach((el) => console.log(formatName(el.name)));
   console.log('done')
 }
 // fnn();
@@ -295,7 +297,7 @@ app.get("/aggregate", async (req, res) => {
 
 nodeCron.schedule('0 0 * * *',async () => {
   try{
-    await User.updateMany({role:'student'},{classDuration:0,classStatus:'pending'});
+    await User.updateMany({role:'student'},{classDuration:0,classStatus:'pending',slots:[]});
   }catch(err){
     console.log(err);
   }

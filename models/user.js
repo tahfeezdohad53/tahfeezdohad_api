@@ -21,7 +21,7 @@ const schema = new mongoose.Schema({
     name:{
         type:String,
         lowercase:true,
-    },
+    }, 
     classStatus:{
         type:String,
         default:'pending',
@@ -31,6 +31,7 @@ const schema = new mongoose.Schema({
         type:Number,
         default:0,
     },
+    slots:[],
     batch:{
         type:String,
         // required:true,

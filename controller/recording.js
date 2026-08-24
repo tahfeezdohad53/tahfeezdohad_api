@@ -15,7 +15,7 @@ import { formatName } from "./leave.js";
 import resend from "../libs/resend.js";
 
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
-  const { isOnline, url, duration } = req.body;
+  const { isOnline, url, duration,slot } = req.body;
   const { studentId } = req.params;
   const { id, role } = req.user;
   if (role === "student")
@@ -30,11 +30,13 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
     audio: url,
     duration: Math.ceil(duration),
     classMode: isOnline ? "online" : "in-person",
+    classType:slot,
   });
 
   await User.findByIdAndUpdate(studentId, {
     classStatus: "recorded",
     $inc: { classDuration: Math.ceil(duration) },
+    $push:{slots:slot},
   });
   // if (isOnline)
   //   await OnlineClass.create({
