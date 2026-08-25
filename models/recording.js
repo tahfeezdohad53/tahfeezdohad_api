@@ -35,7 +35,7 @@ const schema = new mongoose.Schema(
     },
     classType:{
       type:String,
-      enum:['jz','t1','t2','t3','t4','t5','jz-mj','jd','tm']
+      enum:['jz','t1','t2','t3','t4','t5','jz-mj','jd','tm','mj']
     }
   },
   { timestamps: true },
