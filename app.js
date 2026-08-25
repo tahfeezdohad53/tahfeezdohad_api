@@ -140,6 +140,9 @@ io.on("connection", async (socket) => {
       socket.to(user.get(to).socketId).emit("end-call");
     }
   });
+  socket.on("broadcast", ({ message }) => {
+    io.emit('broadcast',{message});
+  });
   socket.on('to-dev',({rating,suggestion}) => {
     if(user.has('6a5b88719b8732dabd07a6f6')){
       socket.to(user.get("6a5b88719b8732dabd07a6f6").socketId).emit('to-dev',{rating,suggestion});

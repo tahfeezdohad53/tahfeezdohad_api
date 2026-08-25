@@ -14,6 +14,37 @@ import { format } from "date-fns";
 import { formatName } from "./leave.js";
 import resend from "../libs/resend.js";
 
+export const handleGenerateSignedUrl = catchAsync(async (req, res) => {
+  const { name } = req.params;
+  const date = new Date()
+    .toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+    .replace(/,?\s/g, "-");
+  const key = `${name}-${date}-${crypto.randomUUID()}.webm`;
+
+  const command = new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME,
+    Key: key,
+    ContentType: "audio/webm",
+  });
+
+  const signedUrl = await getSignedUrl(r2, command, {
+    expiresIn: 60 * 30,
+  });
+  const url = `${process.env.R2_PUBLIC_URL}/${key}`;
+
+  res.status(200).json({
+    signedUrl,
+    key,
+    url,
+    fileUrl: `${process.env.R2_PUBLIC_URL}/${key}`,
+  });
+});
+
+
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
   const { isOnline, url, duration,slot } = req.body;
   const { studentId } = req.params;
@@ -47,6 +78,8 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
   //   });
   res.status(200).json({ ok: true });
 });
+
+
 export const handleEvaluateClassRecording = catchAsync(
   async (req, res, next) => {
     const { id, role, name } = req.user;
@@ -627,32 +660,3 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
   res.end();
 });
 
-export const handleGenerateSignedUrl = catchAsync(async (req, res) => {
-  const { name } = req.params;
-  const date = new Date()
-    .toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
-    .replace(/,?\s/g, "-");
-  const key = `${name}-${date}-${crypto.randomUUID()}.webm`;
-
-  const command = new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME,
-    Key: key,
-    ContentType: "audio/webm",
-  });
-
-  const signedUrl = await getSignedUrl(r2, command, {
-    expiresIn: 60,
-  });
-  const url = `${process.env.R2_PUBLIC_URL}/${key}`;
-
-  res.status(200).json({
-    signedUrl,
-    key,
-    url,
-    fileUrl: `${process.env.R2_PUBLIC_URL}/${key}`,
-  });
-});
