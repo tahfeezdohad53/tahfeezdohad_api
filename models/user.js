@@ -25,7 +25,7 @@ const schema = new mongoose.Schema({
     classStatus:{
         type:String,
         default:'pending',
-        enum:['pending','recorded'],
+        enum:['pending','recorded','absent'],
     },
     classDuration:{
         type:Number,

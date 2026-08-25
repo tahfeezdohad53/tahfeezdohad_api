@@ -12,6 +12,15 @@ export const handleUpdateStudent = catchAsync(async (req,res,next) => {
     // await Student.findOneAndUpdate({_id:id},{name});
     // res.status(200).json({ok:true});
 })
+export const handleMarkAbsent = catchAsync(async (req, res, next) => {
+  const { id,role } = req.user;
+  const {studentId} = req.body;
+  if(role === 'student') return res.status(401).json({ok:false});
+
+
+  await User.findOneAndUpdate({_id:studentId},{classStatus:"absent"});
+  res.status(200).json({ok:true});
+});
 export const handleGetStudentsExcel = catchAsync(async (req, res, next) => {
 //   const { name } = req.body;
   const { id } = req.user;
