@@ -19,6 +19,7 @@ import maqaratRoutes from "./routes/maqarat.js";
 import gurfahRoutes from "./routes/gurfah.js";
 import leaveRoutes from "./routes/leave.js";
 import messageRoutes from "./routes/message.js";
+import reportRoutes from "./routes/report.js";
 import aliveRoutes from "./routes/alive.js";
 import mongoose from "mongoose";
 import jsonwebtoken from "jsonwebtoken";
@@ -655,6 +656,7 @@ app.use("/maqarat", maqaratRoutes);
 app.use("/gurfah", gurfahRoutes);
 app.use("/leave", leaveRoutes);
 app.use("/message", messageRoutes);
+app.use("/report", reportRoutes);
 app.use("/fee", feeRoutes);
 app.use("/alive", aliveRoutes);
 

@@ -514,8 +514,6 @@ export const handleCheckIsUploaded = catchAsync(async (req, res, next) => {
         uploaded: false,
       });
     }
-
-    return next(error);
   }
 });
 
