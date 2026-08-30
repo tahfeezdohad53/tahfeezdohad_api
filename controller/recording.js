@@ -606,6 +606,11 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       width: 20,
     },
     {
+      header: "Teacher_ITS",
+      key: "teacher_its",
+      width: 20,
+    },
+    {
       header: "Student Name",
       key: "student_name",
       width: 50,
@@ -636,6 +641,7 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       date: format(recording.createdAt, "MMM d, yyyy"),
       time: format(recording.createdAt, "HH:mm"),
       its: recording.studentName.split(" ")[0],
+      teacher_its:recording.teacherName.split(' ')[0],
       student_name: formatName(recording.studentName),
       teacher_name: formatName(recording.teacherName),
       duration: recording.duration,

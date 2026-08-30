@@ -5,6 +5,7 @@ const schema = new mongoose.Schema({
     count:Number,
     success:Number,
     fail:Number,
+    saveFailed:Number,
 },{timestamps:true});
 
 const model = mongoose.model('Statistics',schema);

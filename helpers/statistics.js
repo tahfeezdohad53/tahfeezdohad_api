@@ -12,6 +12,11 @@ export async function updateStatistics(req,res,next){
           { $inc: { count: 1, success: 1 } },
           { upsert: true },
         );
+        if(status === 'saveFailed')await Statistics.findOneAndUpdate(
+          { type: "recording" },
+          { $inc: { saveFailed: 1 } },
+          { upsert: true },
+        );
         res.status(200).json({ok:true});
     }catch(err){
         res.status(200).json({ ok: true });
