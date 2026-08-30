@@ -621,6 +621,11 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       width: 50,
     },
     {
+      header: "Class type",
+      key: "class_type",
+      width: 50,
+    },
+    {
       header: "Duration (min)",
       key: "duration",
       width: 15,
@@ -629,6 +634,11 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       header: "Mode",
       key: "mode",
       width: 15,
+    },
+    {
+      header: "Evaluation_status",
+      key: "evaluation_status",
+      width: 20,
     },
   ];
 
@@ -644,8 +654,10 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       teacher_its:recording.teacherName.split(' ')[0],
       student_name: formatName(recording.studentName),
       teacher_name: formatName(recording.teacherName),
+      class_type:recording?.classType || '-',
       duration: recording.duration,
       mode: recording.classMode,
+      evaluation_status:recording.evaluationStatus,
     });
   }
 
