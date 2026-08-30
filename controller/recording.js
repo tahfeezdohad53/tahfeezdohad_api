@@ -640,6 +640,11 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       key: "evaluation_status",
       width: 20,
     },
+    {
+      header: "Grade",
+      key: "grade",
+      width: 15,
+    },
   ];
 
   worksheet.getColumn("duration").alignment = {
@@ -658,6 +663,7 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       duration: recording.duration,
       mode: recording.classMode,
       evaluation_status:recording.evaluationStatus,
+      grade:recording?.grade || '-'
     });
   }
 
