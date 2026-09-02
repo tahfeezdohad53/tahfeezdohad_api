@@ -125,13 +125,13 @@ export const handleGetStudents = catchAsync(async (req,res,next) => {
             {proxyTeacher:id}
         ]
         filter.role = 'student';
-        students = await User.find(filter).populate('teacher proxyTeacher');
+        students = await User.find(filter).sort({name:1}).populate('teacher proxyTeacher').lean();
     }
     if(role === 'admin'){
         let filter = {role:'student'};
         if(batch) filter.batch = batch;
         if(classStatus && classStatus !== 'all') filter.classStatus = classStatus;
-        students = await User.find(filter).populate('teacher proxyTeacher');
+        students = await User.find(filter).sort({name:1}).populate('teacher proxyTeacher').lean();
         count = students.length;
     }
    
