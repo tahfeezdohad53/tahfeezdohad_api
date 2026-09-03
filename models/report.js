@@ -8,9 +8,17 @@ const schema = new mongoose.Schema(
         required:true,
         type:Number
     },
-    page:{
+    page:{ 
         required:true,
         type:Number
+    },
+    from:{
+      type:Number,
+      required:true,
+    },
+    to:{
+      type:Number,
+      required:true,
     },
     audio: String,
     duration: Number,
@@ -22,7 +30,6 @@ const schema = new mongoose.Schema(
     talqeen: Number,
     tambeeh: Number,
     makharij: String,
-    ahkaam: String,
     classMode: {
       type: String,
       default: "in-person",

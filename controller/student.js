@@ -125,13 +125,27 @@ export const handleGetStudents = catchAsync(async (req,res,next) => {
             {proxyTeacher:id}
         ]
         filter.role = 'student';
-        students = await User.find(filter).sort({name:1}).populate('teacher proxyTeacher').lean();
+        students = await User.find(filter).populate('teacher proxyTeacher').lean();
+        students.sort((a,b) => {
+          const nameA = a.name.split(' ')[1];
+          const nameB = b.name.split(' ')[1];
+
+          return nameA.localeCompare(nameB);
+        });
+        
     }
     if(role === 'admin'){
         let filter = {role:'student'};
         if(batch) filter.batch = batch;
         if(classStatus && classStatus !== 'all') filter.classStatus = classStatus;
-        students = await User.find(filter).sort({name:1}).populate('teacher proxyTeacher').lean();
+        students = await User.find(filter).populate('teacher proxyTeacher').lean();
+        students.sort((a, b) => {
+          const lastNameA = a.name.split(" ")[1];
+          const lastNameB = b.name.split(" ")[1];
+
+          return lastNameA.localeCompare(lastNameB);
+        });
+        
         count = students.length;
     }
    

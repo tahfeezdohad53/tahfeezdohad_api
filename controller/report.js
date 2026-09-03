@@ -10,7 +10,7 @@ import resend from "../libs/resend.js";
 
 export const handleCreateReport = catchAsync(async (req, res) => {
     const {id} = req.user;
-    const {studentId,juz,page,tambeeh,talqeen,questions,grade,ahkaam,makharij,remarks,classMode,classType} = req.body;
+    const {studentId,juz,page,tambeeh,talqeen,questions,from,to,makharij,remarks,classMode,classType} = req.body;
     await Report.create({...req.body,teacher:id});
     res.status(201).json({ok:true});
 });
