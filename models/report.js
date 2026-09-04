@@ -2,29 +2,39 @@ import mongoose from "mongoose";
 
 const schema = new mongoose.Schema(
   {
-    teacher: mongoose.Schema.Types.ObjectId,
-    student: mongoose.Schema.Types.ObjectId,
-    juz:{
-        required:true,
-        type:Number
+    teacher: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    page:{ 
-        required:true,
-        type:Number
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    from:{
-      type:Number,
-      required:true,
+    juz: {
+      required: true,
+      type: Number,
     },
-    to:{
-      type:Number,
-      required:true,
+    page: {
+      required: true,
+      type: Number,
+    },
+    from: {
+      type: Number,
+      required: true,
+    },
+    to: {
+      type: Number,
+      required: true,
     },
     audio: String,
     duration: Number,
-    grade: {
+    hifzGrade: {
       type: String,
-      uppercase:true,
+      uppercase: true,
+    },
+    makharijGrade: {
+      type: String,
+      uppercase: true,
     },
     remarks: String,
     talqeen: Number,
@@ -35,10 +45,10 @@ const schema = new mongoose.Schema(
       default: "in-person",
       enum: ["in-person", "online"],
     },
-    classType:{
-      type:String,
-      enum:['jz','t1','t2','t3','t4','t5','jz-mj','jd','tm','mj']
-    }
+    classType: {
+      type: String,
+      enum: ["jz", "t1", "t2", "t3", "t4", "t5", "jz-mj", "jd", "tm", "mj"],
+    },
   },
   { timestamps: true },
 );

@@ -14,3 +14,12 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     await Report.create({...req.body,teacher:id});
     res.status(201).json({ok:true});
 });
+
+export const handleGetReports = catchAsync(async (req, res) => {
+    const {id} = req.user;
+    
+    const reports = await Report.find().sort({createdAt:-1}).populate('teacher student').lean();
+
+    res.status(200).json({ok:true, reports});
+});
+
