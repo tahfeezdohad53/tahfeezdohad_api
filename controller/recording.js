@@ -696,8 +696,13 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       width: 20,
     },
     {
-      header: "Grade",
-      key: "grade",
+      header: "Hifz grade",
+      key: "hifz_grade",
+      width: 15,
+    },
+    {
+      header: "Makharij grade",
+      key: "makharij_grade",
       width: 15,
     },
   ];
@@ -718,7 +723,8 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       duration: recording.duration,
       mode: recording.classMode,
       evaluation_status:recording.evaluationStatus,
-      grade:recording?.grade || '-'
+      hifz_grade:recording?.hifzGrade || '-',
+      makharij_grade:recording?.makharijGrade || '-'
     });
   }
 
