@@ -26,6 +26,9 @@ const schema = new mongoose.Schema(
       uppercase:true,
     },
     remarks: String,
+    totalTalqeen:Number,
+    hifzGrade:String,
+    makharijGrade:String,
     talqeenMissed: Number,
     makharijMissed: String,
     classMode: {

@@ -14,6 +14,7 @@ import ExcelJs from "exceljs";
 import { format } from "date-fns";
 import { formatName } from "./leave.js";
 import resend from "../libs/resend.js";
+import mongoose from "mongoose";
 
 export const handleGenerateSignedUrl = catchAsync(async (req, res) => {
   const { name } = req.params;
@@ -86,7 +87,7 @@ export const handleEvaluateClassRecording = catchAsync(
     const { id, role, name } = req.user;
     const { recordingId } = req.params;
     const {
-      data: { talqeenMissed, makharijMissed, grade, remarks },
+      data: { totalTalqeen,talqeenMissed, makharijMissed, hifzGrade, makharijGrade, remarks },
     } = req.body;
 
     if (role !== "admin")
@@ -98,9 +99,11 @@ export const handleEvaluateClassRecording = catchAsync(
         evaluationStatus: "evaluated",
         evaluatedBy: formatName(name),
         evaluationDate: new Date(),
+        totalTalqeen,
         talqeenMissed,
         makharijMissed,
-        grade,
+        hifzGrade,
+        makharijGrade,
         remarks,
       },
       { returnDocument: "after" },
@@ -298,7 +301,7 @@ export const handleEvaluateClassRecording = catchAsync(
         color: #111827;
       "
     >
-      ${format(recording.createdAt,"dd MMM, yyyy")}
+      ${format(recording.createdAt, "dd MMM, yyyy")}
     </td>
   </tr>
 </table>
@@ -326,6 +329,32 @@ export const handleEvaluateClassRecording = catchAsync(
                   margin-bottom: 22px;
                 "
                 >
+                  <tr>
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    background-color: #f9fafb;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 13px;
+                    color: #6b7280;
+                  "
+                    >
+                      Total Talqeen
+                    </td>
+
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    text-align: right;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 14px;
+                    font-weight: 600;
+                  "
+                    >
+                      ${totalTalqeen}
+                    </td>
+                  </tr>
+
                   <tr>
                     <td
                       style="
@@ -383,11 +412,12 @@ export const handleEvaluateClassRecording = catchAsync(
                       style="
                     padding: 14px 16px;
                     background-color: #f9fafb;
+                    border-bottom: 1px solid #e5e7eb;
                     font-size: 13px;
                     color: #6b7280;
                   "
                     >
-                      Grade
+                      Hifz Grade
                     </td>
 
                     <td
@@ -399,7 +429,32 @@ export const handleEvaluateClassRecording = catchAsync(
                     color: #166534;
                   "
                     >
-                      ${grade.toUpperCase()}
+                      ${hifzGrade}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    background-color: #f9fafb;
+                    font-size: 13px;
+                    color: #6b7280;
+                  "
+                    >
+                      Makharij Grade
+                    </td>
+
+                    <td
+                      style="
+                    padding: 14px 16px;
+                    text-align: right;
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #166534;
+                  "
+                    >
+                      ${makharijGrade}
                     </td>
                   </tr>
                 </table>
@@ -681,5 +736,8 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
   await workbook.xlsx.write(res);
 
   res.end();
+});
+export const handleGetLast15DaysRecDuration = catchAsync(async (req, res, next) => {
+      
 });
 

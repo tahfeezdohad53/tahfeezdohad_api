@@ -7,6 +7,7 @@ import {
   handleCheckIsUploaded,
   handleGetRecordingsExcel,
   handleEvaluateClassRecording,
+  handleGetLast15DaysRecDuration,
 } from "../controller/recording.js";
 import { uploadAudio } from '../libs/multer.js';
 import { updateStatistics } from '../helpers/statistics.js';
@@ -21,5 +22,6 @@ router.get("/signedToken/:name", protectRoute, handleGenerateSignedUrl);
 router.get('/getRecordings',protectRoute,handleGetRecordings);
 router.get('/excel',protectRoute,handleGetRecordingsExcel);
 router.patch("/evaluate/:recordingId", protectRoute, handleEvaluateClassRecording);
+router.get("/getLast15DaysRecDuration", handleGetLast15DaysRecDuration);
 
 export default router;
