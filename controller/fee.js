@@ -137,9 +137,9 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
         ? [
             "huzefaratlam63@gmail.com",
             // "adilaliasgar53@gmail.com",
-            student.contactEmail,
+            // student.contactEmail,
           ]
-        : ["huzefaratlam63@gmail.com", "adilaliasgar53@gmail.com"], // or an array of emails
+        : ["huzefaratlam63@gmail.com"], // or an array of emails
       subject: `Donation received`,
       html: `
           <!DOCTYPE html>
