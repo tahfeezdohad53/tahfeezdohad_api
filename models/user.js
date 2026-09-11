@@ -31,6 +31,16 @@ const schema = new mongoose.Schema({
         type:Number,
         default:0,
     },
+    teacherAttendanceStatus:{
+        type:String,
+        enum:['checkedIn','checkedOut'],
+    },
+    lastStatusTime:{
+        type:Date,
+    },
+    teacherTotalMin:{
+        type:Number
+    },
     slots:[],
     batch:{
         type:String,

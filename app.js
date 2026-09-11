@@ -20,6 +20,7 @@ import gurfahRoutes from "./routes/gurfah.js";
 import leaveRoutes from "./routes/leave.js";
 import messageRoutes from "./routes/message.js";
 import reportRoutes from "./routes/report.js";
+import teacherAttendanceRoutes from "./routes/teacherAttendance.js";
 import aliveRoutes from "./routes/alive.js";
 import mongoose from "mongoose";
 import jsonwebtoken from "jsonwebtoken";
@@ -302,6 +303,7 @@ app.get("/aggregate", async (req, res) => {
 nodeCron.schedule('0 0 * * *',async () => {
   try{
     await User.updateMany({role:'student'},{classDuration:0,classStatus:'pending',slots:[]});
+    await User.updateMany({role:'teacher'},{teacherTotalMin:0});
   }catch(err){
     console.log(err);
   }
@@ -658,6 +660,7 @@ app.use("/leave", leaveRoutes);
 app.use("/message", messageRoutes);
 app.use("/report", reportRoutes);
 app.use("/fee", feeRoutes);
+app.use("/teacherAttendance", teacherAttendanceRoutes);
 app.use("/alive", aliveRoutes);
 
 (async function () {
