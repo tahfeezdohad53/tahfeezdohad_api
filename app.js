@@ -215,12 +215,12 @@ async function fnn() {
   // await Fee.insertMany(feeObligations);
   // await Fee.updateMany({},{amountPaid:0,status:'pending'});
 
-  const u = await User.findOne({ its: 309071899 });
-  u.password = '7189';   
-  await u.save(); 
- 
+  // const u = await User.findOne({ its: 309071899 });
+  // u.password = '7189';   
+  // await u.save(); 
+  await User.updateMany({role:'teacher'},{$unset:{teacherAttendanceStatus:1,teacherTotalMin:1,lastStatusTime:1}})
 }
-fnn();
+// fnn();
 
 app.get("/turn-credentials", async (req, res) => {
   const response = await axios.post(
