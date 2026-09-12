@@ -131,7 +131,7 @@ export const handleGenerateExcel = catchAsync(async (req, res, next) => {
 
     let query = {};
 
-    if(role !== 'admin') return res.status(401).json({ok:false});
+    if(role === 'admin' || role === 'teacher') return res.status(401).json({ok:false});
 
     if(startDate && endDate) {
       const localStartDate = new Date(startDate);
