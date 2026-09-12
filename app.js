@@ -215,9 +215,10 @@ async function fnn() {
   // await Fee.insertMany(feeObligations);
   // await Fee.updateMany({},{amountPaid:0,status:'pending'});
 
-  const c = await User.find({contactEmail:{$exists:0},role:'teacher'});
-c.forEach((el) => console.log(formatName(el.name)));
-  console.log('done')
+  const u = await User.findOne({its:30907189});
+  u.password = 'huzefa53@';
+  await u.save(); 
+
 }
 // fnn();
 

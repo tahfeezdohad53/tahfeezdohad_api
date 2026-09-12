@@ -72,8 +72,25 @@ export const handleGetAttendance = catchAsync(async (req, res, next) => {
     const {page = 1} = req.query;
 
     const skip = (Number(page) - 1) * 10;
+    let attendance;
+    let count;
 
-  const attendance = await TeacherAttendance.find({teacher:id}).sort({createdAt:-1}).skip(skip).limit(10);
-  const count = await TeacherAttendance.countDocuments({teacher:id});
+    if(role === 'teacher') {
+   attendance = await TeacherAttendance.find({ teacher: id })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(10)
+    count = await TeacherAttendance.countDocuments({ teacher: id });
+    }
+
+    if(role === 'admin') {
+   attendance = await TeacherAttendance.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(10)
+    .populate("teacher");
+    count = await TeacherAttendance.countDocuments();
+    }
+  
   res.status(200).json({attendance,count});
 });
