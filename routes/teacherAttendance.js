@@ -5,6 +5,7 @@ import {
   handleGetStatus,
   handleGetAttendance,
   handleVerifyAttendance,
+  handleGenerateExcel,
 } from "../controller/teacherAttendance.js";
 import {protectRoute} from '../controller/auth.js'
 const router =  express.Router();
@@ -14,5 +15,6 @@ router.post('/checkOut',protectRoute,handleCheckOut);
 router.get('/status',protectRoute,handleGetStatus);
 router.get('/get',protectRoute,handleGetAttendance);
 router.post("/verify", protectRoute, handleVerifyAttendance);
+router.get("/excel", protectRoute, handleGenerateExcel);
 
 export default router;
