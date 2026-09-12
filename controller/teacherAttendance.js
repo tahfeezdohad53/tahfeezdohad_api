@@ -144,7 +144,8 @@ export const handleGenerateExcel = catchAsync(async (req, res, next) => {
       ]
     }
 
-    if(teacher) query.teacher = teacher;
+    if(role === 'admin' && teacher) query.teacher = teacher;
+    if(role === 'teacher') query.teacher = id;
 
     const attendance = await TeacherAttendance.find(query).populate({path:'teacher',select:'name its'}).lean();
 
