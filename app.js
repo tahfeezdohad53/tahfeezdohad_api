@@ -215,8 +215,8 @@ async function fnn() {
   // await Fee.insertMany(feeObligations);
   // await Fee.updateMany({},{amountPaid:0,status:'pending'});
 
-  const u = await User.findOne({ its: 30387346 });
-  u.password = '7346';   
+  const u = await User.findOne({ its: 309071899 });
+  u.password = '7189';   
   await u.save(); 
  
 }

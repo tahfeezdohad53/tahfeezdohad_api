@@ -46,10 +46,10 @@ export const handleCheckOut = catchAsync(async (req, res, next) => {
       new Date(latestAttendance.checkedIn),
     );
     
-    // latestAttendance.checkedOut = date;
-    // latestAttendance.totalMin = Number(diff);
+    latestAttendance.checkedOut = date;
+    latestAttendance.totalMin = Number(diff);
     
-    // await latestAttendance.save();
+    await latestAttendance.save();
     await User.findByIdAndUpdate(id,{teacherAttendanceStatus:"checkedOut",lastStatusTime:date,$inc:{teacherTotalMin:Number(diff)}});
 
     res.status(200).json({ok:true});
