@@ -212,7 +212,7 @@ export const handleGenerateExcel = catchAsync(async (req, res, next) => {
         name: formatName(el.teacher.name),
         date: format(new Date(el.checkedIn), "dd MMM, yyyy"),
         checkedIn: format(new Date(el.checkedIn), "HH:mm"),
-        checkedOut: format(new Date(el.checkedOut), "HH:mm"),
+        checkedOut: el?.checkedOut ? format(new Date(el.checkedOut), "HH:mm") : '-',
         min: el.totalMin,
         batch: el.batch,
         verification: el.isVerified ? "done" : "pending",
