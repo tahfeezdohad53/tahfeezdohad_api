@@ -15,6 +15,9 @@ const schema = new mongoose.Schema({
     totalMin:{
         type:Number,
     },
+    recordingMin:{
+        type:Number,
+    },
     isVerified:{
         type:Boolean,
     },

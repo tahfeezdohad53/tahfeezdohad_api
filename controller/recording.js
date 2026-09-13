@@ -2,6 +2,7 @@ import catchAsync from "../utils/catchAsync.js";
 import Recording from "../models/recording.js";
 import Statistics from "../models/statistics.js";
 import User from "../models/user.js";
+import TeacherAttendance from "../models/teacherAttendance.js";
 import OnlineClass from "../models/onlineclass.js";
 import { Readable } from "stream";
 import cloudinary from "../libs/cloudinary.js";
@@ -65,6 +66,14 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
     classMode: isOnline ? "online" : "in-person",
     classType:slot,
   });
+
+  const latestAttendance = await TeacherAttendance.findOne({teacher:id}).sort({checkedIn:-1});
+
+  if(!latestAttendance?.checkedOut){
+    if(latestAttendance.recordingMin) latestAttendance.recordingMin += Math.ceil(duration);
+    else latestAttendance.recordingMin = Math.ceil(duration);
+    await latestAttendance.save();
+  }
 
   await User.findByIdAndUpdate(studentId, {
     classStatus: "recorded",

@@ -58,6 +58,40 @@ export const handleCheckOut = catchAsync(async (req, res, next) => {
     res.status(200).json({ok:true});
 });
 
+export const handleManualCheckout = catchAsync(async (req, res, next) => {
+  const { id, role } = req.user;
+  const {checkoutMinute,checkoutHour,attendanceId,teacherId} = req.body;
+
+  const date = new Date();
+
+    if (role !== "admin") return res.status(401).json({ ok: false });
+
+
+  date.setHours(checkoutHour,checkoutMinute,0,0);
+  
+
+  // if(hour > 12 && hour < 15) return res.status(400).json({ok:false});
+
+  // if((hour === 12 && min > 35) || (hour === 18 && min > 35)) return res.status(400).json({ok:false});
+  const latestAttendance = await TeacherAttendance.findById(attendanceId).select('checkedIn').lean();
+
+  const diff = differenceInMinutes(date, new Date(latestAttendance.checkedIn));
+  await TeacherAttendance.findByIdAndUpdate(attendanceId,{checkedOut:date,totalMin:Number(diff)})
+
+
+  // latestAttendance.checkedOut = date;
+  // latestAttendance.totalMin = Number(diff);
+
+  // await latestAttendance.save();
+  await User.findByIdAndUpdate(teacherId, {
+    teacherAttendanceStatus: "checkedOut",
+    lastStatusTime: date,
+    $inc: { teacherTotalMin: Number(diff) },
+  });
+
+  res.status(200).json({ ok: true });
+});
+
 
 export const handleGetStatus = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
@@ -189,6 +223,11 @@ export const handleGenerateExcel = catchAsync(async (req, res, next) => {
         key:'min'
       },
       {
+        header:'Recording_min',
+        key:'recMin',
+        width:15,
+      },
+      {
         header:'Verification',
         key:'verification',
         width:25
@@ -200,6 +239,9 @@ export const handleGenerateExcel = catchAsync(async (req, res, next) => {
     };
 
     workSheet.getColumn(7).alignment = {
+      horizontal:'left'
+    }
+    workSheet.getColumn(8).alignment = {
       horizontal:'left'
     }
     workSheet.getColumn(1).alignment = {
@@ -214,6 +256,7 @@ export const handleGenerateExcel = catchAsync(async (req, res, next) => {
         checkedIn: format(new Date(el.checkedIn), "HH:mm"),
         checkedOut: el?.checkedOut ? format(new Date(el.checkedOut), "HH:mm") : '-',
         min: el.totalMin,
+        recMin: el.recordingMin,
         batch: el.batch,
         verification: el.isVerified ? "done" : "pending",
       });
