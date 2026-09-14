@@ -1,6 +1,6 @@
 import catchAsync from "../utils/catchAsync.js";
 import User from "../models/user.js";
-import Fee from "../models/fee.js";
+import Obligation from "../models/obligation.js";
 import { getTerm } from "../helpers/getTerm.js";
 import resend from "../libs/resend.js";
 import { format } from "date-fns";
@@ -8,145 +8,196 @@ import { formatName } from "./leave.js";
 import { formatCurrency } from "../helpers/formatCurrency.js";
 import numberToWords from "number-to-words";
 
-export const handleGetFeeObligations = catchAsync(async (req, res, next) => {
+export const handleGetObligations = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
   const { batch, status, page, its } = req.query;
+
   const skip = (page - 1) * 10;
+
   if (role !== "admin")
     return res.status(401).json({ message: "Not Authorized" });
 
   let query = {};
 
   if (its) {
-    const studentt = await User.findOne({ its: Number(its) })
+    const student = await User.findOne({ its: Number(its) })
       .select("_id its name")
       .lean();
-    const obligations = await Fee.findOne({ student: studentt._id }).populate(
-      "student",
-    );
-   
-    return res
-      .status(200)
-      .json({
-        obligations: [
-          {
-            _id: obligations._id,
-            student: { its: studentt.its, name: studentt.name },
-            batch: obligations.batch,
-            allocatedFee: obligations.allocatedFee,
-            term: obligations.term,
-            year: obligations.year,
-            status: obligations.status,
-            amountPaid: obligations.amountPaid,
-            createdAt: obligations.createdAt,
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const obligation = await Obligation.findOne({
+      student: student._id,
+    }).populate("student");
+
+    if (!obligation) {
+      return res.status(404).json({ message: "Obligation not found" });
+    }
+
+    return res.status(200).json({
+      obligations: [
+        {
+          _id: obligation._id,
+          student: {
+            its: student.its,
+            name: student.name,
           },
-        ],
-        count: 1,
-      });
+          batch: obligation.batch,
+          allocatedFee: obligation.allocatedFee,
+          term: obligation.term,
+          year: obligation.year,
+          status: obligation.status,
+          amountPaid: obligation.amountPaid,
+          createdAt: obligation.createdAt,
+        },
+      ],
+      count: 1,
+    });
   }
 
-  if (status !== "all" && status) query.status = status;
-  if (batch !== "all" && batch) query.batch = batch;
+  if (status !== "all" && status) {
+    query.status = status;
+  }
+
+  if (batch !== "all" && batch) {
+    query.batch = batch;
+  }
+
   query.term = getTerm(new Date().getMonth() + 1);
+
   const [obligations, count] = await Promise.all([
-    await Fee.find(query).populate("student").skip(skip).limit(10),
-    await Fee.countDocuments(query),
+    Obligation.find(query).populate("student").skip(skip).limit(10),
+
+    Obligation.countDocuments(query),
   ]);
 
-  res.status(200).json({ ok: true, count, obligations });
+  res.status(200).json({
+    ok: true,
+    count,
+    obligations,
+  });
 });
 
-export const handleGetFeeStatistics = catchAsync(async (req, res, next) => {
-  const { id, role } = req.user;
+export const handleGetObligationStatistics = catchAsync(
+  async (req, res, next) => {
+    const { id, role } = req.user;
 
-  const [totalStudents, feePaidThisMonth, feePendingThisMonth] =
-    await Promise.all([
-      await User.countDocuments({
-        $and: [
-          { role: "student" },
-          { name: { $not: { $regex: "tahfeez", $options: "i" } } },
-        ],
-      }),
-      await Fee.countDocuments({ status: "paid" }),
-      await Fee.countDocuments({
-        $or: [{ status: "pending" }, { status: "partial" }],
-      }),
-    ]);
-
-  const currentMonth = new Date().getMonth() + 1;
-  const term = getTerm(currentMonth);
-
-  const totalFee = await Fee.aggregate([
-    {
-      $match: { term: term },
-    },
-    {
-      $group: {
-        _id: "status",
-        paid: {
-          $sum: {
-            $cond: [
-              {
-                $or: [
-                  { $eq: ["$status", "paid"] },
-                  { $eq: ["$status", "partial"] },
-                ],
+    const [totalStudents, obligationPaidThisMonth, obligationPendingThisMonth] =
+      await Promise.all([
+        User.countDocuments({
+          $and: [
+            { role: "student" },
+            {
+              name: {
+                $not: {
+                  $regex: "tahfeez",
+                  $options: "i",
+                },
               },
-              "$amountPaid",
-              0,
-            ],
-          },
-        },
+            },
+          ],
+        }),
 
-        pending: {
-          $sum: {
-            $cond: [{ $eq: ["$status", "pending"] }, "$allocatedFee", 0],
+        Obligation.countDocuments({
+          status: "paid",
+        }),
+
+        Obligation.countDocuments({
+          $or: [{ status: "pending" }, { status: "partial" }],
+        }),
+      ]);
+
+    const currentMonth = new Date().getMonth() + 1;
+    const term = getTerm(currentMonth);
+
+    const totalObligation = await Obligation.aggregate([
+      {
+        $match: {
+          term: term,
+        },
+      },
+      {
+        $group: {
+          _id: "status",
+
+          paid: {
+            $sum: {
+              $cond: [
+                {
+                  $or: [
+                    { $eq: ["$status", "paid"] },
+                    { $eq: ["$status", "partial"] },
+                  ],
+                },
+                "$amountPaid",
+                0,
+              ],
+            },
+          },
+
+          pending: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "pending"] }, "$allocatedFee", 0],
+            },
           },
         },
       },
-    },
-  ]);
-  // console.log(totalFee);
-  res
-    .status(200)
-    .json({
+    ]);
+
+    res.status(200).json({
       ok: true,
       totalStudents,
-      feePaidThisMonth,
-      feePendingThisMonth,
-      totalFee,
+      obligationPaidThisMonth,
+      obligationPendingThisMonth,
+      totalObligation,
     });
-});
-export const handleUpdateFee = catchAsync(async (req, res, next) => {
-  const { id, role } = req.user;
-  const { amount, status, id: feeId,transactionId } = req.body;
+  },
+);
 
-  const fee = await Fee.findByIdAndUpdate(
-    feeId,
-    { $inc:{amountPaid:amount}, status,transaction_id:transactionId },
-    { returnDocument: "after" },
+export const handleUpdateObligation = catchAsync(async (req, res, next) => {
+  const { id, role } = req.user;
+
+  const { amount, status, id: obligationId, transactionId } = req.body;
+
+  const obligation = await Obligation.findByIdAndUpdate(
+    obligationId,
+    {
+      $inc: {
+        amountPaid: amount,
+      },
+      status,
+      transaction_id: transactionId,
+    },
+    {
+      returnDocument: "after",
+    },
   );
-  const student = await User.findById(fee.student)
+
+  const student = await User.findById(obligation.student)
     .select("contactEmail name its")
     .lean();
 
-  // if (student.contactEmail)
-    await resend.emails.send({
-      from: "Tahfeez Dohad  <noreply@tahfeezdohad.org>",
-      to: student.contactEmail
-        ? [
-            "huzefaratlam63@gmail.com",
-            // "adilaliasgar53@gmail.com",
-            // student.contactEmail,
-          ]
-        : ["huzefaratlam63@gmail.com"], // or an array of emails
-      subject: `Donation received`,
-      html: `
-          <!DOCTYPE html>
+  await resend.emails.send({
+    from: "Tahfeez Dohad <noreply@tahfeezdohad.org>",
+
+    to: student.contactEmail
+      ? ["huzefaratlam63@gmail.com"]
+      : ["huzefaratlam63@gmail.com"],
+
+    subject: `Donation received`,
+
+    html: `
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>Receipt</title>
 
@@ -210,10 +261,7 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
     "
   >
     <tr>
-      <td
-        align="center"
-        valign="top"
-      >
+      <td align="center" valign="top">
 
         <!-- Receipt -->
         <table
@@ -305,7 +353,6 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
                 </tr>
               </table>
 
-
               <!-- ================= DATE / RECEIPT NO ================= -->
 
               <table
@@ -357,7 +404,6 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
 
                   </td>
 
-
                   <!-- Receipt Number -->
                   <td
                     class="receipt-column"
@@ -404,7 +450,7 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
                             white-space:nowrap;
                           "
                         >
-                          ${fee._id}
+                          ${obligation._id}
                         </td>
 
                       </tr>
@@ -414,7 +460,6 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
 
                 </tr>
               </table>
-
 
               <!-- ================= STUDENT DETAILS ================= -->
 
@@ -463,7 +508,6 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
 
                 </tr>
 
-
                 <!-- ITS ID -->
                 <tr>
 
@@ -496,7 +540,6 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
                   </td>
 
                 </tr>
-
 
                 <!-- Address -->
                 <tr>
@@ -533,7 +576,6 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
 
               </table>
 
-
               <!-- ================= AMOUNT IN WORDS ================= -->
 
               <table
@@ -559,13 +601,14 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
                     "
                   >
                     ${numberToWords
-                      .toWords(Number(String(fee.amountPaid).replace(/,/g, "")))
+                      .toWords(
+                        Number(String(obligation.amountPaid).replace(/,/g, "")),
+                      )
                       .replace(/\b\w/g, (char) => char.toUpperCase())}
                   </td>
 
                 </tr>
               </table>
-
 
               <!-- ================= AMOUNT ================= -->
 
@@ -608,13 +651,12 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
                     "
                   >
                     <b>
-                      ${formatCurrency().format(fee.amountPaid)}
+                      ${formatCurrency().format(obligation.amountPaid)}
                     </b>
                   </td>
 
                 </tr>
               </table>
-
 
               <!-- ================= PAYMENT DETAILS ================= -->
 
@@ -637,13 +679,12 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
                     "
                   >
                     By Online
-                    (Dt.: ${format(fee.updatedAt, "dd MMM yyyy")},
-                    Ref.No.: ${fee.transaction_id})
+                    (Dt.: ${format(obligation.updatedAt, "dd MMM yyyy")},
+                    Ref.No.: ${obligation.transaction_id})
                   </td>
 
                 </tr>
               </table>
-
 
               <!-- ================= RECEIPT TYPE ================= -->
 
@@ -672,7 +713,7 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
                       white-space:nowrap;
                     "
                   >
-                    Receipt Type - 
+                    Receipt Type -
                   </td>
 
                   <!-- Value -->
@@ -691,7 +732,6 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
 
                 </tr>
               </table>
-
 
               <!-- ================= DIVIDER ================= -->
 
@@ -718,7 +758,6 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
 
                 </tr>
               </table>
-
 
               <!-- ================= FOOTER ================= -->
 
@@ -759,6 +798,7 @@ export const handleUpdateFee = catchAsync(async (req, res, next) => {
 </body>
 </html>
 `,
-    });
+  });
+
   res.status(200).json({ ok: true });
 });

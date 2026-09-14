@@ -60,23 +60,23 @@ export const handleCheckOut = catchAsync(async (req, res, next) => {
 
 export const handleManualCheckout = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
-  const {checkoutMinute,checkoutHour,attendanceId,teacherId} = req.body;
+  const {checkOutDate,attendanceId,teacherId} = req.body;
   // return console.log(checkoutHour,checkoutMinute);
-  const date = new Date();
+  
 
     if (role !== "admin") return res.status(401).json({ ok: false });
 
 
-  date.setHours(checkoutHour,checkoutMinute,0,0);
+  
   
 
   // if(hour > 12 && hour < 15) return res.status(400).json({ok:false});
 
   // if((hour === 12 && min > 35) || (hour === 18 && min > 35)) return res.status(400).json({ok:false});
   const latestAttendance = await TeacherAttendance.findById(attendanceId).select('checkedIn').lean();
-  const diff = differenceInMinutes(date, new Date(latestAttendance.checkedIn));
+  const diff = differenceInMinutes(checkOutDate, new Date(latestAttendance.checkedIn));
   // return console.log(console.log(diff));
-  await TeacherAttendance.findByIdAndUpdate(attendanceId,{checkedOut:date,totalMin:Number(diff)})
+  await TeacherAttendance.findByIdAndUpdate(attendanceId,{checkedOut:checkOutDate,totalMin:Number(diff)})
 
 
   // latestAttendance.checkedOut = date;
@@ -85,7 +85,7 @@ export const handleManualCheckout = catchAsync(async (req, res, next) => {
   // await latestAttendance.save();
   await User.findByIdAndUpdate(teacherId, {
     teacherAttendanceStatus: "checkedOut",
-    lastStatusTime: date,
+    lastStatusTime: checkOutDate,
     $inc: { teacherTotalMin: Number(diff) },
   });
 
