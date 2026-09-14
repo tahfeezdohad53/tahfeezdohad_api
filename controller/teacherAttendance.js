@@ -117,7 +117,7 @@ export const handleVerifyAttendance = catchAsync(async (req, res, next) => {
 
 export const handleGetAttendance = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
-    const {page = 1,startDate,endDate,teacher} = req.query;
+    const {page = 1,startDate,endDate,teacher,batch} = req.query;
 
     const skip = (Number(page) - 1) * 10;
     let attendance;
@@ -137,6 +137,7 @@ export const handleGetAttendance = catchAsync(async (req, res, next) => {
     }
 
     if(teacher) query.teacher = teacher;
+    if(batch && batch !=='all') query.batch = batch;
 
     if(role === 'teacher') {
    attendance = await TeacherAttendance.find({ teacher: id })

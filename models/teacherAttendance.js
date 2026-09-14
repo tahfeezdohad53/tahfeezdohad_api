@@ -24,7 +24,7 @@ const schema = new mongoose.Schema({
     batch:{
         type:String,
         required:true,
-        enum:['yaqoot_mardo','yaqoot_bairo','kibaar','sigaar','atfaal','taheri_hall'],
+        enum:['yaqoot_mardo','yaqoot_bairo','kibaar','sigaar','atfaal','taheri_hall','online'],
     }
 },{timestamps:true});
 
