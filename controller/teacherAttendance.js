@@ -61,7 +61,7 @@ export const handleCheckOut = catchAsync(async (req, res, next) => {
 export const handleManualCheckout = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
   const {checkoutMinute,checkoutHour,attendanceId,teacherId} = req.body;
-
+  // return console.log(checkoutHour,checkoutMinute);
   const date = new Date();
 
     if (role !== "admin") return res.status(401).json({ ok: false });
@@ -74,8 +74,8 @@ export const handleManualCheckout = catchAsync(async (req, res, next) => {
 
   // if((hour === 12 && min > 35) || (hour === 18 && min > 35)) return res.status(400).json({ok:false});
   const latestAttendance = await TeacherAttendance.findById(attendanceId).select('checkedIn').lean();
-
   const diff = differenceInMinutes(date, new Date(latestAttendance.checkedIn));
+  // return console.log(console.log(diff));
   await TeacherAttendance.findByIdAndUpdate(attendanceId,{checkedOut:date,totalMin:Number(diff)})
 
 
@@ -140,7 +140,8 @@ export const handleGetAttendance = catchAsync(async (req, res, next) => {
     if(batch && batch !=='all') query.batch = batch;
 
     if(role === 'teacher') {
-   attendance = await TeacherAttendance.find({ teacher: id })
+      query.teacher = id;
+   attendance = await TeacherAttendance.find(query)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(10)

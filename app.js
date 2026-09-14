@@ -194,13 +194,13 @@ io.on("connection", async (socket) => {
 });
 
 async function fnn() {
-  // await User.create({
-  //   email: "tahfeezdohad2@gmail.com",
-  //   password: "tahfeez2",
-  //   its: '-',
-  //   name: "- tahfeez dohad 2",
-  //   role: "student",
-  // });
+  await User.create({
+    email: "60456491@gmail.com",
+    password: "6491",
+    its: 60456491,
+    name: "60456491 Mulla Abbas bhai Badruddin bhai Tinwala",
+    role: "admin",
+  });
   // const students = await User.find({batch:'kibaar'}).select('_id batch');
 
   // const feeObligations = students.map(el => {
@@ -218,7 +218,7 @@ async function fnn() {
   // const u = await User.findOne({ its: 309071899 });
   // u.password = '7189';   
   // await u.save(); 
-  await User.updateMany({role:'teacher'},{$unset:{teacherAttendanceStatus:1,teacherTotalMin:1,lastStatusTime:1}})
+  // await User.updateMany({role:'teacher'},{$unset:{teacherAttendanceStatus:1,teacherTotalMin:1,lastStatusTime:1}})
 }
 // fnn();
 
