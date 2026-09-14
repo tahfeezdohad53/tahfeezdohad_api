@@ -60,7 +60,7 @@ export const handleCheckOut = catchAsync(async (req, res, next) => {
 
 export const handleManualCheckout = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
-  const {checkOutDate,attendanceId,teacherId} = req.body;
+  const {checkOutDate,attendanceId,teacherId,type} = req.body;
   // return console.log(checkoutHour,checkoutMinute);
   
 
@@ -73,21 +73,47 @@ export const handleManualCheckout = catchAsync(async (req, res, next) => {
   // if(hour > 12 && hour < 15) return res.status(400).json({ok:false});
 
   // if((hour === 12 && min > 35) || (hour === 18 && min > 35)) return res.status(400).json({ok:false});
-  const latestAttendance = await TeacherAttendance.findById(attendanceId).select('checkedIn').lean();
-  const diff = differenceInMinutes(checkOutDate, new Date(latestAttendance.checkedIn));
+  const latestAttendance = await TeacherAttendance.findById(attendanceId).select('checkedIn checkedOut').lean();
+  let diff;
+console.log(type)
+  if(type === 'checkOut') {
+    diff = differenceInMinutes(checkOutDate, new Date(latestAttendance.checkedIn));
+  }
+  if(type === 'checkIn') {
+    diff = differenceInMinutes(new Date(latestAttendance.checkedOut),checkOutDate);
+  }
   // return console.log(console.log(diff));
-  await TeacherAttendance.findByIdAndUpdate(attendanceId,{checkedOut:checkOutDate,totalMin:Number(diff)})
+ if(type === 'checkOut'){
+   await TeacherAttendance.findByIdAndUpdate(attendanceId, {
+     checkedOut: checkOutDate,
+     totalMin: Number(diff),
+   });
 
+   // latestAttendance.checkedOut = date;
+   // latestAttendance.totalMin = Number(diff);
+
+   // await latestAttendance.save();
+   await User.findByIdAndUpdate(teacherId, {
+     teacherAttendanceStatus: "checkedOut",
+     lastStatusTime: checkOutDate,
+     $inc: { teacherTotalMin: Number(diff) },
+   });
+ }
+
+ if(type === 'checkIn'){
+  await TeacherAttendance.findByIdAndUpdate(attendanceId, {
+    checkedIn: checkOutDate,
+    totalMin: Number(diff),
+  });
 
   // latestAttendance.checkedOut = date;
   // latestAttendance.totalMin = Number(diff);
 
   // await latestAttendance.save();
   await User.findByIdAndUpdate(teacherId, {
-    teacherAttendanceStatus: "checkedOut",
-    lastStatusTime: checkOutDate,
     $inc: { teacherTotalMin: Number(diff) },
   });
+ }
 
   res.status(200).json({ ok: true });
 });
