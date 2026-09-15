@@ -12,9 +12,10 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     const {id} = req.user;
     const {studentId,juz,page,tambeeh,talqeen,questions,from,to,makharij,remarks,classMode,classType} = req.body;
 
-    const totalTalqeen = Math.round(tambeeh / 2) + talqeen;
-    const hifzMarks = (3 * questions - totalTalqeen) + 35;
-    console.log(hifzMarks)
+    const totalTalqeen = Math.round(Number(tambeeh) / 2) + Number(talqeen);
+    console.log('total talqeen: ',totalTalqeen);
+    const hifzMarks = ((3 * Number(questions) + 2) - totalTalqeen) + 35;
+    console.log('hifz marks: ',hifzMarks);
     let hifzGrade;
     if (hifzMarks > 85) hifzGrade = "A+";
     if (hifzMarks > 75 && hifzMarks <= 85) hifzGrade = "A";
