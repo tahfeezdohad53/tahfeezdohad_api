@@ -11,7 +11,7 @@ import User from "./models/user.js";
 import Obligation from "./models/obligation.js";
 import authRoutes from "./routes/auth.js";
 import studentRoutes from "./routes/student.js";
-import obligationRoutes from "./routes/obligation.js";
+import hubRoutes from "./routes/hub.js";
 import recordingRoutes from "./routes/recording.js";
 import teacherRoutes from "./routes/teacher.js";
 import userRoutes from "./routes/user.js";
@@ -195,10 +195,10 @@ io.on("connection", async (socket) => {
 
 async function fnn() {
   await User.create({
-    email: "60456491@gmail.com",
-    password: "6491",
-    its: 60456491,
-    name: "60456491 Mulla Abbas bhai Badruddin bhai Tinwala",
+    email: "tahfeezdohadadmin1@gmail.com",
+    password: "admin5253@",
+    its: 11111111,
+    name: "- Tahfeez dohad admin 1",
     role: "admin",
   });
   // const students = await User.find({batch:'kibaar'}).select('_id batch');
@@ -219,6 +219,13 @@ async function fnn() {
   // u.password = '7189';   
   // await u.save(); 
   // await User.updateMany({role:'teacher'},{$unset:{teacherAttendanceStatus:1,teacherTotalMin:1,lastStatusTime:1}})
+
+  // try{
+  //   await User.updateMany({role:'student'},{$rename:{allocatedFee:'allocatedHub'}});
+  //   console.log('done');
+  // }catch(err){
+  //   console.log(err);
+  // }
 }
 // fnn();
 
@@ -649,6 +656,22 @@ nodeCron.schedule("0 19 * * *", async () => {
   { timezone: "Asia/Kolkata" },
 );
 
+nodeCron.schedule("0 0 1 1,4,7,10 *", async () => {
+  const students = await User.find({name:{$not:{$regex:'tahfeez',$options:'i'}}}).select('_id batch allocatedHub');
+  const obligations = students.map(el => {
+    return {
+      student:el._id,
+      batch:el.batch,
+      allocatedFee:4000,
+      term:3,
+      year:2026,
+    }
+  })
+  await Obligation.insertMany(obligations);
+
+  
+},{timezone:'Asia/Kolkata'});
+
 app.get("/student/getAllStudentsAndTeachers", protectRoute, fetchData);
 app.use("/auth", authRoutes);
 app.use("/student", studentRoutes);
@@ -660,7 +683,7 @@ app.use("/gurfah", gurfahRoutes);
 app.use("/leave", leaveRoutes);
 app.use("/message", messageRoutes);
 app.use("/report", reportRoutes);
-app.use("/obligation", obligationRoutes);
+app.use("/hub", hubRoutes);
 app.use("/teacherAttendance", teacherAttendanceRoutes);
 app.use("/alive", aliveRoutes);
 

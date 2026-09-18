@@ -84,19 +84,17 @@ console.log(type)
   }
   // return console.log(console.log(diff));
  if(type === 'checkOut'){
-   await TeacherAttendance.findByIdAndUpdate(attendanceId, {
-     checkedOut: checkOutDate,
-     totalMin: Number(diff),
-   });
+   const attendance = await TeacherAttendance.findById(attendanceId);
+    const isCheckedOut = attendance.checkedOut;
 
-   // latestAttendance.checkedOut = date;
-   // latestAttendance.totalMin = Number(diff);
+   attendance.checkedOut = checkOutDate;
+   attendance.totalMin = Number(diff);
 
    // await latestAttendance.save();
    await User.findByIdAndUpdate(teacherId, {
      teacherAttendanceStatus: "checkedOut",
      lastStatusTime: checkOutDate,
-     $inc: { teacherTotalMin: Number(diff) },
+     $inc: { teacherTotalMin: isCheckedOut ? 0 : Number(diff) },
    });
  }
 

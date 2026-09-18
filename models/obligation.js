@@ -11,7 +11,7 @@ const schema = new mongoose.Schema(
         type:String,
         required:true,
     },
-    allocatedFee:{
+    allocatedHub:{
         type:Number,
         required:true,
     },

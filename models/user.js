@@ -52,7 +52,7 @@ const schema = new mongoose.Schema({
         type:Boolean,
         default:true,
     },
-    fees:Number,
+    allocatedHub:Number,
     teacher:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
@@ -77,8 +77,13 @@ const schema = new mongoose.Schema({
     }
 },{timestamps:true});
 
-schema.pre('save',async function(next){
+schema.pre('save',async function(){
     // let NameOfTeacher;
+    if(!this.isModified('password')){
+        console.log('password not modified!');
+         return;
+    }
+    console.log('pass modified');
     const hashedPass = await hash(this.password,10);
     this.password = hashedPass;
 })

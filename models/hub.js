@@ -25,8 +25,6 @@ const schema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// schema.index({student:1,term:1,year:1},{unique:true})
-schema.removeIndex({student:1,term:1,year:1});
-const model = mongoose.model("Fee", schema);
+const model = mongoose.model("Hub", schema);
 
 export default model;

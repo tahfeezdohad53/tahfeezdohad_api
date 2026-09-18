@@ -33,8 +33,12 @@ export const handleGetAccounts = catchAsync(async (req, res, next) => {
     return res.status(200).json({accounts,totalRes});
   }
   if(role === 'student'){
-    const accounts = await User.find({role:'student',batch}).skip(skip).limit(10).select('_id name its role batch').lean();
-    const totalRes = await User.countDocuments({ role: "student",batch });
+    const accounts = await User.find({role:'student',batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(10).select('_id name its role batch allocatedHub contactEmail').lean();
+    const totalRes = await User.countDocuments({
+      role: "student",
+      batch,
+      name: { $not: { $regex: "tahfeez", $options: "i" } },
+    });
 
     return res.status(200).json({accounts,totalRes});
   }

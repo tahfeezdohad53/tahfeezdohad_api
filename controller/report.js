@@ -21,6 +21,7 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     if (hifzMarks > 75 && hifzMarks <= 85) hifzGrade = "A";
     if (hifzMarks > 65 && hifzMarks <= 75) hifzGrade = "B+";
     if (hifzMarks > 60 && hifzMarks <= 65) hifzGrade = "B";
+    if (hifzMarks < 60) hifzGrade = "D";
 
     const noOfMakharij = makharij.trim().split(' ').length;
 

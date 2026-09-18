@@ -11,6 +11,8 @@ import {
   handleGetMaqaratStudents,
   handleGetStudentsExcel,
   handleMarkAbsent,
+  handleUpdateStudentsBatch,
+  handleUpdateStudentsBulk,
 } from "../controller/student.js";
 import { uploadImage } from '../libs/multer.js';
 
@@ -25,6 +27,8 @@ router.patch('/assignProxy',protectRoute,handleAssignProxy)
 router.get('/getStudents',protectRoute,handleGetStudents)
 router.get('/getMaqaratStudents',protectRoute,handleGetMaqaratStudents)
 router.get('/excel',protectRoute,handleGetStudentsExcel);
+router.patch('/update/bulk',protectRoute,handleUpdateStudentsBulk);
+router.patch('/update/:studentId',protectRoute,handleUpdateStudent);
 // router.get('/getAllStudentsAndTeachers',protectRoute,handleGetAllStudentNames)
 
 export default router;
