@@ -66,7 +66,7 @@ export const handleManualCheckout = catchAsync(async (req, res, next) => {
 
     if (role !== "admin") return res.status(401).json({ ok: false });
 
-
+    console.log(checkOutDate);
   
   
 
@@ -76,9 +76,7 @@ export const handleManualCheckout = catchAsync(async (req, res, next) => {
   const latestAttendance = await TeacherAttendance.findById(attendanceId).select('checkedIn checkedOut').lean();
   let diff;
 console.log(type)
-  if(type === 'checkOut') {
-    diff = differenceInMinutes(checkOutDate, new Date(latestAttendance.checkedIn));
-  }
+  
   if(type === 'checkIn') {
     diff = differenceInMinutes(new Date(latestAttendance.checkedOut),checkOutDate);
   }
@@ -86,11 +84,20 @@ console.log(type)
  if(type === 'checkOut'){
    const attendance = await TeacherAttendance.findById(attendanceId);
     const isCheckedOut = attendance.checkedOut;
-
-   attendance.checkedOut = checkOutDate;
+    const checkedInDate = new Date(attendance.checkedIn).getDate();
+    console.log(checkedInDate);
+    const checkedInMonth = new Date(attendance.checkedIn).getMonth();
+   const formattedDate = new Date(checkOutDate);
+   formattedDate.setDate(checkedInDate);
+   formattedDate.setMonth(checkedInMonth);
+   if(type === 'checkOut') {
+    diff = differenceInMinutes(formattedDate, new Date(latestAttendance.checkedIn));
+  }
+   attendance.checkedOut = formattedDate;
+   console.log(formattedDate);
    attendance.totalMin = Number(diff);
 
-   // await latestAttendance.save();
+   await attendance.save();
    await User.findByIdAndUpdate(teacherId, {
      teacherAttendanceStatus: "checkedOut",
      lastStatusTime: checkOutDate,
