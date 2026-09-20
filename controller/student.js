@@ -60,17 +60,25 @@ export const handleGetStudentsExcel = catchAsync(async (req, res, next) => {
       key: "email",
       width: 25,
     },
+    {
+      header: "Batch",
+      key: "batch",
+      width: 25,
+    },
   ];
 
-  const students = await User.find({ role: "student" })
-    .select("name its email")
+  const students = await User.find({ role: "student",name:{$not:{$regex:'tahfeez',$options:'i'}} })
+    .select("name its email batch")
     .lean();
 
-  for (const student of students) {
+    const sortedStudents = students.sort((a,b) => a.name.split(' ')[1].localeCompare(b.name.split(' ')[1]))
+
+  for (const student of sortedStudents) {
     worksheet.addRow({
       its: student.its,
       name: formatName(student.name),
       email: student.email,
+      batch:student.batch
     });
   }
 

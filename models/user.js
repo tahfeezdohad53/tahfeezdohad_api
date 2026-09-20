@@ -67,6 +67,9 @@ const schema = new mongoose.Schema({
         default:'student',
         enum:['student','teacher','admin']
     },
+    isSubAdmin:{
+        type:Boolean,
+    },
     status:{
         type:String,
         enum:['online','offline'],

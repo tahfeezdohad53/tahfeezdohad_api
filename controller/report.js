@@ -22,6 +22,7 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     if (hifzMarks > 65 && hifzMarks <= 75) hifzGrade = "B+";
     if (hifzMarks > 60 && hifzMarks <= 65) hifzGrade = "B";
     if (hifzMarks < 60) hifzGrade = "D";
+    console.log("hifz grade: ", hifzGrade);
 
     const noOfMakharij = makharij.trim().split(' ').length;
 
@@ -31,7 +32,7 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     if(noOfMakharij === 3) makharijGrade = "B";
     if(noOfMakharij > 3) makharijGrade = "D";
 
-    await Report.create({...req.body,teacher:id,makharijGrade,hifzGrade});
+    await Report.create({ ...req.body, teacher: id, makharijGrade, hifzGrade });
     res.status(201).json({ok:true});
 });
 

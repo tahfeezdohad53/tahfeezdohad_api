@@ -20,6 +20,9 @@ const schema = new mongoose.Schema(
     },
     date:{
         type:Date,
+    },
+    paidAt:{
+      type:Date,
     }
   },
   { timestamps: true },

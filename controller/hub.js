@@ -8,6 +8,8 @@ import { format } from "date-fns";
 import { formatName } from "./leave.js";
 import { formatCurrency } from "../helpers/formatCurrency.js";
 import numberToWords from "number-to-words";
+import ExcelJs from 'exceljs';
+import { sendExcel } from "../libs/xlsx.js";
 
 export const handleGetObligations = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
@@ -85,7 +87,7 @@ export const handleGetObligationStatistics = catchAsync(
   async (req, res, next) => {
     const { id, role } = req.user;
 
-    const [totalStudents, obligationPaidThisMonth, obligationPendingThisMonth] =
+    const [totalStudents, hubPaidThisMonth, hubPendingThisMonth,partialHubThisMonth] =
       await Promise.all([
         User.countDocuments({
           $and: [
@@ -106,53 +108,57 @@ export const handleGetObligationStatistics = catchAsync(
         }),
 
         Obligation.countDocuments({
-          $or: [{ status: "pending" }, { status: "partial" }],
+          status:'pending',
+        }),
+        Obligation.countDocuments({
+          status:'partial',
         }),
       ]);
 
     const currentMonth = new Date().getMonth() + 1;
     const term = getTerm(currentMonth);
 
-    const totalObligation = await Obligation.aggregate([
-      {
-        $match: {
-          term: term,
-        },
-      },
-      {
-        $group: {
-          _id: "status",
+    // const totalObligation = await Obligation.aggregate([
+    //   {
+    //     $match: {
+    //       term: term,
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "status",
 
-          paid: {
-            $sum: {
-              $cond: [
-                {
-                  $or: [
-                    { $eq: ["$status", "paid"] },
-                    { $eq: ["$status", "partial"] },
-                  ],
-                },
-                "$amountPaid",
-                0,
-              ],
-            },
-          },
+    //       paid: {
+    //         $sum: {
+    //           $cond: [
+    //             {
+    //               $or: [
+    //                 { $eq: ["$status", "paid"] },
+    //                 { $eq: ["$status", "partial"] },
+    //               ],
+    //             },
+    //             "$amountPaid",
+    //             0,
+    //           ],
+    //         },
+    //       },
 
-          pending: {
-            $sum: {
-              $cond: [{ $eq: ["$status", "pending"] }, "$allocatedHub", 0],
-            },
-          },
-        },
-      },
-    ]);
+    //       pending: {
+    //         $sum: {
+    //           $cond: [{ $eq: ["$status", "pending"] }, "$allocatedHub", 0],
+    //         },
+    //       },
+    //     },
+    //   },
+    // ]);
 
     res.status(200).json({
       ok: true,
       totalStudents,
-      obligationPaidThisMonth,
-      obligationPendingThisMonth,
-      totalObligation,
+      hubPaidThisMonth,
+      hubPendingThisMonth,
+      partialHubThisMonth,
+      // totalObligation,
     });
   },
 );
@@ -160,7 +166,7 @@ export const handleGetObligationStatistics = catchAsync(
 export const handleUpdateObligation = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
 
-  const { amount, status, id: obligationId, transactionId, dates,batch,studentId,allocatedHub } = req.body;
+  const { amount, status, id: obligationId, transactionId, dates,batch,studentId,allocatedHub,paidAt } = req.body;
 
 
   if(batch && allocatedHub){
@@ -197,6 +203,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
         transaction_id: transactionId,
         amountPaid: amount / dates.length,
         date: new Date(el),
+        paidAt:new Date(paidAt),
       });
     }),
   );
@@ -1081,5 +1088,118 @@ export const handleUpdateObligationData = catchAsync(async (req, res, next) => {
   await Obligation.findByIdAndUpdate(obligationId,update);
   await User.findByIdAndUpdate(studentId,update);
   res.status(200).json({ok:true});
+
+});
+
+
+export const handleGetReportsExcel = catchAsync(async (req, res, next) => {
+  const { id, role } = req.user;
+  const { page, from, to, its, batch } = req.query;
+  if (role !== "admin") return res.status(401).json({ ok: false });
+
+  const skip = (Number(page) - 1) * 10;
+  let query = {};
+
+  let hubReports;
+  let hubReportsCount;
+  if (batch && batch !== "all") query.batch = batch;
+
+  if (its) {
+    const user = await User.findOne({ its }).select("_id").lean();
+    query.student = user._id;
+    hubReports = await Hub.find(query).populate("student");
+    // hubReportsCount = await Hub.countDocuments(query);
+  }
+
+  if (from && !to) {
+    const date = new Date(from);
+    date.setHours(0, 0, 0, 0);
+
+    query.date = { $gte: date };
+  }
+  if (from && to) {
+    const fromDate = new Date(from);
+    fromDate.setHours(0, 0, 0, 0);
+
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999);
+
+    query.$and = [{ date: { $gte: fromDate } }, { date: { $lte: toDate } }];
+  }
+
+  hubReports = await Hub.find(query)
+    .populate("student")
+    .sort({ createdAt: -1 })
+    
+  
+
+    const workbook = new ExcelJs.Workbook();
+
+    const worksheet = workbook.addWorksheet('reports');
+
+    worksheet.columns = [
+      {
+        key:'name',
+        header:'Name',
+        width:50,
+      },
+      {
+        key:'its',
+        header:'ITS',
+        width:15,
+      },
+      {
+        key:'amount',
+        header:'Amount',
+        width:15,
+      },
+      {
+        key:'date',
+        header:'Date',
+        width:15,
+      },
+      {
+        key:'paidAt',
+        header:'Paid_At',
+        width:15,
+      },
+      {
+        key:'batch',
+        header:'Batch',
+        width:25,
+      },
+    ];
+
+    hubReports.forEach(el => {
+      worksheet.addRow({
+        name:el.student.name,
+        its:el.student.its,
+        amount:el.amountPaid,
+        date:el.date,
+        batch:el.batch,
+        paidAt:el.paidAt || '-',
+      })
+    })
+
+    worksheet.getColumn(1).font = {
+      bold:true
+    }
+    for(let i=2;i<5;i++){
+      worksheet.getColumn(i).alignment = {
+        horizontal:'left'
+      }
+    }
+
+    // await sendExcel({filename:'hubReports',res,workbook});
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+
+    res.setHeader("Content-Disposition", "attachment; filename=hub_reports");
+
+    await workbook.xlsx.write(res);
+
+    res.end();
 
 });

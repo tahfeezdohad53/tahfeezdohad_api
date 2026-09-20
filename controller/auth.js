@@ -90,7 +90,8 @@ export const handlePasswordSignin = catchAsync(async (req, res, next) => {
 export const protectRoute = catchAsync(async (req, res, next) => {
   const {jwt} = req.cookies;
   // const jwt = req.headers?.authorization?.split(" ")[1];
-  if(!jwt) return res.status(400).json({ok:false,message:'please login first'})
+  
+  if(!jwt) return res.status(401).json({ok:false,message:'please login first'})
   try{
     const user = jsonwebtoken.verify(
     jwt,
@@ -102,35 +103,11 @@ export const protectRoute = catchAsync(async (req, res, next) => {
     req.user = {...user,id:user._id};
     return next();
   }
-  else res.status(400).json({ok:false,message:'account not found'});
-
-  // if (role === "student") {
-  //   const student = await Student.findById(id);
-  //   if(student) {
-  //       req.user = {id:student._id,role:student.role}
-  //       return next();
-  //   }
-  //   else res.status(400).json({ok:false,message:'account not found'});
-  // }
-  // if (role === "teacher") {
-  //   const teacher = await Teacher.findById(id);
-  //   if (teacher) {
-  //       req.user = {id:teacher._id,role:teacher.role}
-  //       return next();
-  //   }
-  //   else res.status(400).json({ok:false,message:'account not found'});
-  // }
-  // if (role === "admin") {
-  //   const admin = await Admin.findById(id);
-  //   if (admin)  {
-  //       req.user = {id:admin._id,role:admin.role}
-  //       return next();
-  //   }
-  //   else res.status(400).json({ok:false,message:'account not found'});
-  // }
+  else res.status(401).json({ok:false,message:'account not found'});
 
   }catch(err){
-    res.status(400).json({message:'you are not authenticated'});
+    console.log(err);
+    res.status(401).json({message:'you are not authenticated'});
   }
 });
 

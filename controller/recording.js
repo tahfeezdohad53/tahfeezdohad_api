@@ -54,7 +54,7 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
   if (role === "student")
     return res
-      .status(200)
+      .status(401)
       .json({ ok: false, message: "you are not allowed for this action" });
 
   const recording = await Recording.create({
