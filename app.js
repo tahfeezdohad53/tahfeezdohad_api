@@ -192,27 +192,29 @@ io.on("connection", async (socket) => {
     }
   });
 });
+// const its7000 = [30919558];
 
 async function fnn() {
-  await User.create({
-    email: "tahfeezdohadadmin1@gmail.com",
-    password: "admin5253@",
-    its: 11111111,
-    name: "- Tahfeez dohad admin 1",
-    role: "admin",
-  });
-  // const students = await User.find({batch:'kibaar'}).select('_id batch');
+  // await User.create({
+  //   email: "tahfeezdohadadmin1@gmail.com",
+  //   password: "admin5253@",
+  //   its: 11111111,
+  //   name: "- Tahfeez dohad admin 1",
+  //   role: "student",
+  //   allocatedHub:5000,
+  // });
+  const students = await User.find({role:'student',name:{$not:{$regex:'tahfeez',$options:'i'}}}).select('_id batch allocatedHub');
 
-  // const feeObligations = students.map(el => {
-  //   return {
-  //     student:el._id,
-  //     batch:el.batch,
-  //     allocatedFee:4000,
-  //     term:3,
-  //     year:2026,
-  //   }
-  // })
-  // await Fee.insertMany(feeObligations);
+  const feeObligations = students.map(el => {
+    return {
+      student:el._id,
+      batch:el.batch || '?',
+      allocatedHub:el.allocatedHub || 0,
+      term:4,
+      year:2026,
+    }
+  })
+  await Obligation.insertMany(feeObligations);
   // await Fee.updateMany({},{amountPaid:0,status:'pending'});
 
   // const u = await User.findOne({ its: 309071899 });
@@ -221,11 +223,20 @@ async function fnn() {
   // await User.updateMany({role:'teacher'},{$unset:{teacherAttendanceStatus:1,teacherTotalMin:1,lastStatusTime:1}})
 
   // try{
-  //   await User.updateMany({role:'student'},{$rename:{allocatedFee:'allocatedHub'}});
+  //   await User.updateMany(
+  //     {
+  //       its: {
+  //         $in: [40183946],
+  //       },
+  //     },
+  //     { allocatedHub: 10000 },
+  //   );
   //   console.log('done');
   // }catch(err){
   //   console.log(err);
   // }
+
+  
 }
 // fnn();
 

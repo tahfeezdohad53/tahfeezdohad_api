@@ -46,7 +46,7 @@ const schema = new mongoose.Schema({
         type:String,
         // required:true,
         lowercase:true,
-        enum:['yaqoot_mardo','yaqoot_bairo','baneen','banaat','kibaar','taheri_hall']
+        enum:['yaqoot_mardo','yaqoot_bairo','baneen','banaat','kibaar','taheri_hall','sigaar']
     },
     isActive:{
         type:Boolean,

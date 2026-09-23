@@ -47,11 +47,10 @@ export const handleGenerateSignedUrl = catchAsync(async (req, res) => {
   });
 });
 
-
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
-  const { isOnline, url, duration,slot } = req.body;
+  const { isOnline, url, duration, slot, remarks } = req.body;
   const { studentId } = req.params;
-  const { id, role } = req.user;
+  const { id, role, name } = req.user;
   if (role === "student")
     return res
       .status(401)
@@ -64,13 +63,16 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
     audio: url,
     duration: Math.ceil(duration),
     classMode: isOnline ? "online" : "in-person",
-    classType:slot,
+    classType: slot,
   });
 
-  const latestAttendance = await TeacherAttendance.findOne({teacher:id}).sort({checkedIn:-1});
+  const latestAttendance = await TeacherAttendance.findOne({
+    teacher: id,
+  }).sort({ checkedIn: -1 });
 
-  if(!latestAttendance?.checkedOut){
-    if(latestAttendance.recordingMin) latestAttendance.recordingMin += Math.ceil(duration);
+  if (!latestAttendance?.checkedOut) {
+    if (latestAttendance.recordingMin)
+      latestAttendance.recordingMin += Math.ceil(duration);
     else latestAttendance.recordingMin = Math.ceil(duration);
     await latestAttendance.save();
   }
@@ -78,8 +80,178 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(studentId, {
     classStatus: "recorded",
     $inc: { classDuration: Math.ceil(duration) },
-    $push:{slots:slot},
+    $push: { slots: slot },
+    remarks: remarks || "",
   });
+
+  if (remarks) {
+    const student = await User.findById(studentId);
+    const date = format(new Date(), "dd MMM, yyyy");
+    const studentName = formatName(student.name);
+    const teacherName = formatName(name);
+    if (student.contactEmail)
+      await resend.emails.send({
+        from: "Tahfeez Dohad <noreply@tahfeezdohad.org>",
+        to: student.contactEmail,
+        // to: "huzefaratlam63@gmail.com",
+        subject: `Class Remarks for ${studentName} – ${date}`,
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body style="
+  margin: 0;
+  padding: 0;
+  background-color: #f8f6f2;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #222;
+">
+  <div style="
+    max-width: 600px;
+    margin: 40px auto;
+    background: #ffffff;
+    border: 1px solid #eadfce;
+    border-radius: 14px;
+    overflow: hidden;
+  ">
+
+    <!-- Header -->
+    <div style="
+      background: #a85b00;
+      padding: 24px;
+      text-align: center;
+    ">
+      <h1 style="
+        margin: 0;
+        color: #ffffff;
+        font-size: 22px;
+      ">
+        Tahfeez Dohad
+      </h1>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 32px 28px;">
+
+      <h2 style="
+        margin: 0 0 8px;
+        font-size: 20px;
+        color: #222;
+      ">
+        Class Remarks
+      </h2>
+
+      <p style="
+        margin: 0 0 24px;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.6;
+      ">
+        We would like to share the following remarks regarding
+        <strong>${studentName}</strong>'s class.
+      </p>
+
+      <!-- Details -->
+      <div style="
+        background: #faf8f4;
+        border: 1px solid #eee3d3;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 20px;
+      ">
+
+        <p style="margin: 0 0 12px; font-size: 14px;">
+          <strong>Student:</strong><br />
+          ${studentName}
+        </p>
+
+        <p style="margin: 0 0 12px; font-size: 14px;">
+          <strong>Teacher:</strong><br />
+          ${teacherName}
+        </p>
+
+        <p style="margin: 0; font-size: 14px;">
+          <strong>Date:</strong><br />
+          ${date}
+        </p>
+
+      </div>
+
+      <!-- Remarks -->
+      <div style="
+        border-left: 4px solid #a85b00;
+        background: #fffaf3;
+        padding: 16px 18px;
+        border-radius: 6px;
+      ">
+        <p style="
+          margin: 0 0 8px;
+          font-size: 14px;
+          font-weight: bold;
+          color: #8b4b00;
+        ">
+          Remarks
+        </p>
+
+        <p style="
+          margin: 0;
+          font-size: 15px;
+          line-height: 1.7;
+          color: #333;
+        ">
+          ${remarks}
+        </p>
+      </div>
+
+      <p style="
+        margin: 28px 0 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #666;
+      ">
+        If you have any questions regarding the above remarks,
+        please feel free to contact us.
+      </p>
+
+      <p style="
+        margin: 28px 0 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #333;
+      ">
+        Regards,<br />
+        <strong>Tahfeez Dohad</strong>
+      </p>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="
+      padding: 16px 28px;
+      background: #faf8f4;
+      border-top: 1px solid #eee3d3;
+      text-align: center;
+    ">
+      <p style="
+        margin: 0;
+        font-size: 12px;
+        color: #999;
+      ">
+        This is an automated communication from Tahfeez Dohad.
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
+`,
+      });
+      await Statistics.findOneAndUpdate({},{$inc:{remarksSent:1}},{upsert:true,});
+  }
   // if (isOnline)
   //   await OnlineClass.create({
   //     student: studentId,
@@ -90,13 +262,19 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
   res.status(200).json({ ok: true });
 });
 
-
 export const handleEvaluateClassRecording = catchAsync(
   async (req, res, next) => {
     const { id, role, name } = req.user;
     const { recordingId } = req.params;
     const {
-      data: { totalTalqeen,talqeenMissed, makharijMissed, hifzGrade, makharijGrade, remarks },
+      data: {
+        totalTalqeen,
+        talqeenMissed,
+        makharijMissed,
+        hifzGrade,
+        makharijGrade,
+        remarks,
+      },
     } = req.body;
 
     if (role !== "admin")
@@ -548,7 +726,7 @@ export const handleEvaluateClassRecording = catchAsync(
 
 export const handleCheckIsUploaded = catchAsync(async (req, res, next) => {
   const { url } = req.query;
-  console.log('finding rec');
+  console.log("finding rec");
   console.log(url);
   if (!url) {
     return res.status(400).json({
@@ -568,13 +746,13 @@ export const handleCheckIsUploaded = catchAsync(async (req, res, next) => {
         Key: key,
       }),
     );
-    console.log('finded')
+    console.log("finded");
     return res.status(200).json({
       uploaded: true,
     });
   } catch (error) {
     if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
-      console.log('failed to find')
+      console.log("failed to find");
       return res.status(200).json({
         uploaded: false,
       });
@@ -725,15 +903,15 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
       date: format(recording.createdAt, "MMM d, yyyy"),
       time: format(recording.createdAt, "HH:mm"),
       its: recording.studentName.split(" ")[0],
-      teacher_its:recording.teacherName.split(' ')[0],
+      teacher_its: recording.teacherName.split(" ")[0],
       student_name: formatName(recording.studentName),
       teacher_name: formatName(recording.teacherName),
-      class_type:recording?.classType || '-',
+      class_type: recording?.classType || "-",
       duration: recording.duration,
       mode: recording.classMode,
-      evaluation_status:recording.evaluationStatus,
-      hifz_grade:recording?.hifzGrade || '-',
-      makharij_grade:recording?.makharijGrade || '-'
+      evaluation_status: recording.evaluationStatus,
+      hifz_grade: recording?.hifzGrade || "-",
+      makharij_grade: recording?.makharijGrade || "-",
     });
   }
 
@@ -752,7 +930,6 @@ export const handleGetRecordingsExcel = catchAsync(async (req, res, next) => {
 
   res.end();
 });
-export const handleGetLast15DaysRecDuration = catchAsync(async (req, res, next) => {
-      
-});
-
+export const handleGetLast15DaysRecDuration = catchAsync(
+  async (req, res, next) => {},
+);

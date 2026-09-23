@@ -68,7 +68,7 @@ export const handleGetObligations = catchAsync(async (req, res, next) => {
     query.batch = batch;
   }
 
-  query.term = getTerm(new Date().getMonth() + 1);
+  // query.term = getTerm(new Date().getMonth() + 1);
 
   const [obligations, count] = await Promise.all([
     Obligation.find(query).populate("student").skip(skip).limit(10),

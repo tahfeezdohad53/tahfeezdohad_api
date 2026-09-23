@@ -6,6 +6,7 @@ const schema = new mongoose.Schema({
     success:Number,
     fail:Number,
     saveFailed:Number,
+    remarksSent:Number,
 },{timestamps:true});
 
 const model = mongoose.model('Statistics',schema);
