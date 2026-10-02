@@ -10,6 +10,15 @@ const schema = new mongoose.Schema({
     },
     contactEmail:{
         type:String,
+        lowercase:true,
+        trim:true,
+    },
+    address:{
+        type:String,
+        lowercase:true,
+    },
+    contactNumber:{
+        type:Number,
     },
     password:String,
     its:{

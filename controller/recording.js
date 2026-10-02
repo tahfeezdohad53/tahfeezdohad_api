@@ -90,7 +90,8 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
     const studentName = formatName(student.name);
     const teacherName = formatName(name);
     if (student.contactEmail)
-      await resend.emails.send({
+      try{
+    await resend.emails.send({
         from: "Tahfeez Dohad <noreply@tahfeezdohad.org>",
         to: student.contactEmail,
         // to: "huzefaratlam63@gmail.com",
@@ -250,6 +251,10 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
 </html>
 `,
       });
+    }catch(err){
+      console.log(err);
+      console.log('failed to send remarks email');
+    }
       await Statistics.findOneAndUpdate({},{$inc:{remarksSent:1}},{upsert:true,});
   }
   // if (isOnline)

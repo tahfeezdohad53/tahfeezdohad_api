@@ -31,6 +31,7 @@ import nodeCron from "node-cron";
 import resend from "./libs/resend.js";
 import { formatName } from "./controller/leave.js";
 import { format } from "date-fns";
+import { contactInfo } from "./utils/info.js";
 configDotenv();
 const app = express();
 const server = http.createServer(app);
@@ -237,6 +238,19 @@ async function fnn() {
   // }
 
   
+
+  // let operations = [];
+
+  // contactInfo.forEach(el => {
+  //   const obj = {updateOne:{
+  //     filter:{its:el.its},
+  //     update:{$set:{contactEmail:el.email,contactNumber:el.phone,address:el.address}},
+  //   }}
+  //   operations.push(obj);
+  // })
+
+  // console.log(operations.length);
+  // await User.bulkWrite(operations);
 }
 // fnn();
 
