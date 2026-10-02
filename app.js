@@ -322,7 +322,10 @@ app.get("/aggregate", async (req, res) => {
 nodeCron.schedule('0 0 * * *',async () => {
   try{
     await User.updateMany({role:'student'},{classDuration:0,classStatus:'pending',slots:[]});
-    await User.updateMany({role:'teacher'},{teacherTotalMin:0});
+    await User.updateMany({$or:[
+      {role:'teacher'},
+      {role:'admin'},
+    ]},{teacherTotalMin:0});
   }catch(err){
     console.log(err);
   }
