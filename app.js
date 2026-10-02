@@ -203,22 +203,22 @@ async function fnn() {
   //   role: "student",
   //   allocatedHub:5000,
   // });
-  const students = await User.find({role:'student',name:{$not:{$regex:'tahfeez',$options:'i'}}}).select('_id batch allocatedHub');
+  // const students = await User.find({role:'student',name:{$not:{$regex:'tahfeez',$options:'i'}}}).select('_id batch allocatedHub');
 
-  const feeObligations = students.map(el => {
-    return {
-      student:el._id,
-      batch:el.batch || '?',
-      allocatedHub:el.allocatedHub || 0,
-      term:4,
-      year:2026,
-    }
-  })
-  await Obligation.insertMany(feeObligations);
+  // const feeObligations = students.map(el => {
+  //   return {
+  //     student:el._id,
+  //     batch:el.batch || '?',
+  //     allocatedHub:el.allocatedHub || 0,
+  //     term:4,
+  //     year:2026,
+  //   }
+  // })
+  // await Obligation.insertMany(feeObligations);
   // await Fee.updateMany({},{amountPaid:0,status:'pending'});
 
-  // const u = await User.findOne({ its: 309071899 });
-  // u.password = '7189';   
+  // const u = await User.findOne({ its: 30911375 });
+  // u.password = '1375';   
   // await u.save(); 
   // await User.updateMany({role:'teacher'},{$unset:{teacherAttendanceStatus:1,teacherTotalMin:1,lastStatusTime:1}})
 
