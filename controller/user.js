@@ -18,8 +18,8 @@ export const handleUpdatePassword = catchAsync(async (req, res, next) => {
 
 export const handleAddContactEmail = catchAsync(async (req, res, next) => {
   const { id } = req.user;
-  const { contactEmail } = req.body;
-  await User.findByIdAndUpdate(id, {contactEmail});
+  const { contactEmail,contactNumber } = req.body;
+  await User.findByIdAndUpdate(id, {contactEmail,contactNumber});
   res.status(200).json({ ok: true, message: "contact email added updated" });
 });
 export const handleGetAccounts = catchAsync(async (req, res, next) => {
