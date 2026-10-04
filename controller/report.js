@@ -244,8 +244,10 @@ export const handleCreateReport = catchAsync(async (req, res) => {
 
 export const handleGetReports = catchAsync(async (req, res) => {
     const {id} = req.user;
-    
-    const reports = await Report.find().sort({createdAt:-1}).populate('teacher student').lean();
+    const {student} = req.query;
+    const query = {};
+    if(student) query.student = student;
+    const reports = (await Report.find(query).sort({createdAt:-1}).populate('teacher student').limit(50).lean());
 
     res.status(200).json({ok:true, reports});
 });
