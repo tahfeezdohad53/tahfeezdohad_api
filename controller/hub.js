@@ -596,7 +596,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
                         line-height:15px;
                       "
                     >
-                      ${format(new Date(), "dd MMM yyyy")}
+                      ${format(paidAt, "dd MMM yyyy")}
                     </div>
 
                   </td>
