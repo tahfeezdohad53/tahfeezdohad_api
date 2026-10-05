@@ -8,6 +8,7 @@ import multer from "multer";
 import { Readable } from "stream";
 import { v2 as cloudinary } from "cloudinary";
 import User from "./models/user.js";
+import Report from "./models/report.js";
 import Obligation from "./models/obligation.js";
 import authRoutes from "./routes/auth.js";
 import studentRoutes from "./routes/student.js";
@@ -38,7 +39,7 @@ const server = http.createServer(app);
 const allowedOrigins = process.env.URL.split(",");
 const io = new Server(server, {
   cors: {
-    origin:allowedOrigins,
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -86,7 +87,6 @@ io.use((socket, next) => {
 });
 
 io.on("connection", async (socket) => {
-
   const currentUser = await User.findByIdAndUpdate(socket.user._id, {
     status: "online",
   });
@@ -100,8 +100,7 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("incoming-call", ({ to, from, offer }) => {
-
-    if (user.has(to)) { 
+    if (user.has(to)) {
       socket
         .to(user.get(to).socketId)
         .emit("incoming-call", { caller: from, offer });
@@ -144,17 +143,20 @@ io.on("connection", async (socket) => {
     }
   });
   socket.on("broadcast", ({ message }) => {
-    io.emit('broadcast',{message});
+    io.emit("broadcast", { message });
   });
-  socket.on('to-dev',({rating,suggestion}) => {
-    if(user.has('6a5b88719b8732dabd07a6f6')){
-      socket.to(user.get("6a5b88719b8732dabd07a6f6").socketId).emit('to-dev',{rating,suggestion});
+  socket.on("to-dev", ({ rating, suggestion }) => {
+    if (user.has("6a5b88719b8732dabd07a6f6")) {
+      socket
+        .to(user.get("6a5b88719b8732dabd07a6f6").socketId)
+        .emit("to-dev", { rating, suggestion });
     }
-    if(user.has('6a54f7f3dcf32777f8d23f74')){
-      socket.to(user.get("6a54f7f3dcf32777f8d23f74").socketId).emit('to-dev',{rating,suggestion});
+    if (user.has("6a54f7f3dcf32777f8d23f74")) {
+      socket
+        .to(user.get("6a54f7f3dcf32777f8d23f74").socketId)
+        .emit("to-dev", { rating, suggestion });
     }
-    
-  })
+  });
 
   socket.on(
     "message",
@@ -172,7 +174,6 @@ io.on("connection", async (socket) => {
     },
   );
   socket.on("disconnect", async (reason) => {
-
     const current = user.get(socket.user._id);
     if (!user.has(socket.user._id)) {
       socket.broadcast.emit("offline-broadcast", {
@@ -205,7 +206,6 @@ async function fnn() {
   //   allocatedHub:5000,
   // });
   // const students = await User.find({role:'student',name:{$not:{$regex:'tahfeez',$options:'i'}}}).select('_id batch allocatedHub');
-
   // const feeObligations = students.map(el => {
   //   return {
   //     student:el._id,
@@ -217,12 +217,10 @@ async function fnn() {
   // })
   // await Obligation.insertMany(feeObligations);
   // await Fee.updateMany({},{amountPaid:0,status:'pending'});
-
   // const u = await User.findOne({ its: 30911375 });
-  // u.password = '1375';   
-  // await u.save(); 
+  // u.password = '1375';
+  // await u.save();
   // await User.updateMany({role:'teacher'},{$unset:{teacherAttendanceStatus:1,teacherTotalMin:1,lastStatusTime:1}})
-
   // try{
   //   await User.updateMany(
   //     {
@@ -236,11 +234,7 @@ async function fnn() {
   // }catch(err){
   //   console.log(err);
   // }
-
-  
-
   // let operations = [];
-
   // contactInfo.forEach(el => {
   //   const obj = {updateOne:{
   //     filter:{its:el.its},
@@ -248,7 +242,6 @@ async function fnn() {
   //   }}
   //   operations.push(obj);
   // })
-
   // console.log(operations.length);
   // await User.bulkWrite(operations);
 }
@@ -313,7 +306,7 @@ app.get("/aggregate", async (req, res) => {
     {
       $project: {
         _id: 0,
-        id:1,
+        id: 1,
         totalDurationInMin: 1,
         recordingsSubmitted: 1,
         name: "$_id",
@@ -331,23 +324,32 @@ app.get("/aggregate", async (req, res) => {
     },
   ]);
   res.status(200).json({ ok: true, teachersTotalMin });
-})
+});
 
-nodeCron.schedule('0 0 * * *',async () => {
-  try{
-    await User.updateMany({role:'student'},{classDuration:0,classStatus:'pending',slots:[]});
-    await User.updateMany({$or:[
-      {role:'teacher'},
-      {role:'admin'},
-    ]},{teacherTotalMin:0});
-  }catch(err){
-    console.log(err);
-  }
-},{
-  timezone:'Asia/Kolkata'
-})
+nodeCron.schedule(
+  "0 0 * * *",
+  async () => {
+    try {
+      await User.updateMany(
+        { role: "student" },
+        { classDuration: 0, classStatus: "pending", slots: [] },
+      );
+      await User.updateMany(
+        { $or: [{ role: "teacher" }, { role: "admin" }] },
+        { teacherTotalMin: 0 },
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  {
+    timezone: "Asia/Kolkata",
+  },
+);
 
-nodeCron.schedule("0 19 * * *", async () => {
+nodeCron.schedule(
+  "0 19 * * *",
+  async () => {
     try {
       const teachersTotalMin = await Recording.aggregate([
         {
@@ -684,21 +686,512 @@ nodeCron.schedule("0 19 * * *", async () => {
   { timezone: "Asia/Kolkata" },
 );
 
-nodeCron.schedule("0 0 1 1,4,7,10 *", async () => {
-  const students = await User.find({name:{$not:{$regex:'tahfeez',$options:'i'}}}).select('_id batch allocatedHub');
-  const obligations = students.map(el => {
-    return {
-      student:el._id,
-      batch:el.batch,
-      allocatedFee:4000,
-      term:3,
-      year:2026,
-    }
-  })
-  await Obligation.insertMany(obligations);
+export function formatName2(name) {
+  if (!name) return;
+  const formattedName = name
+    .split(" ")
+    .slice(1)
+    .map((el) => el.slice(0, 1).toUpperCase() + el.slice(1))
+    .join(" ");
+  return formattedName;
+}
 
-  
+nodeCron.schedule(
+  "0 0 1 1,4,7,10 *",
+  async () => {
+    const students = await User.find({
+      name: { $not: { $regex: "tahfeez", $options: "i" } },
+    }).select("_id batch allocatedHub");
+    const obligations = students.map((el) => {
+      return {
+        student: el._id,
+        batch: el.batch,
+        allocatedFee: 4000,
+        term: 3,
+        year: 2026,
+      };
+    });
+    await Obligation.insertMany(obligations);
+  },
+  { timezone: "Asia/Kolkata" },
+);
+
+nodeCron.schedule('0 19 * * *',async () => {
+  await sendReportsEmail();
 },{timezone:'Asia/Kolkata'});
+
+
+async function sendReportsEmail() {
+  const from = new Date();
+  from.setHours(0, 0, 0, 0);
+  const to = new Date();
+  to.setHours(23, 59, 59, 999);
+
+  // const reports = await Report.find({
+  //   $and: [{ createdAt: { $gte: from } }, { createdAt: { $lte: to } }],
+  // });
+
+  const reports = await Report.aggregate([
+    // 1. Filter reports by date
+    {
+      $match: {
+        createdAt: {
+          $gte: from,
+          $lte: to,
+        },
+      },
+    },
+
+    // 2. Populate student
+    {
+      $lookup: {
+        from: "users",
+        localField: "student",
+        foreignField: "_id",
+        as: "student",
+      },
+    },
+
+    {
+      $unwind: "$student",
+    },
+
+    // 3. Group reports by teacher
+    {
+      $group: {
+        _id: "$teacher",
+
+        reports: {
+          $push: {
+            studentName: "$student.name",
+            from: "$from",
+            to: "$to",
+            hifzGrade: "$hifzGrade",
+            makharijGrade: "$makharijGrade",
+            makharij: "$makharij",
+            remarks: "$remarks",
+          },
+        },
+      },
+    },
+
+    // 4. Populate teacher
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "_id",
+        as: "teacher",
+      },
+    },
+
+    {
+      $unwind: "$teacher",
+    },
+
+    // 5. Return only what the email needs
+    {
+      $project: {
+        _id: 0,
+        teacherName: "$teacher.name",
+        reports: 1,
+      },
+    },
+  ]);
+  // console.log(reports[0].reports)
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Student Progress Report</title>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f4f4f4;
+      color: #222222;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .email-wrapper {
+      width: 100%;
+      padding: 30px 15px;
+    }
+
+    .email-container {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #dddddd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .teacher-section {
+      margin-bottom: 35px;
+    }
+
+    .teacher-name {
+      text-align: center;
+      font-size: 22px;
+      line-height: 28px;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .report-table th {
+      background-color: #f1f1f1;
+      border: 1px solid #cccccc;
+      padding: 11px 8px;
+      font-size: 13px;
+      line-height: 17px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .report-table td {
+      border: 1px solid #cccccc;
+      padding: 11px 8px;
+      font-size: 13px;
+      line-height: 18px;
+      text-align: center;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .report-table th:first-child,
+    .report-table td:first-child {
+      width: 27%;
+      text-align: left;
+    }
+
+    .report-table th:nth-child(2),
+    .report-table td:nth-child(2) {
+      width: 13%;
+    }
+
+    .report-table th:nth-child(3),
+    .report-table td:nth-child(3) {
+      width: 13%;
+    }
+
+    .report-table th:nth-child(4),
+    .report-table td:nth-child(4) {
+      width: 17%;
+    }
+
+    .report-table th:last-child,
+    .report-table td:last-child {
+      width: 30%;
+      text-align: left;
+    }
+
+    .footer {
+      margin-top: 25px;
+      text-align: center;
+      font-size: 11px;
+      line-height: 16px;
+      color: #777777;
+    }
+
+    @media only screen and (max-width: 600px) {
+
+      .email-wrapper {
+        padding: 10px 5px;
+      }
+
+      .email-container {
+        border-radius: 5px;
+      }
+
+      .content {
+        padding: 18px 8px;
+      }
+
+      .teacher-section {
+        margin-bottom: 25px;
+      }
+
+      .teacher-name {
+        font-size: 19px;
+        line-height: 25px;
+        margin-bottom: 18px;
+      }
+
+      .report-table th {
+        padding: 8px 4px;
+        font-size: 11px;
+        line-height: 14px;
+      }
+
+      .report-table td {
+        padding: 9px 4px;
+        font-size: 11px;
+        line-height: 15px;
+      }
+
+      .report-table th:first-child,
+      .report-table td:first-child {
+        width: 25%;
+      }
+
+      .report-table th:nth-child(2),
+      .report-table td:nth-child(2) {
+        width: 14%;
+      }
+
+      .report-table th:nth-child(3),
+      .report-table td:nth-child(3) {
+        width: 13%;
+      }
+
+      .report-table th:nth-child(4),
+      .report-table td:nth-child(4) {
+        width: 17%;
+      }
+
+      .report-table th:last-child,
+      .report-table td:last-child {
+        width: 31%;
+      }
+
+      .footer {
+        margin-top: 18px;
+        font-size: 10px;
+      }
+    }
+
+    @media only screen and (max-width: 380px) {
+
+      .content {
+        padding: 15px 5px;
+      }
+
+      .teacher-name {
+        font-size: 17px;
+        line-height: 22px;
+      }
+
+      .report-table th {
+        padding: 7px 3px;
+        font-size: 10px;
+      }
+
+      .report-table td {
+        padding: 8px 3px;
+        font-size: 10px;
+        line-height: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="email-wrapper">
+
+    <div class="email-container">
+
+      <div class="content">
+
+        ${reports
+          .map(
+            (teacherReport) => `
+            
+            <div class="teacher-section">
+
+              <div class="teacher-name">
+                ${formatName2(teacherReport.teacherName)}
+              </div>
+
+              <table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  border="1"
+  style="
+    width:100%;
+    border-collapse:collapse;
+    border:1px solid #cccccc;
+  "
+>
+  <thead>
+    <tr>
+      <th style="
+        border:1px solid #cccccc;
+        background-color:#f1f1f1;
+        padding:11px 8px;
+        font-size:13px;
+        text-align:center;
+      ">
+        Student Name
+      </th>
+
+      <th style="
+        border:1px solid #cccccc;
+        background-color:#f1f1f1;
+        padding:11px 8px;
+        font-size:13px;
+        text-align:center;
+      ">
+        Juz
+      </th>
+
+      <th style="
+        border:1px solid #cccccc;
+        background-color:#f1f1f1;
+        padding:11px 8px;
+        font-size:13px;
+        text-align:center;
+      ">
+        Hifz
+      </th>
+
+      <th style="
+        border:1px solid #cccccc;
+        background-color:#f1f1f1;
+        padding:11px 8px;
+        font-size:13px;
+        text-align:center;
+      ">
+        Makharij
+      </th>
+
+      <th style="
+        border:1px solid #cccccc;
+        background-color:#f1f1f1;
+        padding:11px 8px;
+        font-size:13px;
+        text-align:center;
+      ">
+        Remarks
+      </th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+    ${teacherReport.reports
+      .map(
+        (report) => `
+          <tr>
+
+            <td style="
+              border:1px solid #cccccc;
+              padding:11px 8px;
+              font-size:13px;
+              text-align:left;
+            ">
+              ${formatName2(report.studentName)}
+            </td>
+
+            <td style="
+              border:1px solid #cccccc;
+              padding:11px 8px;
+              font-size:13px;
+              text-align:center;
+            ">
+              ${report.from} - ${report.to}
+            </td>
+
+            <td style="
+              border:1px solid #cccccc;
+              padding:11px 8px;
+              font-size:13px;
+              text-align:center;
+            ">
+              ${report.hifzGrade}
+            </td>
+
+            <td style="
+              border:1px solid #cccccc;
+              padding:11px 8px;
+              font-size:13px;
+              text-align:center;
+            ">
+              ${report.makharijGrade}
+            </td>
+
+            <td style="
+              border:1px solid #cccccc;
+              padding:11px 8px;
+              font-size:13px;
+              text-align:left;
+              max-width:180px;
+            ">
+              ${report.remarks}
+            </td>
+
+          </tr>
+        `,
+      )
+      .join("")}
+
+  </tbody>
+</table>
+
+            </div>
+
+          `,
+          )
+          .join("")}
+
+        <div class="footer">
+          This is a computer-generated report.
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+
+</html>
+`;
+
+    await resend.emails.send({
+      from: "Tahfeez Dohad Reports Management <noreply@tahfeezdohad.org>",
+
+      to: [
+        "murtazayudaipurwala@gmail.com",
+        "aliasgar.adil@mahadalzahra.com",
+        "abbasmahesri@gmail.com",
+        "huzefaratlam63@gmail.com",
+      ],
+
+      subject: "Daily Tamreen Report",
+
+      html,
+    });
+  }
+
+
 
 app.get("/student/getAllStudentsAndTeachers", protectRoute, fetchData);
 app.use("/auth", authRoutes);
