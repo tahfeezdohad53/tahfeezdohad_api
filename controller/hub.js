@@ -183,6 +183,9 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
     return res.status(200).json({ ok: true });
   }
 
+  const student = await User.findById(studentId);
+  if (!student.contactEmail || !student.address) return res.status(400).json({ ok: false, message: "email not found" });
+
   const obligation = await Obligation.findByIdAndUpdate(
     obligationId,
     {
@@ -218,11 +221,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
     paidAt:new Date(paidAt),
   })
 
-  const student = await User.findById(obligation.student);
-    // .select("contactEmail name its address")
-    // .lean();
-  if (!student.contactEmail || !student.address)
-    return res.status(400).json({ ok: false, message: "email not found" });
+  
 
   await resend.emails.send({
     from: "Tahfeez Dohad <noreply@tahfeezdohad.org>",

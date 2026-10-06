@@ -250,39 +250,39 @@ async function fnn() {
   //   console.log(el.name);
   // })
 
-  const users = await User.find({
-    its: {
-      $in: [
-        "40408003",
-        "50491150",
-        "40408631",
-        "30461040",
-        "40405485",
-        "50403503",
-        "40409120",
-        "40409116",
-        "30610118",
-        "40905544",
-        "50447489",
-        "40408354",
-        "40470950",
-        "40920709",
-        "40170573",
-        "40918809",
-        "50480818",
-        "40184404",
-      ],
-    },
-  }).select('_id');
-  console.log(users)
-  const ids = users.map(el => el._id);
-  await Obligation.deleteMany({
-    student: {
-      $in: ids
-    },
-  });
+  // const users = await User.find({
+  //   its: {
+  //     $in: [
+  //       "40408003",
+  //       "50491150",
+  //       "40408631",
+  //       "30461040",
+  //       "40405485",
+  //       "50403503",
+  //       "40409120",
+  //       "40409116",
+  //       "30610118",
+  //       "40905544",
+  //       "50447489",
+  //       "40408354",
+  //       "40470950",
+  //       "40920709",
+  //       "40170573",
+  //       "40918809",
+  //       "50480818",
+  //       "40184404",
+  //     ],
+  //   },
+  // }).select('_id');
+  // console.log(users)
+  // const ids = users.map(el => el._id);
+  // await Obligation.deleteMany({
+  //   student: {
+  //     $in: ids
+  //   },
+  // });
 }
-fnn();
+// fnn();
 
 app.get("/turn-credentials", async (req, res) => {
   const response = await axios.post(
