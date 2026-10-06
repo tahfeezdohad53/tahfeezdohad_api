@@ -28,14 +28,15 @@ export const handleGetAccounts = catchAsync(async (req, res, next) => {
   const skip = (page - 1) * 10;
   if(currUserRole !== 'admin') return res.status(401).json({ok:false,message:'you are not authorized for this action'});
   if(role === 'teacher'){
-    const accounts = await User.find({role:'teacher'}).skip(skip).limit(10).select('_id name its role').lean();
-    const totalRes = await User.countDocuments({role:'teacher'});
+    const accounts = await User.find({role:'teacher',isActive:true}).skip(skip).limit(10).select('_id name its role').lean();
+    const totalRes = await User.countDocuments({role:'teacher',isActive:true});
     return res.status(200).json({accounts,totalRes});
   }
   if(role === 'student'){
-    const accounts = await User.find({role:'student',batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(10).select('_id name its role batch allocatedHub contactEmail').lean();
+    const accounts = await User.find({role:'student',isActive:true,batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(10).select('_id name its role batch allocatedHub contactEmail').lean();
     const totalRes = await User.countDocuments({
       role: "student",
+      isActive:true,
       batch,
       name: { $not: { $regex: "tahfeez", $options: "i" } },
     });
@@ -43,8 +44,8 @@ export const handleGetAccounts = catchAsync(async (req, res, next) => {
     return res.status(200).json({accounts,totalRes});
   }
   if(role === 'admin'){
-    const accounts = await User.find({role:'admin'}).skip(skip).limit(10).select('_id name its role').lean();
-    const totalRes = await User.countDocuments({ role: "admin" });
+    const accounts = await User.find({role:'admin',isActive:true}).skip(skip).limit(10).select('_id name its role').lean();
+    const totalRes = await User.countDocuments({ role: "admin",isActive:true });
 
     return res.status(200).json({accounts,totalRes});
   }

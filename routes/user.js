@@ -23,8 +23,8 @@ router.get('/getAccounts',protectRoute,handleGetAccounts);
 router.get('/totalAccounts',protectRoute,async (req,res) => {
   try{
     const [teacherTotalCount,studentTotalCount] = await Promise.all([
-      await User.countDocuments({role:'teacher'}),
-      await User.countDocuments({role:'student'})
+      await User.countDocuments({role:'teacher',isActive:true}),
+      await User.countDocuments({role:'student',isActive:true})
     ])
     res.status(200).json({ok:true,teacherTotalCount,studentTotalCount})
   }catch(err){
