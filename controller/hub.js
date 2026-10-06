@@ -185,7 +185,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
 
   const student = await User.findById(studentId);
   if (!student.contactEmail || !student.address) return res.status(400).json({ ok: false, message: "email not found" });
-
+  
   const obligation = await Obligation.findByIdAndUpdate(
     obligationId,
     {
