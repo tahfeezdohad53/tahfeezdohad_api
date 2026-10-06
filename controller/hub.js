@@ -1,6 +1,7 @@
 import catchAsync from "../utils/catchAsync.js";
 import User from "../models/user.js";
 import Obligation from "../models/obligation.js";
+import Receipt from "../models/receipt.js";
 import Hub from "../models/hub.js";
 import { getTerm } from "../helpers/getTerm.js";
 import resend from "../libs/resend.js";
@@ -208,6 +209,14 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
       });
     }),
   );
+
+  await Receipt.create({
+    amountPaid:amount,
+    student:obligation.student,
+    batch:obligation.batch,
+    transaction_id:transactionId,
+    paidAt:new Date(paidAt),
+  })
 
   const student = await User.findById(obligation.student);
     // .select("contactEmail name its address")
