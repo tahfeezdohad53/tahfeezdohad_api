@@ -27,6 +27,9 @@ const schema = new mongoose.Schema(
       required: true,
     },
     audio: String,
+    questions:{
+      type:Number,
+    },
     duration: Number,
     hifzGrade: {
       type: String,
