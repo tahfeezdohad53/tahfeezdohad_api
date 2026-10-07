@@ -1218,9 +1218,9 @@ export const handleGetReportsExcel = catchAsync(async (req, res, next) => {
 
   hubReports.forEach((el) => {
     worksheet.addRow({
-      name: el.student.name,
+      name: formatName(el.student.name),
       its: el.student.its,
-      amount: el.amountPaid,
+      amount: Math.round(el.amountPaid),
       date: el.date,
       batch: el.batch,
       paidAt: el.paidAt || "-",
