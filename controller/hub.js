@@ -1221,7 +1221,7 @@ export const handleGetReportsExcel = catchAsync(async (req, res, next) => {
       name: formatName(el.student.name),
       its: el.student.its,
       amount: Math.round(el.amountPaid),
-      date: el.date,
+      date: format(new Date(el.date),"MMM, yyyy"),
       batch: el.batch,
       paidAt: el.paidAt || "-",
     });
