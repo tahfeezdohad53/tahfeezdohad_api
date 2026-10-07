@@ -1,10 +1,12 @@
 import { hash } from "bcrypt";
 import catchAsync from "../utils/catchAsync.js";
 import User from "../models/user.js";
+import Obligation from "../models/obligation.js";
 import { memoryStorage } from "multer";
 import cloudinary from "../libs/cloudinary.js";
 import { Readable } from "stream";
 import { refetchCachedData } from "../app.js";
+import { getTerm } from "../helpers/getTerm.js";
 
 
 export const handleUpdatePassword = catchAsync(async (req, res, next) => {
@@ -59,14 +61,25 @@ export const handleGetUser = catchAsync(async (req, res, next) => {
 });
 
 export const handleCreateUser = catchAsync(async (req, res, next) => {
+  // console.log('hello')
   const { id,role:currUserRole } = req.user;
-  const {role,its,name,batch,teacher} = req.body;
-  if(role === 'student' && !teacher) return res.status(400).json({ok:false,message:'teacher is required'})
+  const {role,its,name,batch,teacher,allocatedHub,contactNumber,contactEmail,address,} = req.body;
+  // if(role === 'student' && !teacher) return res.status(400).json({ok:false,message:'teacher is required'})
   const user = {role,its,name:`${its} ${name}`,email:`${its}@gmail.com`,password:`${its.slice(4)}`};
   if(role === 'student') {
     user.batch = batch;
-    user.teacher = teacher;
+    // user.teacher = teacher;
+    user.allocatedHub = allocatedHub;
+    user.contactNumber = contactNumber;
+    user.contactEmail = contactEmail;
+    user.address = address;
+    // console.log(user)
+    const student = await User.create(user);
+    await Obligation.create({student:student._id,batch,allocatedHub,term:getTerm(new Date().getMonth() + 1),year:new Date().getFullYear()});
+    return res.status(200).json({ ok: true, user });
+  
   }
+
   if(currUserRole !== 'admin') return res.status(401).json({ok:false,message:'you are not allowed to perform this action'});
   await User.create(user);
   await refetchCachedData()
