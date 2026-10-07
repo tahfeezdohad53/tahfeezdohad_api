@@ -171,22 +171,24 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
     allocatedHub,
     paidAt,
   } = req.body;
+  // console.log(req.body);
+  // console.log(studentId)
+  // return;
+  // if (batch && allocatedHub) {
+  //   let update = {};
 
-  if (batch && allocatedHub) {
-    let update = {};
+  //   if (batch) update.batch = batch;
+  //   if (allocatedHub) update.allocatedHub = Number(allocatedHub);
+  //   // console.log(update);
+  //   await Obligation.findByIdAndUpdate(obligationId, update);
+  //   await User.findByIdAndUpdate(studentId, update);
 
-    if (batch) update.batch = batch;
-    if (allocatedHub) update.allocatedHub = Number(allocatedHub);
-    // console.log(update);
-    await Obligation.findByIdAndUpdate(obligationId, update);
-    await User.findByIdAndUpdate(studentId, update);
-
-    return res.status(200).json({ ok: true });
-  }
+  //   return res.status(200).json({ ok: true });
+  // }
 
   const student = await User.findById(studentId);
-  console.log(studentId)
-  if (!student.contactEmail || !student.address) return res.status(400).json({ ok: false, message: "email not found" });
+  // console.log(student);
+  if (!student?.contactEmail || !student?.address) return res.status(400).json({ ok: false, message: "email not found" });
   
   const obligation = await Obligation.findByIdAndUpdate(
     obligationId,
