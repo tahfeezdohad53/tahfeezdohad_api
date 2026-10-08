@@ -7,20 +7,21 @@ const schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    batch:{
-        type:String,
-        required:true,
+    batch: {
+      type: String,
+      required: true,
     },
-    transaction_id:{
-        type:String,
+    transaction_id: {
+      type: String,
     },
-    amountPaid:{
-        type:Number,
-        default:0,
+    amountPaid: {
+      type: Number,
+      default: 0,
     },
-    paidAt:{
-        type:Date,
+    paidAt: {
+      type: Date,
     },
+    receiptNumber: Number,
   },
   { timestamps: true },
 );

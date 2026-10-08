@@ -218,17 +218,18 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
       });
     }),
   );
-
-  await Receipt.create({
-    amountPaid:amount,
-    student:obligation.student,
-    batch:obligation.batch,
-    transaction_id:transactionId,
-    paidAt:new Date(paidAt),
-  })
-
+  
   const stats = await Statistics.findOneAndUpdate({},{$inc:{receiptNumber:1}},{returnDocument:'after'});
   const receiptNumber = stats.receiptNumber;
+  await Receipt.create({
+    amountPaid: amount,
+    student: obligation.student,
+    batch: obligation.batch,
+    transaction_id: transactionId,
+    paidAt: new Date(paidAt),
+    receiptNumber,
+  });
+
   
   
 
@@ -1326,6 +1327,11 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
       width: 15,
     },
     {
+      key: "receiptNumber",
+      header: "Receipt Number",
+      width: 15,
+    },
+    {
       key: "year",
       header: "Year",
       width: 15,
@@ -1352,6 +1358,7 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
       name: formatName(el.student.name),
       its: el.student.its,
       amount: Math.round(el.amountPaid),
+      receiptNumber: el.receiptNumber || '-',
       // date: format(new Date(el.date),"MMM, yyyy"),
       year: new Date().getFullYear(),
       term: getTerm(new Date().getMonth() + 1),
