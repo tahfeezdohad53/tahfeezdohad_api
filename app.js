@@ -249,7 +249,7 @@ async function fnn() {
   // users.forEach(el => {
   //   console.log(el.name);
   // })
-
+  // console.log(usersCount);
   // const users = await User.find({
   //   its: {
   //     $in: [

@@ -6,6 +6,7 @@ import {
   handleGetReports,
   handleUpdateObligationData,
   handleGetReportsExcel,
+  handleGetHubReceiptsExcel,
 } from "../controller/hub.js";
 import { protectRoute } from '../controller/auth.js';
 
@@ -17,5 +18,6 @@ router.patch("/update", protectRoute, handleUpdateObligation);
 router.patch("/updateData", protectRoute, handleUpdateObligationData);
 router.get("/reports", protectRoute, handleGetReports);
 router.get("/reports/excel", protectRoute, handleGetReportsExcel);
+router.get("/receipts/excel", protectRoute, handleGetHubReceiptsExcel);
 
 export default router;

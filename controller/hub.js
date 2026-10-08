@@ -1278,3 +1278,106 @@ export const handleGetReportsExcel = catchAsync(async (req, res, next) => {
 
   res.end();
 });
+
+export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
+  const { id, role } = req.user;
+  const { its, batch } = req.query;
+  if (role !== "admin") return res.status(401).json({ ok: false });
+
+ 
+  let query = {};
+
+  let hubReceipts;
+  let hubReceiptsCount;
+  if (batch && batch !== "all") query.batch = batch;
+  
+  if (its?.length === 8) {
+    console.log(its)
+    const user = await User.findOne({ its }).select("_id").lean();
+    query.student = user._id;
+    hubReceipts = await Receipt.find(query).populate("student");
+    // hubReceiptsCount = await Hub.countDocuments(query);
+  }
+
+ 
+
+  hubReceipts = await Receipt.find(query)
+    .populate("student")
+    .sort({ createdAt: -1 });
+
+  const workbook = new ExcelJs.Workbook();
+
+  const worksheet = workbook.addWorksheet("reports");
+
+  worksheet.columns = [
+    {
+      key: "name",
+      header: "Name",
+      width: 50,
+    },
+    {
+      key: "its",
+      header: "ITS",
+      width: 15,
+    },
+    {
+      key: "amount",
+      header: "Amount",
+      width: 15,
+    },
+    {
+      key: "year",
+      header: "Year",
+      width: 15,
+    },
+    {
+      key: "term",
+      header: "Term",
+      width: 15,
+    },
+    {
+      key: "paidAt",
+      header: "Paid_At",
+      width: 15,
+    },
+    {
+      key: "batch",
+      header: "Batch",
+      width: 25,
+    },
+  ];
+
+  hubReceipts.forEach((el) => {
+    worksheet.addRow({
+      name: formatName(el.student.name),
+      its: el.student.its,
+      amount: Math.round(el.amountPaid),
+      // date: format(new Date(el.date),"MMM, yyyy"),
+      year: new Date().getFullYear(),
+      term: getTerm(new Date().getMonth() + 1),
+      batch: el.batch,
+      paidAt: el.paidAt || "-",
+    });
+  });
+
+  worksheet.getColumn(1).font = {
+    bold: true,
+  };
+  for (let i = 2; i < 5; i++) {
+    worksheet.getColumn(i).alignment = {
+      horizontal: "left",
+    };
+  }
+
+  // await sendExcel({filename:'hubReceipts',res,workbook});
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
+
+  res.setHeader("Content-Disposition", "attachment; filename=hub_reports");
+
+  await workbook.xlsx.write(res);
+
+  res.end();
+});
