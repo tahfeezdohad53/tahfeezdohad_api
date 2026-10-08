@@ -1329,7 +1329,7 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
     {
       key: "receiptNumber",
       header: "Receipt Number",
-      width: 15,
+      width: 18,
     },
     {
       key: "year",
@@ -1339,7 +1339,7 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
     {
       key: "term",
       header: "Term",
-      width: 15,
+      width: 10,
     },
     {
       key: "paidAt",
@@ -1363,18 +1363,27 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
       name: formatName(el.student.name),
       its: el.student.its,
       amount: Math.round(el.amountPaid),
-      receiptNumber: el.receiptNumber || '-',
+      receiptNumber: el.receiptNumber || "-",
       // date: format(new Date(el.date),"MMM, yyyy"),
       year: new Date().getFullYear(),
       term: getTerm(new Date().getMonth() + 1),
       batch: el.batch,
-      paidAt: el.paidAt || "-",
-      createdAt:format(new Date(el.createdAt),"dd MMM, yyyy"),
+      paidAt: format(new Date(el.paidAt), "dd MMM, yyyy") || "-",
+      createdAt: format(new Date(el.createdAt), "dd MMM, yyyy"),
     });
   });
 
   worksheet.getColumn(1).font = {
     bold: true,
+  };
+  worksheet.getColumn(5).alignment = {
+    horizontal:'left'
+  };
+  worksheet.getColumn(6).alignment = {
+    horizontal:'left'
+  };
+  worksheet.getColumn(7).alignment = {
+    horizontal:'left'
   };
   for (let i = 2; i < 5; i++) {
     worksheet.getColumn(i).alignment = {
