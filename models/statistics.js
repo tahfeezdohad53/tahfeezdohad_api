@@ -7,6 +7,7 @@ const schema = new mongoose.Schema({
     fail:Number,
     saveFailed:Number,
     remarksSent:Number,
+    receiptNumber:Number,
 },{timestamps:true});
 
 const model = mongoose.model('Statistics',schema);
