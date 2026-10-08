@@ -1347,6 +1347,11 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
       width: 15,
     },
     {
+      key: "createdAt",
+      header: "Created_At",
+      width: 15,
+    },
+    {
       key: "batch",
       header: "Batch",
       width: 25,
@@ -1364,6 +1369,7 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
       term: getTerm(new Date().getMonth() + 1),
       batch: el.batch,
       paidAt: el.paidAt || "-",
+      createdAt:format(new Date(el.createdAt),"dd MMM, yyyy"),
     });
   });
 
