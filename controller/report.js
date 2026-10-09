@@ -18,11 +18,12 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     console.log('Student: ',studentId);
     console.log('hifz marks: ',hifzMarks);
     let hifzGrade;
-    if (hifzMarks > 85) hifzGrade = "A+";
-    if (hifzMarks > 75 && hifzMarks <= 85) hifzGrade = "A";
-    if (hifzMarks > 65 && hifzMarks <= 75) hifzGrade = "B+";
-    if (hifzMarks > 60 && hifzMarks <= 65) hifzGrade = "B";
-    if (hifzMarks < 60) hifzGrade = "D";
+     if (hifzMarks > 59) hifzGrade = "A+";
+    if (hifzMarks > 54 && hifzMarks <= 59) hifzGrade = "A";
+    if (hifzMarks > 49 && hifzMarks <= 54) hifzGrade = "B+";
+    if (hifzMarks > 48 && hifzMarks <= 49) hifzGrade = "B";
+    if (hifzMarks > 34 && hifzMarks <= 39) hifzGrade = "c";
+    if (hifzMarks <= 34) hifzGrade = "D";
     console.log("hifz grade: ", hifzGrade);
 
     const noOfMakharij = makharij.trim().split(' ').length;

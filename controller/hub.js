@@ -1314,7 +1314,7 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
     {
       key: "receiptNumber",
       header: "Receipt Number",
-      width: 18,
+      width: 10,
     },
     {
       key: "name",
@@ -1385,7 +1385,7 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
   worksheet.getColumn(7).alignment = {
     horizontal:'left'
   };
-  for (let i = 2; i < 5; i++) {
+  for (let i = 1; i < 5; i++) {
     worksheet.getColumn(i).alignment = {
       horizontal: "left",
     };
