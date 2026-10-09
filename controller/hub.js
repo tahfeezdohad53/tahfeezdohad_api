@@ -1304,13 +1304,18 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
 
   hubReceipts = await Receipt.find(query)
     .populate("student")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: 1 });
 
   const workbook = new ExcelJs.Workbook();
 
   const worksheet = workbook.addWorksheet("reports");
 
   worksheet.columns = [
+    {
+      key: "receiptNumber",
+      header: "Receipt Number",
+      width: 18,
+    },
     {
       key: "name",
       header: "Name",
@@ -1325,11 +1330,6 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
       key: "amount",
       header: "Amount",
       width: 15,
-    },
-    {
-      key: "receiptNumber",
-      header: "Receipt Number",
-      width: 18,
     },
     {
       key: "year",
@@ -1365,7 +1365,7 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
       amount: Math.round(el.amountPaid),
       receiptNumber: el.receiptNumber || "-",
       // date: format(new Date(el.date),"MMM, yyyy"),
-      year: new Date().getFullYear(),
+      year: new Date().getFullYear() + "-" + (new Date().getFullYear() + 1),
       term: getTerm(new Date().getMonth() + 1),
       batch: el.batch,
       paidAt: format(new Date(el.paidAt), "dd MMM, yyyy") || "-",
