@@ -1317,6 +1317,11 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
       width: 18,
     },
     {
+      key: "year",
+      header: "Year",
+      width: 15,
+    },
+    {
       key: "name",
       header: "Name",
       width: 50,
@@ -1329,11 +1334,6 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
     {
       key: "amount",
       header: "Amount",
-      width: 15,
-    },
-    {
-      key: "year",
-      header: "Year",
       width: 15,
     },
     {
