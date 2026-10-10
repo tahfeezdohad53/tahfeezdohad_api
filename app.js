@@ -197,6 +197,22 @@ io.on("connection", async (socket) => {
 // const its7000 = [30919558];
 
 async function fnn() {
+  // const u = await User.find({role:'student',isActive:true,name:{$not:{$regex:'tahfeez',$options:'i'}}});
+  // u.forEach(element => {
+  //   console.log(element._id.toString());
+  // });
+  // const users= u.map(el => el._id.toString());
+  // const obligations = await Obligation.find();
+  // const ids = obligations.map(el => el.student.toString());
+  // const remainingIds = users.filter(el => !ids.includes(el));
+  // console.log(remainingIds)
+  // await Obligation.create({
+  //     student:'6ac9b998b0688027d7ec5410',
+  //     batch:'taheri_hall',
+  //     allocatedHub:4000,
+  //     term:4,
+  //     year:2026,
+  //   })
   // await User.create({
   //   email: "tahfeezdohadadmin1@gmail.com",
   //   password: "admin5253@",
@@ -738,6 +754,7 @@ nodeCron.schedule(
   async () => {
     const students = await User.find({
       name: { $not: { $regex: "tahfeez", $options: "i" } },
+      isActive:true,
     }).select("_id batch allocatedHub");
     const obligations = students.map((el) => {
       return {

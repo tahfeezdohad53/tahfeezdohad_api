@@ -885,7 +885,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
       "
     >
       ${numberToWords
-        .toWords(Number(String(obligation.amountPaid).replace(/,/g, "")))
+        .toWords(Number(String(amount).replace(/,/g, "")))
         .replace(/\b\w/g, (char) => char.toUpperCase())} Only
     </td>
 

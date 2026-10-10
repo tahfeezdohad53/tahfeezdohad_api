@@ -61,15 +61,28 @@ export const handleGetStudentsExcel = catchAsync(async (req, res, next) => {
       width: 25,
     },
     {
+      header: "Contact_email",
+      key: "contactEmail",
+      width: 25,
+    },
+    {
+      header: "Address",
+      key: "address",
+      width: 30,
+    },
+    {
+      header: "Allocated_hub",
+      key: "allocatedHub",
+      width: 30,
+    },
+    {
       header: "Batch",
       key: "batch",
       width: 25,
     },
   ];
 
-  const students = await User.find({ role: "student",name:{$not:{$regex:'tahfeez',$options:'i'}} })
-    .select("name its email batch")
-    .lean();
+  const students = await User.find({ role: "student",isActive:true,name:{$not:{$regex:'tahfeez',$options:'i'}} }).lean();
 
     const sortedStudents = students.sort((a,b) => a.name.split(' ')[1].localeCompare(b.name.split(' ')[1]))
 
@@ -77,8 +90,12 @@ export const handleGetStudentsExcel = catchAsync(async (req, res, next) => {
     worksheet.addRow({
       its: student.its,
       name: formatName(student.name),
-      email: student.email,
-      batch:student.batch
+      // email: student.email,
+      batch:student.batch,
+      contactEmail:student?.contactEmail || '-',
+      contactNumber:student?.contactNumber || '-',
+      address:student?.address || '-',
+      allocatedHub:student?.allocatedHub || '-',
     });
   }
 
