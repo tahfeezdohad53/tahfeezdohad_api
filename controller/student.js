@@ -7,7 +7,7 @@ import { formatName } from "./leave.js";
 export const handleUpdateStudent = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
   const {studentId} = req.params;
-
+  
   if (role !== 'admin') return res.status(401).json({ ok: false });
 
   await User.findByIdAndUpdate(studentId,req.body);

@@ -7,6 +7,7 @@ import {
   handleUpdatePassword,
   handleImageUpdate,
   handleCreateUser,
+  handleDeleteUser,
   handleGetAccounts,
   handleAddContactEmail,
 } from "../controller/user.js";
@@ -18,6 +19,7 @@ const router = new express.Router();
 router.patch('/contactEmail',protectRoute,handleAddContactEmail);
 router.patch("/updatePassword", protectRoute, handleAddContactEmail);
 router.post('/create',protectRoute,handleCreateUser);
+router.delete('/delete/:id',protectRoute,handleDeleteUser);
 router.get('/getUser',protectRoute,handleGetUser);
 router.get('/getAccounts',protectRoute,handleGetAccounts);
 router.get('/totalAccounts',protectRoute,async (req,res) => {

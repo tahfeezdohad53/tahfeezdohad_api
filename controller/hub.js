@@ -25,12 +25,12 @@ export const handleGetObligations = catchAsync(async (req, res, next) => {
   let query = {};
 
   if (its) {
-    const student = await User.findOne({ its: Number(its) })
+    const student = await User.findOne({ its: Number(its),isActive:true })
       .select("_id its name")
       .lean();
 
     if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+      return res.status(200).json({obligations:[],count:0 });
     }
 
     const obligation = await Obligation.findOne({
@@ -38,7 +38,7 @@ export const handleGetObligations = catchAsync(async (req, res, next) => {
     }).populate("student");
 
     if (!obligation) {
-      return res.status(404).json({ message: "Obligation not found" });
+      return res.status(200).json({ obligation:obligations,count:1 });
     }
 
     return res.status(200).json({
@@ -111,41 +111,7 @@ export const handleGetObligationStatistics = catchAsync(
     ]);
 
     const currentMonth = new Date().getMonth() + 1;
-    const term = getTerm(currentMonth);
-
-    // const totalObligation = await Obligation.aggregate([
-    //   {
-    //     $match: {
-    //       term: term,
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "status",
-
-    //       paid: {
-    //         $sum: {
-    //           $cond: [
-    //             {
-    //               $or: [
-    //                 { $eq: ["$status", "paid"] },
-    //                 { $eq: ["$status", "partial"] },
-    //               ],
-    //             },
-    //             "$amountPaid",
-    //             0,
-    //           ],
-    //         },
-    //       },
-
-    //       pending: {
-    //         $sum: {
-    //           $cond: [{ $eq: ["$status", "pending"] }, "$allocatedHub", 0],
-    //         },
-    //       },
-    //     },
-    //   },
-    // ]);
+    // const term = getTerm(currentMonth);
 
     res.status(200).json({
       ok: true,
@@ -188,9 +154,8 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
   // }
 
   const student = await User.findById(studentId);
-  
   // console.log(student);
-  if (!student?.contactEmail || !student?.address) return res.status(400).json({ ok: false, message: "email not found" });
+  if (!student?.contactEmail || !student?.address) return res.status(400).json({ ok: false, message: "email or address is not entered!" });
   
   const obligation = await Obligation.findByIdAndUpdate(
     obligationId,

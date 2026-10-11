@@ -14,8 +14,20 @@ export const handleUpdatePassword = catchAsync(async (req, res, next) => {
   const { password } = req.body;
   console.log("update");
   const hashedPassword = await hash(password, 10);
-  await User.findByIdAndUpdate(id, { password: hashedPassword });
+  const user = await User.findById(id);
+  user.password = hashedPassword;
+  await user.save();
   res.status(200).json({ ok: true, message: "password updated" });
+});
+
+export const handleDeleteUser = catchAsync(async (req, res, next) => {
+  const {role} = req.user;
+  const {id} = req.params;
+  if(role !== 'admin') return res.status(401).json({ok:false});
+
+  await User.findByIdAndUpdate(id,{isActive:false});
+  await Obligation.findOneAndDelete({student:id});
+  return res.status(200).json({ ok: true });
 });
 
 export const handleAddContactEmail = catchAsync(async (req, res, next) => {
@@ -35,7 +47,7 @@ export const handleGetAccounts = catchAsync(async (req, res, next) => {
     return res.status(200).json({accounts,totalRes});
   }
   if(role === 'student'){
-    const accounts = await User.find({role:'student',isActive:true,batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(10).select('_id name its role batch allocatedHub contactEmail').lean();
+    const accounts = await User.find({role:'student',isActive:true,batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(10).select('_id name its role batch allocatedHub contactEmail address contactNumber').lean();
     const totalRes = await User.countDocuments({
       role: "student",
       isActive:true,
