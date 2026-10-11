@@ -48,7 +48,7 @@ export const handleGenerateSignedUrl = catchAsync(async (req, res) => {
 });
 
 export const handleCreateAudio = catchAsync(async (req, res, next) => {
-  const { isOnline, url, duration, slot, remarks } = req.body;
+  const { isOnline, url, duration, slot, remarks,huroof,ahkaam } = req.body;
   const { studentId } = req.params;
   const { id, role, name } = req.user;
   if (role === "student")
@@ -83,174 +83,287 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
     $push: { slots: slot },
     remarks: remarks || "",
   });
-
-  if (remarks) {
+  if (remarks || huroof.length > 0 || ahkaam.length > 0) {
     const student = await User.findById(studentId);
     const date = format(new Date(), "dd MMM, yyyy");
     const studentName = formatName(student.name);
     const teacherName = formatName(name);
-    if (student.contactEmail)
+    if (student?.contactEmail)
       try{
     await resend.emails.send({
-        from: "Tahfeez Dohad <noreply@tahfeezdohad.org>",
-        to: student.contactEmail,
-        // to: "huzefaratlam63@gmail.com",
-        subject: `Class Remarks for ${studentName} – ${date}`,
-        html: `
+      from: "Tahfeez Dohad <noreply@tahfeezdohad.org>",
+      to: student.contactEmail,
+      // to: "huzefaratlam63@gmail.com",
+      subject: `Class Remarks for ${studentName} – ${date}`,
+      html: `
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Class Remarks - Tahfeez Dohad</title>
+  </head>
 
-<body style="
-  margin: 0;
-  padding: 0;
-  background-color: #f8f6f2;
-  font-family: Arial, Helvetica, sans-serif;
-  color: #222;
-">
-  <div style="
-    max-width: 600px;
-    margin: 40px auto;
-    background: #ffffff;
-    border: 1px solid #eadfce;
-    border-radius: 14px;
-    overflow: hidden;
+  <body style="
+    margin: 0;
+    padding: 0;
+    background-color: #f8f6f2;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #222;
   ">
-
-    <!-- Header -->
     <div style="
-      background: #a85b00;
-      padding: 24px;
-      text-align: center;
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      border: 1px solid #eadfce;
+      border-radius: 14px;
+      overflow: hidden;
     ">
-      <h1 style="
-        margin: 0;
-        color: #ffffff;
-        font-size: 22px;
-      ">
-        Tahfeez Dohad
-      </h1>
-    </div>
 
-    <!-- Content -->
-    <div style="padding: 32px 28px;">
-
-      <h2 style="
-        margin: 0 0 8px;
-        font-size: 20px;
-        color: #222;
-      ">
-        Class Remarks
-      </h2>
-
-      <p style="
-        margin: 0 0 24px;
-        color: #666;
-        font-size: 14px;
-        line-height: 1.6;
-      ">
-        We would like to share the following remarks regarding
-        <strong>${studentName}</strong>'s class.
-      </p>
-
-      <!-- Details -->
+      <!-- Header -->
       <div style="
-        background: #faf8f4;
-        border: 1px solid #eee3d3;
-        border-radius: 10px;
-        padding: 18px;
-        margin-bottom: 20px;
+        background: #a85b00;
+        padding: 24px;
+        text-align: center;
       ">
+        <h1 style="
+          margin: 0;
+          color: #ffffff;
+          font-size: 22px;
+        ">
+          Tahfeez Dohad
+        </h1>
 
-        <p style="margin: 0 0 12px; font-size: 14px;">
-          <strong>Student:</strong><br />
-          ${studentName}
+        <p style="
+          margin: 8px 0 0;
+          color: #ffead0;
+          font-size: 13px;
+        ">
+          Student Progress &amp; Class Remarks
         </p>
-
-        <p style="margin: 0 0 12px; font-size: 14px;">
-          <strong>Teacher:</strong><br />
-          ${teacherName}
-        </p>
-
-        <p style="margin: 0; font-size: 14px;">
-          <strong>Date:</strong><br />
-          ${date}
-        </p>
-
       </div>
 
-      <!-- Remarks -->
-      <div style="
-        border-left: 4px solid #a85b00;
-        background: #fffaf3;
-        padding: 16px 18px;
-        border-radius: 6px;
-      ">
-        <p style="
+      <!-- Content -->
+      <div style="padding: 32px 28px;">
+
+        <h2 style="
           margin: 0 0 8px;
-          font-size: 14px;
-          font-weight: bold;
-          color: #8b4b00;
+          font-size: 20px;
+          color: #222;
         ">
-          Remarks
+          Class Remarks
+        </h2>
+
+        <p style="
+          margin: 0 0 24px;
+          color: #666;
+          font-size: 14px;
+          line-height: 1.6;
+        ">
+          We would like to share the following remarks regarding
+          <strong>${studentName}</strong>'s class performance.
+        </p>
+
+        <!-- Student Details -->
+        <div style="
+          background: #faf8f4;
+          border: 1px solid #eee3d3;
+          border-radius: 10px;
+          padding: 18px;
+          margin-bottom: 20px;
+        ">
+
+          <p style="margin: 0 0 12px; font-size: 14px; line-height: 1.7;">
+            <strong>Student:</strong><br />
+            ${studentName}
+          </p>
+
+          <p style="margin: 0 0 12px; font-size: 14px; line-height: 1.7;">
+            <strong>Teacher:</strong><br />
+            ${teacherName}
+          </p>
+
+          <p style="margin: 0; font-size: 14px; line-height: 1.7;">
+            <strong>Date:</strong><br />
+            ${date}
+          </p>
+        </div>
+
+        <!-- Remarks -->
+        ${remarks && `<div style="
+          border-left: 4px solid #a85b00;
+          background: #fffaf3;
+          padding: 16px 18px;
+          border-radius: 6px;
+        ">
+          <p style="
+            margin: 0 0 8px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #8b4b00;
+          ">
+            Remarks
+          </p>
+
+          <p style="
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-line;
+          ">${remarks}</p>
+        </div>`}
+
+        <!-- Ahkaam -->
+        ${ahkaam.length > 0 ? `<div style="
+          margin-top: 22px;
+          padding: 18px;
+          background: #faf8f4;
+          border: 1px solid #eee3d3;
+          border-radius: 10px;
+        ">
+          <p style="
+            margin: 0 0 5px;
+            color: #8b4b00;
+            font-size: 16px;
+            font-weight: bold;
+          ">
+            Ahkaam (أحكام)
+          </p>
+
+          <p style="
+            margin: 0 0 14px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.6;
+          ">
+            Tajweed rules observed during tilawat
+          </p>
+
+          <div style="
+            line-height: 2.4;
+            direction: rtl;
+            text-align: left;
+          ">
+            ${ahkaam
+              .map(
+                (item) => `
+              <span style="
+                display: inline-block;
+                margin: 0 5px 6px 0;
+                padding: 6px 12px;
+                background: #fff1dc;
+                border: 1px solid #ead2ad;
+                border-radius: 6px;
+                font-size: 17px;
+                color: #704000;
+              ">${item}</span>
+            `,
+              )
+              .join("")}
+          </div>
+        </div>`:''}
+
+        <!-- Huroof -->
+        ${huroof.length > 0 ? `<div style="
+          margin-top: 16px;
+          padding: 18px;
+          background: #faf8f4;
+          border: 1px solid #eee3d3;
+          border-radius: 10px;
+        ">
+          <p style="
+            margin: 0 0 5px;
+            color: #8b4b00;
+            font-size: 16px;
+            font-weight: bold;
+          ">
+            Huroof (حروف)
+          </p>
+
+          <p style="
+            margin: 0 0 14px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.6;
+          ">
+            Letters requiring additional attention
+          </p>
+
+          <div style="
+            direction: rtl;
+            text-align: left;
+            line-height: 2.5;
+          ">
+            ${huroof
+              .map(
+                (letter) => `
+              <span style="
+                display: inline-block;
+                min-width: 32px;
+                margin: 0 4px 6px 0;
+                padding: 5px 8px;
+                text-align: center;
+                background: #fff1dc;
+                border: 1px solid #ead2ad;
+                border-radius: 6px;
+                font-size: 22px;
+                color: #704000;
+              ">${letter}</span>
+            `,
+              )
+              .join("")}
+          </div>
+        </div>`:''}
+
+        <!-- Closing -->
+        <p style="
+          margin: 28px 0 0;
+          font-size: 14px;
+          line-height: 1.8;
+          color: #666;
+        ">
+          We kindly request you to encourage your child to revise
+          regularly and practise the areas mentioned above. Your
+          support at home plays an important role in the student's
+          progress.
         </p>
 
         <p style="
-          margin: 0;
-          font-size: 15px;
-          line-height: 1.7;
+          margin: 24px 0 0;
+          font-size: 14px;
+          line-height: 1.8;
           color: #333;
         ">
-          ${remarks}
+          Jazakumullahu Khairan for your continued support.
+          <br /><br />
+          Regards,<br />
+          <strong>Tahfeez Dohad</strong>
         </p>
       </div>
 
-      <p style="
-        margin: 28px 0 0;
-        font-size: 14px;
-        line-height: 1.6;
-        color: #666;
+      <!-- Footer -->
+      <div style="
+        padding: 16px 28px;
+        background: #faf8f4;
+        border-top: 1px solid #eee3d3;
+        text-align: center;
       ">
-        If you have any questions regarding the above remarks,
-        please feel free to contact us.
-      </p>
-
-      <p style="
-        margin: 28px 0 0;
-        font-size: 14px;
-        line-height: 1.6;
-        color: #333;
-      ">
-        Regards,<br />
-        <strong>Tahfeez Dohad</strong>
-      </p>
-
+        <p style="
+          margin: 0;
+          font-size: 12px;
+          line-height: 1.6;
+          color: #999;
+        ">
+          This is an automated communication from Tahfeez Dohad.
+          Please do not reply directly to this email.
+        </p>
+      </div>
     </div>
-
-    <!-- Footer -->
-    <div style="
-      padding: 16px 28px;
-      background: #faf8f4;
-      border-top: 1px solid #eee3d3;
-      text-align: center;
-    ">
-      <p style="
-        margin: 0;
-        font-size: 12px;
-        color: #999;
-      ">
-        This is an automated communication from Tahfeez Dohad.
-      </p>
-    </div>
-
-  </div>
-</body>
+  </body>
 </html>
 `,
-      });
+    });
     }catch(err){
       console.log(err);
       console.log('failed to send remarks email');
