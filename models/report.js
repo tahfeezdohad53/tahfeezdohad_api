@@ -30,6 +30,7 @@ const schema = new mongoose.Schema(
     questions:{
       type:Number,
     },
+    hifzMarks:Number,
     duration: Number,
     hifzGrade: {
       type: String,

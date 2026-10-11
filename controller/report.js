@@ -19,11 +19,11 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     console.log('hifz marks: ',hifzMarks);
     let hifzGrade;
      if (hifzMarks > 59) hifzGrade = "A+";
-    if (hifzMarks > 54 && hifzMarks <= 59) hifzGrade = "A";
-    if (hifzMarks > 49 && hifzMarks <= 54) hifzGrade = "B+";
-    if (hifzMarks > 48 && hifzMarks <= 49) hifzGrade = "B";
-    if (hifzMarks > 34 && hifzMarks <= 39) hifzGrade = "c";
-    if (hifzMarks <= 34) hifzGrade = "D";
+     else if (hifzMarks > 54) hifzGrade = "A";
+     else if (hifzMarks > 49) hifzGrade = "B+";
+     else if (hifzMarks > 39) hifzGrade = "B";
+     else if (hifzMarks > 34) hifzGrade = "C";
+     else hifzGrade = "D";
     console.log("hifz grade: ", hifzGrade);
 
     const noOfMakharij = makharij.trim().split(' ').length;
@@ -34,7 +34,7 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     if(noOfMakharij === 3) makharijGrade = "B";
     if(noOfMakharij > 3) makharijGrade = "D";
 
-    await Report.create({ ...req.body, teacher: id, makharijGrade, hifzGrade,questions });
+    await Report.create({ ...req.body, teacher: id, makharijGrade, hifzGrade,questions,hifzMarks });
     if (remarks) {
       const student = await User.findById(studentId);
       const date = format(new Date(), "dd MMM, yyyy");
