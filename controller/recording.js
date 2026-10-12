@@ -83,7 +83,7 @@ export const handleCreateAudio = catchAsync(async (req, res, next) => {
     $push: { slots: slot },
     remarks: remarks || "",
   });
-  if (remarks || huroof.length > 0 || ahkaam.length > 0) {
+  if (remarks || huroof?.length > 0 || ahkaam?.length > 0) {
     const student = await User.findById(studentId);
     const date = format(new Date(), "dd MMM, yyyy");
     const studentName = formatName(student.name);
