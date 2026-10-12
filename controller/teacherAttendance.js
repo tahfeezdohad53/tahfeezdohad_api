@@ -42,7 +42,7 @@ export const handleCheckOut = catchAsync(async (req, res, next) => {
     // if((hour === 12 && min > 35) || (hour === 18 && min > 35)) return res.status(400).json({ok:false});
 
     const latestAttendance = await TeacherAttendance.findOne({teacher:id}).sort({createdAt:-1});
-    
+    if(latestAttendance.checkedOut) return res.status(200).json({ok:true});
     
     const diff = differenceInMinutes(
       date,
