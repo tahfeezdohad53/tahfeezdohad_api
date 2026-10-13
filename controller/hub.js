@@ -202,7 +202,6 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
     from: "Tahfeez Dohad <noreply@tahfeezdohad.org>",
 
     to: student.contactEmail,
-    
 
     subject: `Hub Receipt`,
     html: `<!DOCTYPE html>
@@ -619,7 +618,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
                             overflow-wrap:anywhere;
                           "
                           >
-                            ${String(receiptNumber).padStart(3,'0')}
+                            ${String(receiptNumber).padStart(3, "0")}
                           </td>
                         </tr>
                       </table>
@@ -1008,7 +1007,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
           font-weight:bold;
         "
       >
-        (وصول کرنا فی صحیح) عبد سیدنا طع
+        (وصول کرنا ني صحیح) عبد سیدنا طع
       </span>
     </td>
   </tr>

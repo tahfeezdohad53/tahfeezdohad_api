@@ -33,6 +33,7 @@ import resend from "./libs/resend.js";
 import { formatName } from "./controller/leave.js";
 import { format } from "date-fns";
 import { contactInfo } from "./utils/info.js";
+import { getTerm } from "./helpers/getTerm.js";
 configDotenv();
 const app = express();
 const server = http.createServer(app);
@@ -207,12 +208,12 @@ async function fnn() {
   // const remainingIds = users.filter(el => !ids.includes(el));
   // console.log(remainingIds)
   // await Obligation.create({
-  //     student:'6ac9b998b0688027d7ec5410',
-  //     batch:'taheri_hall',
-  //     allocatedHub:4000,
-  //     term:4,
-  //     year:2026,
-  //   })
+  //   student: "6acccdad489ecb403b4a1a19",
+  //   batch: "kibaar",
+  //   allocatedHub: 4000,
+  //   term: 4,
+  //   year: 2026,
+  // });
   // await User.create({
   //   email: "tahfeezdohadadmin1@gmail.com",
   //   password: "admin5253@",
@@ -754,15 +755,18 @@ nodeCron.schedule(
   async () => {
     const students = await User.find({
       name: { $not: { $regex: "tahfeez", $options: "i" } },
+      role:'student',
       isActive:true,
     }).select("_id batch allocatedHub");
+    const currentTerm = getTerm(new Date().getMonth() + 1);
+    const currentYear = new Date().getFullYear();
     const obligations = students.map((el) => {
       return {
         student: el._id,
         batch: el.batch,
-        allocatedFee: 4000,
-        term: 3,
-        year: 2026,
+        allocatedFee: el.allocatedHub,
+        term: currentTerm,
+        year: currentYear,
       };
     });
     await Obligation.insertMany(obligations);
