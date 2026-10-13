@@ -887,7 +887,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
       <b>${formatCurrency().format(amount)}</b>
     </td>
 
-    <!-- آپ طرف سے -->
+    <!-- آپ طرف سی‌ -->
     <td
       valign="middle"
       align="right"
