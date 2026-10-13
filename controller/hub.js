@@ -971,7 +971,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
           margin-right:35px;
         "
       >
-        طریقے وصول کیا ہے
+        طریقے وصول تھیا چھے
       </span>
 
       <span
