@@ -183,6 +183,7 @@ io.on("connection", async (socket) => {
       });
     }
     if (current?.socketId === socket.id) {
+      console.log(socket.user._id," :disconnected");
       user.delete(socket.user._id);
       socket.broadcast.emit("offline-broadcast", {
         id: socket.user?._id,
