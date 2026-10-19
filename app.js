@@ -47,7 +47,7 @@ const io = new Server(server, {
   },
 });
 
-app.post('/resend/webook',express.raw({type:'application/json'}),async (req,res) => {
+app.post('/resend/webhook',express.raw({type:'application/json'}),async (req,res) => {
    try {
      const {data,type} = resend.webhooks.verify({
        payload: req.body.toString(),
@@ -334,7 +334,7 @@ async function fnn() {
   //   },
   // });
 }
-fnn();
+// fnn();
 
 app.get("/turn-credentials", async (req, res) => {
   const response = await axios.post(

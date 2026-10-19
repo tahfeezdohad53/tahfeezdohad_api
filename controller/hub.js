@@ -1248,7 +1248,7 @@ export const handleGetReportsExcel = catchAsync(async (req, res, next) => {
 
 export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
-  const { its, batch } = req.query;
+  const { its, batch, from, to } = req.query;
   if (role !== "admin") return res.status(401).json({ ok: false });
 
  
@@ -1264,6 +1264,19 @@ export const handleGetHubReceiptsExcel = catchAsync(async (req, res, next) => {
     query.student = user._id;
     hubReceipts = await Receipt.find(query).populate("student");
     // hubReceiptsCount = await Hub.countDocuments(query);
+  }
+
+  if(from && !to){
+    const date = new Date(from);
+    date.setHours(0,0,0,0);
+    query.paidAt = {$gte:date};
+  }
+  if(from && to){
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    fromDate.setHours(0,0,0,0);
+    toDate.setHours(23,59,59,999);
+    query.$and = [{ paidAt: { $gte: fromDate } }, { paidAt: { $lte: toDate } }];
   }
 
  
