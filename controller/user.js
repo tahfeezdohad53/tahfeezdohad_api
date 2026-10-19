@@ -88,6 +88,7 @@ export const handleCreateUser = catchAsync(async (req, res, next) => {
     // console.log(user)
     const student = await User.create(user);
     await Obligation.create({student:student._id,batch,allocatedHub,term:getTerm(new Date().getMonth() + 1),year:new Date().getFullYear()});
+    await refetchCachedData();
     return res.status(200).json({ ok: true, user });
   
   }
