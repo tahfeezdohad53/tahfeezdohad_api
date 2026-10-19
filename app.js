@@ -10,6 +10,7 @@ import { v2 as cloudinary } from "cloudinary";
 import User from "./models/user.js";
 import Report from "./models/report.js";
 import Obligation from "./models/obligation.js";
+import Receipt from "./models/receipt.js";
 import authRoutes from "./routes/auth.js";
 import studentRoutes from "./routes/student.js";
 import hubRoutes from "./routes/hub.js";
@@ -45,6 +46,39 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
+app.post('/resend/webook',express.raw({type:'application/json'}),async (req,res) => {
+   try {
+     const {data,type} = resend.webhooks.verify({
+       payload: req.body.toString(),
+       headers: {
+         id: req.headers["svix-id"],
+         timestamp: req.headers["svix-timestamp"],
+         signature: req.headers["svix-signature"],
+       },
+       webhookSecret: process.env.RESEND_WEBHOOK_SECRET,
+     });
+     // handle result
+     switch(type){
+      case 'email.sent':
+        await Receipt.findByIdAndUpdate(data.tags.receiptId,{emailStatus:'delivered'});
+        break;
+      case 'email.bounced':
+        await Receipt.findByIdAndUpdate(data.tags.receiptId,{emailStatus:'bounced',emailErrorMessage:data.bounce.message});
+        break;
+      case 'email.delivery_delayed':
+        await Receipt.findByIdAndUpdate(data.tags.receiptId,{emailStatus:'delayed',emailErrorMessage:''});
+        break;
+      case 'email.failed':
+        await Receipt.findByIdAndUpdate(data.tags.receiptId,{emailStatus:'failed',emailErrorMessage:data.failed.reason});
+        break;
+     }
+     res.sendStatus(200);
+   } catch {
+     res.status(400).send("Invalid webhook");
+   }
+})
+
 app.use(express.json());
 app.use(
   cors({
@@ -183,6 +217,7 @@ io.on("connection", async (socket) => {
       });
     }
     if (current?.socketId === socket.id) {
+            console.log(socket.user._id, " :disconnected");
       user.delete(socket.user._id);
       socket.broadcast.emit("offline-broadcast", {
         id: socket.user?._id,
@@ -208,9 +243,9 @@ async function fnn() {
   // const remainingIds = users.filter(el => !ids.includes(el));
   // console.log(remainingIds)
   // await Obligation.create({
-  //   student: "6acccdad489ecb403b4a1a19",
-  //   batch: "kibaar",
-  //   allocatedHub: 4000,
+  //   student: "6a54eb10b40e3f3ce6c2bc62",
+  //   batch: "yaqoot_mardo",
+  //   allocatedHub: 21000,
   //   term: 4,
   //   year: 2026,
   // });
@@ -299,7 +334,7 @@ async function fnn() {
   //   },
   // });
 }
-// fnn();
+fnn();
 
 app.get("/turn-credentials", async (req, res) => {
   const response = await axios.post(

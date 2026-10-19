@@ -22,6 +22,8 @@ const schema = new mongoose.Schema(
       type: Date,
     },
     receiptNumber: Number,
+    emailStatus:String,
+    emailErrorMessage:String,
   },
   { timestamps: true },
 );

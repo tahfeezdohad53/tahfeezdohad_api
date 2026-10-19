@@ -186,7 +186,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
   
   const stats = await Statistics.findOneAndUpdate({},{$inc:{receiptNumber:1}},{returnDocument:'after'});
   const receiptNumber = stats.receiptNumber;
-  await Receipt.create({
+  const receipt = await Receipt.create({
     amountPaid: amount,
     student: obligation.student,
     batch: obligation.batch,
@@ -204,6 +204,7 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
     to: student.contactEmail,
 
     subject: `Hub Receipt`,
+    tags:[{name:'receiptId',value:receipt._id}],
     html: `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -1076,9 +1077,10 @@ export const handleUpdateObligation = catchAsync(async (req, res, next) => {
   res.status(200).json({ ok: true });
 });
 
-export const handleGetReports = catchAsync(async (req, res, next) => {
+export const handleGetReceipts = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
   const { page, from, to, its, batch } = req.query;
+
   if (role !== "admin") return res.status(401).json({ ok: false });
 
   const skip = (Number(page) - 1) * 10;
@@ -1091,15 +1093,15 @@ export const handleGetReports = catchAsync(async (req, res, next) => {
   if (its) {
     const user = await User.findOne({ its }).select("_id").lean();
     query.student = user._id;
-    hubReports = await Hub.find(query).populate("student");
-    hubReportsCount = await Hub.countDocuments(query);
+    hubReports = await Receipt.find(query).populate("student");
+    hubReportsCount = await Receipt.countDocuments(query);
   }
 
   if (from && !to) {
     const date = new Date(from);
     date.setHours(0, 0, 0, 0);
 
-    query.date = { $gte: date };
+    query.paidAt = { $gte: date };
   }
   if (from && to) {
     const fromDate = new Date(from);
@@ -1108,15 +1110,15 @@ export const handleGetReports = catchAsync(async (req, res, next) => {
     const toDate = new Date(to);
     toDate.setHours(23, 59, 59, 999);
 
-    query.$and = [{ date: { $gte: fromDate } }, { date: { $lte: toDate } }];
+    query.$and = [{ paidAt: { $gte: fromDate } }, { paidAt: { $lte: toDate } }];
   }
 
-  hubReports = await Hub.find(query)
+  hubReports = await Receipt.find(query)
     .populate("student")
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(10);
-  hubReportsCount = await Hub.countDocuments(query);
+  hubReportsCount = await Receipt.countDocuments(query);
   res.status(200).json({ ok: true, hubReports, hubReportsCount });
 });
 
