@@ -60,7 +60,7 @@ app.post('/resend/webook',express.raw({type:'application/json'}),async (req,res)
      });
      // handle result
      switch(type){
-      case 'email.sent':
+      case 'email.delivered':
         await Receipt.findByIdAndUpdate(data.tags.receiptId,{emailStatus:'delivered'});
         break;
       case 'email.bounced':
