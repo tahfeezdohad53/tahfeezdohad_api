@@ -82,7 +82,7 @@ export const handlePasswordSignin = catchAsync(async (req, res, next) => {
     sameSite:'none',
     httpOnly:true,
     secure:true,
-    maxAge:10 * 24 * 60 * 60 * 1000
+    maxAge:1000 * 24 * 60 * 60 * 1000
   })
   res.status(200).json({ ok: true });
 });
