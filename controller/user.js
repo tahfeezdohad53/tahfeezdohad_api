@@ -74,7 +74,7 @@ export const handleGetAccounts = catchAsync(async (req, res, next) => {
     return res.status(200).json({accounts,totalRes});
   }
   if(role === 'student'){
-    const accounts = await User.find({role:'student',isActive:true,batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(10).select('_id name its role batch allocatedHub contactEmail address contactNumber').lean();
+    const accounts = await User.find({role:'student',isActive:true,batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(10).select('_id name its isActive role batch allocatedHub contactEmail address contactNumber').lean();
     const totalRes = await User.countDocuments({
       role: "student",
       isActive:true,
