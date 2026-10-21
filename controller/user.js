@@ -20,6 +20,22 @@ export const handleUpdatePassword = catchAsync(async (req, res, next) => {
   res.status(200).json({ ok: true, message: "password updated" });
 });
 
+export const handleRecoverAccount = catchAsync(async (req, res, next) => {
+  const { id } = req.user;
+  const { userId } = req.params;
+  const student = await User.findByIdAndUpdate(userId,{isActive:true},{returnDocument:'before'});
+
+  if(student.isActive) return res.status(400).json({ok:false,message:'student is not deleted'});
+  await Obligation.create({
+    student:student._id,
+    allocatedHub:student.allocatedHub,
+    year:new Date().getFullYear(),
+    term:getTerm(new Date().getMonth() + 1),
+    batch:student.batch,
+  })
+  res.status(200).json({ ok: true});
+});
+
 export const handleDeleteUser = catchAsync(async (req, res, next) => {
   const {role} = req.user;
   const {id} = req.params;
@@ -38,9 +54,20 @@ export const handleAddContactEmail = catchAsync(async (req, res, next) => {
 });
 export const handleGetAccounts = catchAsync(async (req, res, next) => {
   const { id,role:currUserRole } = req.user;
-  const {role,batch,page} = req.query;
+  const {role,batch,page,ITS,isActive} = req.query;
   const skip = (page - 1) * 10;
   if(currUserRole !== 'admin') return res.status(401).json({ok:false,message:'you are not authorized for this action'});
+
+  if(isActive === 'false'){
+    const accounts = await User.find({ isActive:false }).select("-password").skip(skip).limit(10);
+    const totalRes = await User.countDocuments({isActive:false});
+    return res.status(200).json({ ok: true, accounts, totalRes });
+  }
+  if(ITS){
+    const account = await User.findOne({its:ITS}).select('-password');
+    const totalRes = 1;
+    return res.status(200).json({ok:true,accounts:[account],totalRes});
+  }
   if(role === 'teacher'){
     const accounts = await User.find({role:'teacher',isActive:true}).skip(skip).limit(10).select('_id name its role').lean();
     const totalRes = await User.countDocuments({role:'teacher',isActive:true});

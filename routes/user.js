@@ -10,6 +10,7 @@ import {
   handleDeleteUser,
   handleGetAccounts,
   handleAddContactEmail,
+  handleRecoverAccount,
 } from "../controller/user.js";
 import {uploadImage} from '../libs/multer.js';
 
@@ -17,6 +18,7 @@ const router = new express.Router();
 
 
 router.patch('/contactEmail',protectRoute,handleAddContactEmail);
+router.post('/recover-account/:userId',protectRoute,handleRecoverAccount);
 router.patch("/updatePassword", protectRoute, handleAddContactEmail);
 router.post('/create',protectRoute,handleCreateUser);
 router.delete('/delete/:id',protectRoute,handleDeleteUser);
