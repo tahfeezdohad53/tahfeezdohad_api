@@ -148,14 +148,16 @@ export const handleVerifyAttendance = catchAsync(async (req, res, next) => {
 
 export const handleGetAttendance = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
-    const {page = 1,startDate,endDate,teacher,batch} = req.query;
+    const {page = 1,startDate,endDate,teacher,batch,status} = req.query;
 
     const skip = (Number(page) - 1) * 10;
     let attendance;
     let count;
     let query = {};
-
-    
+  
+    if(status === 'pending'){
+      query.isVerified = false;
+    }
     if(startDate && endDate) {
       const localStartDate = new Date(startDate);
       const localEndDate = new Date(endDate);
