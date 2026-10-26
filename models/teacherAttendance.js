@@ -20,6 +20,7 @@ const schema = new mongoose.Schema({
     },
     isVerified:{
         type:Boolean,
+        default:false,
     },
     batch:{
         type:String,

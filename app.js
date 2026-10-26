@@ -10,6 +10,7 @@ import { v2 as cloudinary } from "cloudinary";
 import User from "./models/user.js";
 import Report from "./models/report.js";
 import Obligation from "./models/obligation.js";
+import TeacherAttendance from "./models/teacherAttendance.js";
 import Receipt from "./models/receipt.js";
 import authRoutes from "./routes/auth.js";
 import studentRoutes from "./routes/student.js";
@@ -1283,7 +1284,6 @@ async function sendReportsEmail() {
       html,
     });
   }
-
 
 
 app.get("/student/getAllStudentsAndTeachers", protectRoute, fetchData);
