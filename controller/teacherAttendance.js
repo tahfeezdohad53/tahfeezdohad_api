@@ -217,120 +217,120 @@ export const handleGenerateExcel = catchAsync(async (req, res, next) => {
     }
     let attendance;
 
-    if(role === 'admin'){
-       attendance = await TeacherAttendance.aggregate([
-        {
-          $match:{
-            createdAt:{$gte:localStartDate},
-            createdAt:{$lte:localEndDate},
-            isVerified:true,
-          }
-        },
-         {
-           $lookup: {
-             foreignField: "_id",
-             as: "teacherData",
-             from: "users",
-             localField: "teacher",
-           },
-         },
-         {
-           $unwind: {
-             path: "$teacher",
-           },
-         },
-         {
-           $group: {
-             _id: "$teacher",
-             name: { $first: "$teacherData.name" },
-             min: { $sum: "$totalMin" },
-             // ma:{}
-           },
-         },
-         {
-           $project: {
-             name: 1,
-             min: { $divide: ["$min", 60] },
-           },
-         },
-         {
-           $project: {
-             _id: 0,
-             name: 1,
-             hours: "$min",
-           },
-         },
-         {
-           $unwind: {
-             path: "$name",
-           },
-         },
-       ]);
-       console.log(attendance);
+    // if(role === 'admin'){
+    //    attendance = await TeacherAttendance.aggregate([
+    //     {
+    //       $match:{
+    //         createdAt:{$gte:localStartDate},
+    //         createdAt:{$lte:localEndDate},
+    //         isVerified:true,
+    //       }
+    //     },
+    //      {
+    //        $lookup: {
+    //          foreignField: "_id",
+    //          as: "teacherData",
+    //          from: "users",
+    //          localField: "teacher",
+    //        },
+    //      },
+    //      {
+    //        $unwind: {
+    //          path: "$teacher",
+    //        },
+    //      },
+    //      {
+    //        $group: {
+    //          _id: "$teacher",
+    //          name: { $first: "$teacherData.name" },
+    //          min: { $sum: "$totalMin" },
+    //          // ma:{}
+    //        },
+    //      },
+    //      {
+    //        $project: {
+    //          name: 1,
+    //          min: { $divide: ["$min", 60] },
+    //        },
+    //      },
+    //      {
+    //        $project: {
+    //          _id: 0,
+    //          name: 1,
+    //          hours: "$min",
+    //        },
+    //      },
+    //      {
+    //        $unwind: {
+    //          path: "$name",
+    //        },
+    //      },
+    //    ]);
+    //    console.log(attendance);
 
-           const workbook = new ExcelJs.Workbook();
+    //        const workbook = new ExcelJs.Workbook();
 
-           const workSheet = workbook.addWorksheet("attendance");
+    //        const workSheet = workbook.addWorksheet("attendance");
 
-           workSheet.columns = [
-             {
-               header: "ITS",
-               key: "ITS",
-               width: 40,
-             },
-             {
-               header: "Name",
-               key: "name",
-               width: 55,
-             },
-             {
-               header: "Hours",
-               key: "hours",
-             },
-           ];
+    //        workSheet.columns = [
+    //          {
+    //            header: "ITS",
+    //            key: "ITS",
+    //            width: 40,
+    //          },
+    //          {
+    //            header: "Name",
+    //            key: "name",
+    //            width: 55,
+    //          },
+    //          {
+    //            header: "Hours",
+    //            key: "hours",
+    //          },
+    //        ];
 
-           workSheet.getColumn(1).font = {
-             bold: true,
-           };
+    //        workSheet.getColumn(1).font = {
+    //          bold: true,
+    //        };
 
-          //  workSheet.getColumn(7).alignment = {
-          //    horizontal: "left",
-          //  };
-          //  workSheet.getColumn(8).alignment = {
-          //    horizontal: "left",
-          //  };
-          //  workSheet.getColumn(1).alignment = {
-          //    horizontal: "left",
-          //  };
+    //       //  workSheet.getColumn(7).alignment = {
+    //       //    horizontal: "left",
+    //       //  };
+    //       //  workSheet.getColumn(8).alignment = {
+    //       //    horizontal: "left",
+    //       //  };
+    //       //  workSheet.getColumn(1).alignment = {
+    //       //    horizontal: "left",
+    //       //  };
 
-           attendance.forEach((el) => {
-             workSheet.addRow({
-               ITS: el.name.split(" ")[0],
-               name: formatName(el.name),
-               hours: Math.ceil(el.hours),
-             });
-           });
-           res.setHeader(
-             "Content-Type",
-             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-           );
+    //        attendance.forEach((el) => {
+    //          workSheet.addRow({
+    //            ITS: el.name.split(" ")[0],
+    //            name: formatName(el.name),
+    //            hours: Math.ceil(el.hours),
+    //          });
+    //        });
+    //        res.setHeader(
+    //          "Content-Type",
+    //          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    //        );
 
-           res.setHeader(
-             "Content-Disposition",
-             "attachment; filename=attendance.xlsx",
-           );
+    //        res.setHeader(
+    //          "Content-Disposition",
+    //          "attachment; filename=attendance.xlsx",
+    //        );
 
-           await workbook.xlsx.write(res);
+    //        await workbook.xlsx.write(res);
 
-           // Send your file buffer here
-           res.end();
-           return;
-    }
+    //        // Send your file buffer here
+    //        res.end();
+    //        return;
+    // }
 
     if(role === 'admin' && teacher) query.teacher = teacher;
     if(role === 'teacher') query.teacher = id;
 
-    if(role === 'teacher') attendance = await TeacherAttendance.find(query)
+    attendance = await TeacherAttendance.find(query)
       .populate({ path: "teacher", select: "name its" })
       .lean();
 
