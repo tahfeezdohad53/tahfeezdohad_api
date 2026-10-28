@@ -4,6 +4,7 @@ import User from '../models/user.js';
 import { differenceInMinutes, format } from "date-fns";
 import ExcelJs from "exceljs";
 import { formatName } from "./leave.js";
+import mongoose from "mongoose";
 
 
 export const handleCheckIn = catchAsync(async (req, res, next) => {
@@ -126,13 +127,75 @@ console.log(type)
 
 export const handleGetStatus = catchAsync(async (req, res, next) => {
   const { id, role } = req.user;
-  
+  let previousMonthMin;
+  let thisMonthMin;
+
   const user = await User.findById(id).select('teacherAttendanceStatus').lean();
   const lastStatus = user.teacherAttendanceStatus;
   const lastStatusTime = user.lastStatusTime;
-  
 
-  res.status(200).json({ ok: true, lastStatus , lastStatusTime});
+  const date = new Date();
+  const startDate = new Date();
+
+  if(date.getDate() > 1 && date.getDate() < 26) startDate.setMonth(date.getMonth() - 2);
+  if(date.getDate() > 25 && date.getDate() < 32) startDate.setMonth(date.getMonth() - 1);
+  startDate.setHours(0,0,0,0);
+  startDate.setDate(26);
+
+  const endDate = new Date();
+
+  endDate.setDate(25);
+  if(date.getDate() >= 1 && date.getDate() < 26) endDate.setMonth(date.getDate() - 1);
+  endDate.setHours(23,59,59,999);
+
+  try{
+previousMonthMin = await TeacherAttendance.aggregate([
+  {
+    $match: {
+      teacher: user._id,
+      checkedIn: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    },
+  },
+  {
+    $group: {
+      _id:'$teacher',
+      totalMin: { $sum: "$totalMin" },
+    },
+  },
+]);
+
+startDate.setDate(26);
+if(date.getDate() > 25) startDate.setMonth(date.getMonth());
+if(date.getDate() > 1 && date.getDate() < 26) {
+  startDate.setMonth(date.getDate() - 1);
+}
+
+thisMonthMin = await TeacherAttendance.aggregate([
+  {
+    $match: {
+      teacher: user._id,
+      checkedIn: {
+        $gte: startDate,
+      },
+    },
+  },
+  {
+    $group: {
+      _id: "$teacher",
+      totalMin: { $sum: "$totalMin" },
+    },
+  },
+]);
+
+
+  }catch(err){
+    console.log(err);
+  }
+
+  res.status(200).json({ ok: true, lastStatus , lastStatusTime, previousMonthMin:previousMonthMin[0]?.totalMin, thisMonthMin:thisMonthMin[0]?.totalMin});
 });
 
 export const handleVerifyAttendance = catchAsync(async (req, res, next) => {
