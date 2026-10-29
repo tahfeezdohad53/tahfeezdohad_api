@@ -246,11 +246,180 @@ export const handleCreateReport = catchAsync(async (req, res) => {
 
 export const handleGetReports = catchAsync(async (req, res) => {
     const {id} = req.user;
-    const {student} = req.query;
+    const {student,startDate,endDate} = req.query;
     const query = {};
     if(student) query.student = student;
-    const reports = (await Report.find(query).sort({createdAt:-1}).populate('teacher student').limit(50).lean());
+    const refactoredStartDate = new Date(startDate);
+    refactoredStartDate.setHours(0,0,0,0);
+    if(startDate){
+      query.createdAt = {$gte:refactoredStartDate};
+    } 
+    if(startDate && endDate){
+      const refactoredEndDate = new Date(endDate);
+      refactoredEndDate.setHours(23,59,59,999);
+      query.$and = [
+        {createdAt: {$gte:refactoredStartDate}},
+        {createdAt: {$lte:refactoredEndDate}},
+      ]
+    } 
+    let reports;
 
+    if(!student && !startDate && !endDate) reports = await Report.find(query)
+      .sort({ createdAt: -1 })
+      .populate("teacher student")
+      .limit(50)
+      .lean();
+    else reports = await Report.find(query)
+      .sort({ createdAt: -1 })
+      .populate("teacher student")
+      .lean();
+    
     res.status(200).json({ok:true, reports});
+});
+
+export const handleGenerateReportsExcel = catchAsync(async (req, res) => {
+    const {id} = req.user;
+    const {student,startDate,endDate} = req.query;
+    const query = {};
+    if(student) query.student = student;
+    const refactoredStartDate = new Date(startDate);
+    refactoredStartDate.setHours(0,0,0,0);
+    if(startDate){
+      query.createdAt = {$gte:refactoredStartDate};
+    } 
+    if(startDate && endDate){
+      const refactoredEndDate = new Date(endDate);
+      refactoredEndDate.setHours(23,59,59,999);
+      query.$and = [
+        {createdAt: {$gte:refactoredStartDate}},
+        {createdAt: {$lte:refactoredEndDate}},
+      ]
+    } 
+    const reports = (await Report.find(query).sort({createdAt:-1}).populate('teacher student').lean());
+
+    const workbook = new ExcelJs.Workbook();
+
+    const worksheet = workbook.addWorksheet('reports');
+
+    worksheet.columns = [
+      {
+        header:'Student_ITS',
+        key:'studentITS',
+        width:18,
+      },
+      {
+        header:'Student_Name',
+        key:'studentName',
+        width:50,
+      },
+      {
+        header:'Mukhtabir_Name',
+        key:'teacherName',
+        width:55,
+      },
+      {
+        header:'Currently_At',
+        key:'currentlyAt',
+        width:18,
+      },
+      {
+        header:'From-To-Juz',
+        key:'juz',
+        width:18,
+      },
+      {
+        header:'Questions',
+        key:'questions',
+      },
+      {
+        header:'Tambeeh',
+        key:'tambeeh',
+      },
+      {
+        header:'Talqeen',
+        key:'talqeen',
+      },
+      {
+        header:'Hifz_Marks',
+        key:'hifzMarks',
+        width:18,
+      },
+      {
+        header:'Hifz_Grade',
+        key:'hifzGrade',
+        width:18,
+      },
+      {
+        header:'Makharij_Grade',
+        key:'makharijGrade',
+        width:18,
+      },
+      {
+        header:'Makharij',
+        key:'makharij',
+        width:30,
+      },
+      {
+        header:'Remarks',
+        key:'remarks',
+        width:60
+      },
+    ]
+
+    worksheet.getColumn(1).font = {
+      bold:true,
+    }
+    worksheet.getColumn(1).alignment = {
+      horizontal:'left'
+    }
+    worksheet.getColumn(6).alignment = {
+      horizontal:'left'
+    }
+    worksheet.getColumn(7).alignment = {
+      horizontal:'left'
+    }
+    worksheet.getColumn(8).alignment = {
+      horizontal:'left'
+    }
+    worksheet.getColumn(9).alignment = {
+      horizontal:'left'
+    }
+    worksheet.getRow(1).font = {
+      bold:true,
+    }
+
+    reports.forEach(el => {
+      worksheet.addRow({
+        studentITS: el.student.its,
+        studentName: formatName(el.student.name),
+        teacherName: formatName(el.teacher.name),
+        currentlyAt: `juz ${el.juz} page ${el.page}`,
+        juz: `${el.from}-${el.to}`,
+        questions: el.questions,
+        tambeeh: el.tambeeh,
+        talqeen: el.talqeen,
+        hifzMarks: el.hifzMarks,
+        hifzGrade: el.hifzGrade,
+        makharijGrade: el.makharijGrade,
+        makharij: el.makharij,
+        remarks: el.remarks,
+      });
+    })
+
+     res.setHeader(
+       "Content-Type",
+       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     );
+
+     res.setHeader(
+       "Content-Disposition",
+       "attachment; filename=reports.xlsx",
+     );
+
+     await workbook.xlsx.write(res);
+
+     // Send your file buffer here
+     res.end();
+    
 });
 
