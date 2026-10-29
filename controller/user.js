@@ -55,11 +55,11 @@ export const handleAddContactEmail = catchAsync(async (req, res, next) => {
 export const handleGetAccounts = catchAsync(async (req, res, next) => {
   const { id,role:currUserRole } = req.user;
   const {role,batch,page,ITS,isActive} = req.query;
-  const skip = (page - 1) * 10;
+  const skip = (page - 1) * 20;
   if(currUserRole !== 'admin') return res.status(401).json({ok:false,message:'you are not authorized for this action'});
 
   if(isActive === 'false'){
-    const accounts = await User.find({ isActive:false }).select("-password").skip(skip).limit(10);
+    const accounts = await User.find({ isActive:false }).select("-password").skip(skip).limit(20);
     const totalRes = await User.countDocuments({isActive:false});
     return res.status(200).json({ ok: true, accounts, totalRes });
   }
@@ -69,12 +69,12 @@ export const handleGetAccounts = catchAsync(async (req, res, next) => {
     return res.status(200).json({ok:true,accounts:[account],totalRes});
   }
   if(role === 'teacher'){
-    const accounts = await User.find({role:'teacher',isActive:true}).skip(skip).limit(10).select('_id name its role').lean();
+    const accounts = await User.find({role:'teacher',isActive:true}).skip(skip).limit(20).select('_id name its role').lean();
     const totalRes = await User.countDocuments({role:'teacher',isActive:true});
     return res.status(200).json({accounts,totalRes});
   }
   if(role === 'student'){
-    const accounts = await User.find({role:'student',isActive:true,batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(10).select('_id isActive name its role batch allocatedHub contactEmail address contactNumber').lean();
+    const accounts = await User.find({role:'student',isActive:true,batch,name:{$not:{$regex:'tahfeez',$options:'i'}}}).skip(skip).limit(20).select('_id isActive name its role batch allocatedHub contactEmail address contactNumber').lean();
     const totalRes = await User.countDocuments({
       role: "student",
       isActive:true,

@@ -221,7 +221,7 @@ export const handleGetReceipts = catchAsync(async (req, res, next) => {
 
   if (role !== "admin") return res.status(401).json({ ok: false });
 
-  const skip = (Number(page) - 1) * 10;
+  const skip = (Number(page) - 1) * 20;
   let query = {};
 
   let hubReports;
@@ -256,7 +256,7 @@ export const handleGetReceipts = catchAsync(async (req, res, next) => {
     .populate("student")
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(10);
+    .limit(20);
   hubReportsCount = await Receipt.countDocuments(query);
   res.status(200).json({ ok: true, hubReports, hubReportsCount });
 });

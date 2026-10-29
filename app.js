@@ -16,6 +16,7 @@ import authRoutes from "./routes/auth.js";
 import studentRoutes from "./routes/student.js";
 import hubRoutes from "./routes/hub.js";
 import recordingRoutes from "./routes/recording.js";
+import dashboardRoutes from "./routes/dashboard.js";
 import teacherRoutes from "./routes/teacher.js";
 import userRoutes from "./routes/user.js";
 import maqaratRoutes from "./routes/maqarat.js";
@@ -1287,6 +1288,7 @@ async function sendReportsEmail() {
 
 
 app.get("/student/getAllStudentsAndTeachers", protectRoute, fetchData);
+app.use("/dashboard", dashboardRoutes);
 app.use("/auth", authRoutes);
 app.use("/student", studentRoutes);
 app.use("/recording", recordingRoutes);
