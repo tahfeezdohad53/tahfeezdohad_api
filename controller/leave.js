@@ -24,7 +24,7 @@ const formatDate = (date) =>
 
 export const handleCreateLeave = catchAsync(async (req, res, next) => {
   const { id, role, batch, name } = req.user;
-  const { type, reason, from, to, days } = req.body;
+  const { type, reason, from, to, days, fromTime, toTime } = req.body;
   if (batch)
     await Leave.create({
       reason,
@@ -93,6 +93,10 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
                 <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Reason</td>
                 <td style="padding:10px;border:1px solid #ddd;">${reason}</td>
               </tr>
+               ${type === 'half-day' ?` <tr>
+            <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Time</td>
+            <td style="padding:10px;border:1px solid #ddd;">${fromTime + " - " + toTime}</td>
+          </tr>` : ''}
             </table>
 
             <p style="margin:0;padding:0;margin-top:24px;margin-bottom:16px;">
@@ -127,7 +131,18 @@ export const handleCreateLeave = catchAsync(async (req, res, next) => {
   `,
   });
   if (!batch)
-    await Leave.create({ reason, from, to, days, user: id, role, name, type });
+    await Leave.create({
+      reason,
+      from,
+      to,
+      days,
+      user: id,
+      role,
+      name,
+      type,
+      fromTime: fromTime || "",
+      toTime: toTime || "",
+    });
   res.status(201).json({ ok: true });
 });
 
@@ -197,7 +212,7 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
     return res
       .status(400)
       .json({ message: "you are not allowed for this action" });
-      const approved = status === "accepted";
+  const approved = status === "accepted";
   const leave = await Leave.findByIdAndUpdate(
     leaveId,
     { status },
@@ -206,15 +221,16 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
 
   const user = await User.findById(leave.user);
 
-  if(approved) await resend.emails.send({
-    from: "Tahfeez Dohad Leave Management <noreply@tahfeezdohad.org>",
-    to: [
-      "adilaliasgar53@gmail.com",
-      "abbas.mahesri@gmail.com",
-      "huzefaratlam63@gmail.com",
-    ],
-    subject: "Your Leave Request Has Been Approved",
-    html: `<!DOCTYPE html>
+  if (approved)
+    await resend.emails.send({
+      from: "Tahfeez Dohad Leave Management <noreply@tahfeezdohad.org>",
+      to: [
+        "adilaliasgar53@gmail.com",
+        "abbas.mahesri@gmail.com",
+        "huzefaratlam63@gmail.com",
+      ],
+      subject: "Your Leave Request Has Been Approved",
+      html: `<!DOCTYPE html>
 <html>
   <body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:24px;">
     <div style="max-width:600px;margin:auto;background:#fff;border-radius:8px;border:1px solid #e5e5e5;overflow:hidden;">
@@ -237,10 +253,14 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
             <td style="padding:10px;border:1px solid #ddd;">${formatName(user.name)}</td>
           </tr>
 
-          ${user?.batch ? `<tr>
+          ${
+            user?.batch
+              ? `<tr>
             <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Batch</td>
             <td style="padding:10px;border:1px solid #ddd;">${leave.batch}</td>
-          </tr>` : ''}
+          </tr>`
+              : ""
+          }
 
           <tr>
             <td style="padding:10px;border:1px solid #ddd;font-weight:bold;">Leave Type</td>
@@ -305,7 +325,7 @@ export const handleUpdateLeave = catchAsync(async (req, res, next) => {
     </div>
   </body>
 </html>`,
-  });
+    });
 
   await resend.emails.send({
     from: "Tahfeez Dohad Leave Management <noreply@tahfeezdohad.org>",

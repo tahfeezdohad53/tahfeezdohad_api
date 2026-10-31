@@ -10,7 +10,7 @@ const schema = new mongoose.Schema(
     type:{
       type:String,
       required:true,
-      enum:['casual','sick']
+      enum:['casual','sick','half-day']
     },
     from: {
       required: true,
@@ -39,7 +39,9 @@ const schema = new mongoose.Schema(
     role:{
       type:String,
       required:true,
-    }
+    },
+    fromTime:String,
+    toTime:String
   },
   { timestamps: true },
 );
