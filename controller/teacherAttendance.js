@@ -136,16 +136,20 @@ export const handleGetStatus = catchAsync(async (req, res, next) => {
 
   const date = new Date();
   const startDate = new Date();
+  const currentMonth = date.getMonth();
+  const currentDate = date.getDate();
 
-  if(date.getDate() > 1 && date.getDate() < 26) startDate.setMonth(date.getMonth() - 2);
-  if(date.getDate() > 25 && date.getDate() < 32) startDate.setMonth(date.getMonth() - 1);
-  startDate.setHours(0,0,0,0);
   startDate.setDate(26);
+  if(currentDate > 1 && currentDate < 26) startDate.setMonth(date.getMonth() - 2);
+  if(currentDate > 25 && currentDate < 32) {
+   startDate.setMonth(currentMonth - 1);
+  }
+  startDate.setHours(0,0,0,0);
 
   const endDate = new Date();
 
   endDate.setDate(25);
-  if(date.getDate() >= 1 && date.getDate() < 26) endDate.setMonth(date.getDate() - 1);
+  if(currentDate >= 1 && currentDate < 26) endDate.setMonth(currentMonth - 1);
   endDate.setHours(23,59,59,999);
 
   try{
@@ -167,10 +171,11 @@ previousMonthMin = await TeacherAttendance.aggregate([
   },
 ]);
 
+
 startDate.setDate(26);
-if(date.getDate() > 25) startDate.setMonth(date.getMonth());
-if(date.getDate() > 1 && date.getDate() < 26) {
-  startDate.setMonth(date.getDate() - 1);
+if(currentDate > 25) startDate.setMonth(date.getMonth());
+if(currentDate > 1 && currentDate < 26) {
+  startDate.setMonth(currentMonth - 1);
 }
 
 thisMonthMin = await TeacherAttendance.aggregate([
