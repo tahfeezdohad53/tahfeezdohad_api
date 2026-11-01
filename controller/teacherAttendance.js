@@ -140,7 +140,10 @@ export const handleGetStatus = catchAsync(async (req, res, next) => {
   const currentDate = date.getDate();
 
   startDate.setDate(26);
-  if(currentDate > 1 && currentDate < 26) startDate.setMonth(date.getMonth() - 2);
+  if(currentDate >= 1 && currentDate < 26) {
+    startDate.setMonth(currentMonth - 2);
+    
+  }
   if(currentDate > 25 && currentDate < 32) {
    startDate.setMonth(currentMonth - 1);
   }
@@ -174,7 +177,7 @@ previousMonthMin = await TeacherAttendance.aggregate([
 
 startDate.setDate(26);
 if(currentDate > 25) startDate.setMonth(date.getMonth());
-if(currentDate > 1 && currentDate < 26) {
+if(currentDate >= 1 && currentDate < 26) {
   startDate.setMonth(currentMonth - 1);
 }
 
