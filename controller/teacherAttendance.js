@@ -227,7 +227,8 @@ export const handleGetAttendance = catchAsync(async (req, res, next) => {
     let query = {};
   
     if(status === 'pending'){
-      query.isVerified = {$exists:0};
+      query.isVerified = false;
+      // query.isVerified = {$exists:0};
     }
     let localStartDate;
     let localEndDate;
