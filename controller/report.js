@@ -303,6 +303,11 @@ export const handleGenerateReportsExcel = catchAsync(async (req, res) => {
 
     worksheet.columns = [
       {
+        header:'Date',
+        key:'date',
+        width:18,
+      },
+      {
         header:'Student_ITS',
         key:'studentITS',
         width:18,
@@ -403,6 +408,7 @@ export const handleGenerateReportsExcel = catchAsync(async (req, res) => {
         makharijGrade: el.makharijGrade,
         makharij: el.makharij,
         remarks: el.remarks,
+        date:el.createdAt,
       });
     })
 

@@ -146,6 +146,11 @@ io.on("connection", async (socket) => {
       socket.emit("not-online");
     }
   });
+  socket.on('restart-call-signal',({to}) => {
+    if(user.has(to)){
+      socket.to(to).emit('restart-call-signal');
+    }
+  })
   socket.on("line-busy", ({ to }) => {
     if (user.has(to)) {
       socket.to(user.get(to).socketId).emit("line-busy");
@@ -235,6 +240,9 @@ io.on("connection", async (socket) => {
 // const its7000 = [30919558];
 
 async function fnn() {
+  // const user = await User.findOne({its:50478007});
+  // user.password = 8007;
+  // await user.save();
   // const u = await User.find({role:'student',isActive:true,name:{$not:{$regex:'tahfeez',$options:'i'}}});
   // u.forEach(element => {
   //   console.log(element._id.toString());
