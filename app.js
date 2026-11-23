@@ -187,16 +187,16 @@ io.on("connection", async (socket) => {
   socket.on("broadcast", ({ message }) => {
     io.emit("broadcast", { message });
   });
-  socket.on("to-dev", ({ rating, suggestion }) => {
+  socket.on("to-dev", () => {
     if (user.has("6a5b88719b8732dabd07a6f6")) {
       socket
         .to(user.get("6a5b88719b8732dabd07a6f6").socketId)
-        .emit("to-dev", { rating, suggestion });
+        .emit("to-dev");
     }
     if (user.has("6a54f7f3dcf32777f8d23f74")) {
       socket
         .to(user.get("6a54f7f3dcf32777f8d23f74").socketId)
-        .emit("to-dev", { rating, suggestion });
+        .emit("to-dev");
     }
   });
 
