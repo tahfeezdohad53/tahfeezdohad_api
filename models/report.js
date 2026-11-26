@@ -49,6 +49,7 @@ const schema = new mongoose.Schema(
       default: "in-person",
       enum: ["in-person", "online"],
     },
+    ahkaam:String,
     classType: {
       type: String,
       enum: ["jz", "t1", "t2", "t3", "t4", "t5", "jz-mj", "jd", "tm", "mj"],

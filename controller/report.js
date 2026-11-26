@@ -10,13 +10,11 @@ import resend from "../libs/resend.js";
 
 export const handleCreateReport = catchAsync(async (req, res) => {
     const {id,name} = req.user;
-    const {student:studentId,juz,page,tambeeh,talqeen,questions,from,to,makharij,remarks,classMode,classType} = req.body;
+    const {student:studentId,juz,page,tambeeh,talqeen,questions,from,to,makharij,remarks,ahkaam='',classMode,classType} = req.body;
 
     const totalTalqeen = Math.round(Number(tambeeh) / 2) + Number(talqeen);
-    console.log('total talqeen: ',totalTalqeen);
+
     const hifzMarks = ((3 * Number(questions) + 2) - totalTalqeen) + 35;
-    console.log('Student: ',studentId);
-    console.log('hifz marks: ',hifzMarks);
     let hifzGrade;
      if (hifzMarks > 59) hifzGrade = "A+";
      else if (hifzMarks > 54) hifzGrade = "A";
@@ -24,7 +22,6 @@ export const handleCreateReport = catchAsync(async (req, res) => {
      else if (hifzMarks > 39) hifzGrade = "B";
      else if (hifzMarks > 34) hifzGrade = "C";
      else hifzGrade = "D";
-    console.log("hifz grade: ", hifzGrade);
 
     const noOfMakharij = makharij.trim().split(' ').length;
 
@@ -34,7 +31,7 @@ export const handleCreateReport = catchAsync(async (req, res) => {
     if(noOfMakharij === 3) makharijGrade = "B";
     if(noOfMakharij > 3) makharijGrade = "D";
 
-    await Report.create({ ...req.body, teacher: id, makharijGrade, hifzGrade,questions,hifzMarks });
+    await Report.create({ ...req.body, teacher: id, makharijGrade, hifzGrade,questions,hifzMarks,ahkaam });
     if (remarks) {
       const student = await User.findById(studentId);
       const date = format(new Date(), "dd MMM, yyyy");
